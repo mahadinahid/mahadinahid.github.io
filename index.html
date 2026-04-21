@@ -670,6 +670,14 @@
           <p>Go to All Clients, click the green WhatsApp button on any client to open the message generator.</p>
           <button class="btn btn-outline btn-sm" onclick="showSection('clients', document.querySelectorAll('.nav-item')[1])">Go to Clients</button>
         </div>
+        <div class="tool-card" style="border:2px solid #229ED9;">
+          <h3>🤖 Telegram Bot Sync</h3>
+          <p>Download <strong>clients_data.json</strong> and upload it to your PythonAnywhere bot folder so the Telegram bot can read your client data.</p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn btn-primary" onclick="exportForTelegramBot()">⬇️ Download for Bot</button>
+            <a class="btn btn-outline btn-sm" href="https://t.me/mahadi_crm_bot" target="_blank">💬 Open Bot</a>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -1803,6 +1811,13 @@ function backupData() {
   const data = JSON.stringify({ clients, suppliers, exportedAt: new Date().toISOString() }, null, 2);
   download('crm_backup_'+new Date().toISOString().split('T')[0]+'.json', data, 'application/json');
   toast('Backup saved!', 'success');
+}
+
+function exportForTelegramBot() {
+  // Exports clients_data.json — upload this to PythonAnywhere for the Telegram bot
+  const data = JSON.stringify(clients, null, 2);
+  download('clients_data.json', data, 'application/json');
+  toast('clients_data.json downloaded! Upload to PythonAnywhere /crm_bot/ folder.', 'success');
 }
 
 function restoreData(event) {
