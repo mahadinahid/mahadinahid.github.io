@@ -274,6 +274,55 @@
   .tool-card h3 { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
   .tool-card p { font-size: 13px; color: var(--gray-500); margin-bottom: 14px; }
 
+  /* Telegram bot export button */
+  .btn-telegram { color:#229ED9; border-color:#229ED9; }
+  .btn-telegram:hover { background:#229ED9; color:#fff; }
+  .bot-export-card { border:2px solid #229ED9 !important; background:linear-gradient(135deg,#fff 70%,#e8f4fd) !important; }
+  .bot-export-card .bot-header { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+  .bot-export-card .bot-icon { font-size:28px; line-height:1; }
+  .bot-export-card .bot-meta h3 { margin-bottom:2px; }
+  .bot-export-card .bot-meta .bot-count { font-size:12px; color:#229ED9; font-weight:600; }
+  .bot-export-card .bot-instructions { background:#f0f9ff; border-radius:8px; padding:10px 12px; margin-bottom:14px; font-size:12px; color:#0369a1; line-height:1.6; }
+  .bot-export-card .bot-instructions code { background:#dbeafe; padding:1px 5px; border-radius:4px; font-family:monospace; font-size:11px; }
+
+  /* ── EmailJS auto-send ───────────────────────────────── */
+  .ejs-card { border:2px solid #ea580c !important; background:linear-gradient(135deg,#fff 75%,#fff7ed) !important; }
+  .ejs-header { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+  .ejs-icon { font-size:26px; line-height:1; }
+  .ejs-meta h3 { margin-bottom:3px; }
+  .ejs-status { font-size:12px; font-weight:600; }
+  .ejs-status.ok  { color:var(--success); }
+  .ejs-status.off { color:var(--gray-400); }
+  .ejs-hint { background:#fff7ed; border:1px solid #fed7aa; border-radius:8px; padding:10px 12px; font-size:12px; color:#7c2d12; margin-bottom:12px; line-height:1.7; }
+  .ejs-hint code { background:#ffedd5; padding:1px 5px; border-radius:3px; font-family:monospace; font-size:11px; }
+  .ejs-input { width:100%; padding:8px 10px; border:1px solid var(--gray-300); border-radius:6px; font-size:13px; font-family:inherit; box-sizing:border-box; transition:.15s; }
+  .ejs-input:focus { outline:none; border-color:#ea580c; box-shadow:0 0 0 3px rgba(234,88,12,.12); }
+  .ejs-input-row { display:flex; gap:8px; }
+  .ejs-input-row .ejs-input { flex:1; }
+  .btn-ejs { background:#ea580c; border-color:#ea580c; color:#fff; }
+  .btn-ejs:hover { background:#c2410c; }
+  .btn-ejs-ghost { background:#fff3ed; color:#ea580c; border:1px solid #fdba74; font-weight:600; }
+  .btn-ejs-ghost:hover { background:#ffedd5; }
+
+  /* ── Supabase Cloud Sync ───────────────────────────── */
+  .sb-pill { display:inline-flex; align-items:center; gap:6px; padding:4px 10px; border-radius:20px; font-size:11px; font-weight:600; border:1px solid #e5e7eb; background:#f9fafb; color:#6b7280; transition:.3s; cursor:pointer; white-space:nowrap; }
+  .sb-pill.synced { background:#ecfdf5; border-color:#6ee7b7; color:#065f46; }
+  .sb-pill.syncing { background:#eff6ff; border-color:#93c5fd; color:#1d4ed8; }
+  .sb-pill.error { background:#fef2f2; border-color:#fca5a5; color:#991b1b; }
+  .sb-pill.offline { background:#f9fafb; border-color:#e5e7eb; color:#6b7280; }
+  .sb-dot { width:7px; height:7px; border-radius:50%; background:currentColor; flex-shrink:0; }
+  .sb-dot.pulse { animation:sbpulse 1s ease-in-out infinite; }
+  @keyframes sbpulse { 0%,100%{opacity:1}50%{opacity:.3} }
+  .sb-card { border:2px solid #6366f1 !important; background:linear-gradient(135deg,#fff 70%,#eef2ff) !important; }
+  .sb-input { width:100%; padding:8px 10px; border:1px solid #d1d5db; border-radius:6px; font-size:12px; font-family:inherit; outline:none; transition:.2s; box-sizing:border-box; }
+  .sb-input:focus { border-color:#6366f1; box-shadow:0 0 0 3px rgba(99,102,241,.1); }
+  .sb-input-row { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:10px; }
+  .sb-hint { background:#eef2ff; border:1px solid #c7d2fe; border-radius:8px; padding:10px 14px; font-size:12px; color:#3730a3; margin-bottom:12px; line-height:1.6; }
+  .btn-sb { background:#6366f1; border-color:#6366f1; color:#fff; }
+  .btn-sb:hover { background:#4f46e5; }
+  .btn-sb-ghost { background:#eef2ff; color:#6366f1; border:1px solid #a5b4fc; font-weight:600; }
+  .btn-sb-ghost:hover { background:#e0e7ff; }
+
   /* Scrollbar */
   ::-webkit-scrollbar { width: 6px; height: 6px; }
   ::-webkit-scrollbar-track { background: transparent; }
@@ -410,11 +459,18 @@
       <span class="page-title" id="page-title">Dashboard</span>
     </div>
     <div class="topbar-right">
+      <span class="sb-pill offline" id="sb-sync-pill" title="Supabase sync — click to open settings" style="display:none;" onclick="showSection('tools', document.querySelectorAll('.nav-item')[6])">
+        <span class="sb-dot"></span>
+        <span class="sb-label">Offline</span>
+      </span>
       <button class="btn btn-outline btn-sm" onclick="showMorningReport(true)" title="Daily briefing" style="color:var(--warning);border-color:var(--warning);">
         ☀️ Morning Report
       </button>
       <button class="btn btn-outline btn-sm" style="color:#25d366;border-color:#25d366;" onclick="promptWhatsAppBulk()" title="Send WhatsApp to overdue clients">
         💬 WA Bulk
+      </button>
+      <button class="btn btn-outline btn-sm btn-telegram" onclick="exportForTelegramBot()" title="Export clients_data.json for the Telegram bot">
+        🤖 Export to Bot
       </button>
       <button class="btn btn-primary" onclick="openClientModal()">
         <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -620,6 +676,47 @@
     <!-- TOOLS -->
     <section id="section-tools" class="section">
       <div class="tools-grid">
+
+        <!-- ── Supabase Cloud Sync ── -->
+        <div class="tool-card sb-card" id="supabase-setup-card" style="grid-column:span 2;">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+            <span style="font-size:26px;">☁️</span>
+            <div>
+              <h3 style="margin:0 0 2px;">Supabase Cloud Sync</h3>
+              <span id="sb-status-text" style="font-size:12px;color:#6b7280;">Not connected — enter your project details below</span>
+            </div>
+          </div>
+          <p style="margin-bottom:12px;">Store all client data in a <strong>Supabase</strong> cloud database — syncs instantly across every device and teammate. Free tier gives you 500 MB and unlimited users with live real-time updates.</p>
+          <div class="sb-hint">
+            <strong>📋 One-time setup (≈ 5 minutes):</strong><br>
+            1. Go to <a href="https://supabase.com" target="_blank" style="color:#4338ca;font-weight:600;">supabase.com</a> → Sign up free → New Project<br>
+            2. Open <strong>SQL Editor</strong> and run this SQL once to create tables:
+            <code style="display:block;background:#1e1b4b;color:#a5b4fc;padding:8px 10px;border-radius:6px;margin:6px 0;font-size:11px;line-height:1.7;white-space:pre-wrap;">create table if not exists crm_clients (id text primary key, data jsonb not null, updated_at timestamptz default now());
+create table if not exists crm_suppliers (id text primary key, data jsonb not null, updated_at timestamptz default now());
+alter table crm_clients enable row level security;
+alter table crm_suppliers enable row level security;
+create policy "anon all" on crm_clients for all using (true) with check (true);
+create policy "anon all" on crm_suppliers for all using (true) with check (true);</code>
+            3. Go to <strong>Project Settings → API</strong> → copy your <em>Project URL</em> and <em>anon public</em> key
+          </div>
+          <div class="sb-input-row">
+            <div>
+              <label style="font-size:11px;font-weight:600;color:#6b7280;display:block;margin-bottom:4px;">Project URL</label>
+              <input class="sb-input" id="sb-url" type="url" placeholder="https://xxxxx.supabase.co" autocomplete="off">
+            </div>
+            <div>
+              <label style="font-size:11px;font-weight:600;color:#6b7280;display:block;margin-bottom:4px;">Anon Public Key</label>
+              <input class="sb-input" id="sb-anon-key" type="password" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9…" autocomplete="off">
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+            <button class="btn btn-sb" onclick="saveSBConfig()">☁️ Connect &amp; Sync</button>
+            <button class="btn btn-sb-ghost" onclick="sbPushAll()">⬆️ Push All Local Data</button>
+            <button class="btn btn-sb-ghost" onclick="sbLoad()">⬇️ Pull from Cloud</button>
+            <button class="btn btn-outline btn-sm" onclick="clearSBConfig()" style="color:#6b7280;margin-left:auto;">Disconnect</button>
+          </div>
+        </div>
+
         <div class="tool-card">
           <h3>Export Clients (CSV)</h3>
           <p>Download all client data as a CSV file for use in Excel or Google Sheets.</p>
@@ -670,14 +767,69 @@
           <p>Go to All Clients, click the green WhatsApp button on any client to open the message generator.</p>
           <button class="btn btn-outline btn-sm" onclick="showSection('clients', document.querySelectorAll('.nav-item')[1])">Go to Clients</button>
         </div>
-        <div class="tool-card" style="border:2px solid #229ED9;">
-          <h3>🤖 Telegram Bot Sync</h3>
-          <p>Download <strong>clients_data.json</strong> and upload it to your PythonAnywhere bot folder so the Telegram bot can read your client data.</p>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;">
-            <button class="btn btn-primary" onclick="exportForTelegramBot()">⬇️ Download for Bot</button>
-            <a class="btn btn-outline btn-sm" href="https://t.me/mahadi_crm_bot" target="_blank">💬 Open Bot</a>
+        <div class="tool-card bot-export-card" id="bot-export-card">
+          <div class="bot-header">
+            <span class="bot-icon">🤖</span>
+            <div class="bot-meta">
+              <h3>Export to Telegram Bot</h3>
+              <span class="bot-count" id="bot-export-count">Loading…</span>
+            </div>
+          </div>
+          <p style="margin-bottom:10px;">Downloads <strong>clients_data.json</strong> — place this file next to <code style="background:#f3f4f6;padding:1px 5px;border-radius:4px;font-size:11px;">bot.py</code> on PythonAnywhere so the bot can answer <strong>/report</strong>, <strong>/overdue</strong>, <strong>/clients</strong> and more in real time.</p>
+          <div class="bot-instructions">
+            <strong>📋 Setup steps:</strong><br>
+            1. Click <em>Export</em> below → save the file<br>
+            2. Upload <code>clients_data.json</code> to PythonAnywhere next to <code>bot.py</code><br>
+            3. Send <code>/sync</code> to <strong>@mahadi_crm_bot</strong> to reload<br>
+            4. Repeat whenever you update clients here
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+            <button class="btn btn-primary" style="background:#229ED9;border-color:#229ED9;" onclick="exportForTelegramBot()">
+              ⬇️ Export clients_data.json
+            </button>
+            <a class="btn btn-outline btn-sm btn-telegram" href="https://t.me/mahadi_crm_bot" target="_blank">
+              💬 Open @mahadi_crm_bot
+            </a>
           </div>
         </div>
+
+        <!-- ── EmailJS Auto-Send Setup ── -->
+        <div class="tool-card ejs-card" id="emailjs-setup-card" style="grid-column:span 2;">
+          <div class="ejs-header">
+            <span class="ejs-icon">⚡</span>
+            <div class="ejs-meta">
+              <h3>EmailJS Auto-Send</h3>
+              <span class="ejs-status off" id="ejs-status-text">Not configured — setup below</span>
+            </div>
+          </div>
+          <p style="margin-bottom:12px;">Send professional follow-up emails <strong>directly from this dashboard</strong> — no email app, no server. Uses <a href="https://www.emailjs.com" target="_blank" style="color:#ea580c;">EmailJS</a> free tier (200 emails/month). Once connected, every overdue client gets a <strong>⚡ Send</strong> button.</p>
+
+          <div class="ejs-hint">
+            <strong>📋 One-time setup (≈ 3 minutes):</strong><br>
+            1. Create a free account at <a href="https://www.emailjs.com" target="_blank" style="color:#92400e;">emailjs.com</a><br>
+            2. <strong>Email Services</strong> → Add Service → connect Gmail / Outlook / etc.<br>
+            3. <strong>Email Templates</strong> → Create Template → use exactly these variables:<br>
+            &nbsp;&nbsp;&nbsp;<code>{{to_email}}</code> &nbsp;<code>{{to_name}}</code> &nbsp;<code>{{from_name}}</code> &nbsp;<code>{{subject}}</code> &nbsp;<code>{{message}}</code><br>
+            4. Copy your <strong>Service ID</strong>, <strong>Template ID</strong>, and <strong>Public Key</strong> (Account → API Keys) below
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;">
+            <input class="ejs-input" type="text"  id="ejs-service-id"  placeholder="Service ID   — e.g.  service_abc1234">
+            <input class="ejs-input" type="text"  id="ejs-template-id" placeholder="Template ID  — e.g.  template_xyz7890">
+            <input class="ejs-input" type="text"  id="ejs-public-key"  placeholder="Public Key   — e.g.  xXxXxXxXxXxXxXxX">
+            <div class="ejs-input-row">
+              <input class="ejs-input" type="text"  id="ejs-from-name" placeholder="Your name for From field  (e.g. Mahadi)">
+              <input class="ejs-input" type="email" id="ejs-reply-to"  placeholder="Your email  (reply-to address)">
+            </div>
+          </div>
+
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn btn-ejs"       onclick="saveEJSConfig()">💾 Save & Activate</button>
+            <button class="btn btn-outline btn-sm" id="ejs-test-btn" onclick="testEJSSend()">🧪 Send Test Email</button>
+            <button class="btn btn-outline btn-sm" onclick="clearEJSConfig()" style="color:var(--danger);border-color:var(--danger);">✕ Clear</button>
+          </div>
+        </div>
+
       </div>
     </section>
 
@@ -1078,6 +1230,7 @@
           <option value="all">All with Email</option>
         </select>
         <button class="btn btn-primary btn-sm" onclick="sendAllEmails()">📧 Open All Emails</button>
+        <button class="btn btn-sm btn-ejs-ghost" id="ejs-send-all-btn" onclick="sendAllEmailsEJS()" style="display:none;">⚡ Send All via EmailJS</button>
         <button class="btn btn-outline btn-sm" onclick="copyAllEmails()">📋 Copy All Addresses</button>
       </div>
       <div class="email-client-list" id="email-client-list">
@@ -1085,7 +1238,7 @@
       </div>
     </div>
     <div style="padding:12px 24px;border-top:1px solid var(--gray-200);background:var(--gray-50);border-radius:0 0 12px 12px;font-size:12px;color:var(--gray-500);">
-      💡 <strong>Tip:</strong> Click "Compose" to open a pre-filled email draft in your email app. Edit before sending.
+      💡 <strong>Tip:</strong> Click <strong>✏️ Edit</strong> to review the template in the compose window, then <strong>⚡ Send Now</strong> to send via EmailJS — or <strong>📧 Open in App</strong> to use your email client. <span id="ejs-modal-tip" style="color:#ea580c;font-weight:600;"></span>
     </div>
   </div>
 </div>
@@ -1100,8 +1253,9 @@
       </button>
     </div>
     <div class="modal-body">
-      <div style="font-size:12px;color:var(--gray-500);margin-bottom:12px;padding:8px 12px;background:var(--gray-50);border-radius:8px;">
-        ✏️ Review and edit your email draft below, then click <strong>Open in Email App</strong> to send.
+      <div id="compose-hint" style="font-size:12px;color:var(--gray-600);margin-bottom:12px;padding:9px 13px;background:var(--gray-50);border-radius:8px;display:flex;align-items:center;justify-content:space-between;gap:8px;">
+        <span>✏️ Review and edit your draft. Use <strong>⚡ Send Now</strong> to deliver via EmailJS, or <strong>📧 Open in App</strong> to open your email client.</span>
+        <span id="ejs-compose-badge" style="flex-shrink:0;font-size:11px;padding:2px 8px;border-radius:20px;font-weight:600;"></span>
       </div>
       <div class="email-fields">
         <div class="email-field-row">
@@ -1118,11 +1272,12 @@
         </div>
       </div>
     </div>
-    <div class="modal-footer" style="justify-content:space-between;">
+    <div class="modal-footer" style="justify-content:space-between;align-items:center;">
       <button class="btn btn-outline btn-sm" onclick="copyEmailBody()">📋 Copy Body</button>
-      <div style="display:flex;gap:8px;">
-        <button class="btn btn-outline" onclick="closeModal('compose-modal')">Cancel</button>
-        <button class="btn btn-primary" onclick="openInEmailApp()">📧 Open in Email App</button>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button class="btn btn-outline btn-sm" onclick="closeModal('compose-modal')">Cancel</button>
+        <button class="btn btn-outline" onclick="openInEmailApp()" title="Opens your default email app">📧 Open in App</button>
+        <button class="btn btn-ejs" id="ejs-send-btn" onclick="sendEmailFromCompose()" title="Send directly via EmailJS — no email app needed">⚡ Send Now</button>
       </div>
     </div>
   </div>
@@ -1131,16 +1286,24 @@
 <!-- TOAST -->
 <div class="toast-container" id="toast-container"></div>
 
+<!-- Supabase JS SDK (free, real-time cloud database) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+
+<!-- EmailJS SDK (free, runs 100% in-browser, no server needed) -->
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+
 <script>
 // ==================== DATA ====================
 let clients = JSON.parse(localStorage.getItem('crm_clients') || '[]');
 let suppliers = JSON.parse(localStorage.getItem('crm_suppliers') || '[]');
+let sbClient = null; // Supabase client instance — set by initSupabase()
 
 function save() {
   localStorage.setItem('crm_clients', JSON.stringify(clients));
   localStorage.setItem('crm_suppliers', JSON.stringify(suppliers));
   updateSidebarStats();
   updateNavCount();
+  updateBotExportCount();
 }
 
 function genId() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
@@ -1272,6 +1435,7 @@ function saveClient() {
   if (editId) { clients = clients.map(c => c.id === editId ? data : c); }
   else { clients.unshift(data); }
   save();
+  sbUpsert('crm_clients', data);
   closeModal('client-modal');
   renderClients();
   renderDashboard();
@@ -1282,6 +1446,7 @@ function deleteClient(id) {
   if (!confirm('Delete this client? This cannot be undone.')) return;
   clients = clients.filter(c => c.id !== id);
   save();
+  sbDelete('crm_clients', id);
   renderClients();
   renderDashboard();
   toast('Client deleted', 'success');
@@ -1386,6 +1551,7 @@ function addFollowup(clientId) {
   c.followups.push({ id: genId(), channel, date, note });
   c.lastContact = date;
   save();
+  sbUpsert('crm_clients', c);
   viewClient(clientId);
   toast('Follow-up logged!', 'success');
 }
@@ -1395,6 +1561,7 @@ function deleteFollowup(clientId, fuId) {
   if (!c) return;
   c.followups = (c.followups||[]).filter(f => f.id !== fuId);
   save();
+  sbUpsert('crm_clients', c);
   viewClient(clientId);
 }
 
@@ -1446,6 +1613,7 @@ function saveSupplier() {
   if (editId) { suppliers = suppliers.map(s => s.id === editId ? data : s); }
   else { suppliers.unshift(data); }
   save();
+  sbUpsert('crm_suppliers', data);
   closeModal('supplier-modal');
   renderSuppliers();
   toast(editId ? 'Supplier updated!' : 'Supplier added!', 'success');
@@ -1698,6 +1866,7 @@ function deleteSupplier(id) {
   if (!confirm('Delete this supplier?')) return;
   suppliers = suppliers.filter(s => s.id !== id);
   save();
+  sbDelete('crm_suppliers', id);
   renderSuppliers();
   toast('Supplier deleted', 'success');
 }
@@ -1814,10 +1983,50 @@ function backupData() {
 }
 
 function exportForTelegramBot() {
-  // Exports clients_data.json — upload this to PythonAnywhere for the Telegram bot
-  const data = JSON.stringify(clients, null, 2);
-  download('clients_data.json', data, 'application/json');
-  toast('clients_data.json downloaded! Upload to PythonAnywhere /crm_bot/ folder.', 'success');
+  if (!clients.length) {
+    toast('No clients to export — add some clients first.', 'error');
+    return;
+  }
+
+  // Normalise every client so bot.py can read it regardless of which field-name
+  // variant the dashboard happened to write (followUpDate vs nextFollowup etc.)
+  const normalised = clients.map(c => {
+    // Resolve whichever follow-up date field is populated
+    const fd = c.followUpDate || c.nextFollowup || c.nextFollowUp || c.followupDate || '';
+    return {
+      ...c,
+      followUpDate: fd,    // key used by the dashboard JS
+      nextFollowup: fd,    // key used by bot.py
+      // Ensure every field the bot might read exists (fallback to empty string)
+      name:            c.name            || '',
+      company:         c.company         || '',
+      country:         c.country         || '',
+      source:          c.source          || '',
+      whatsapp:        c.whatsapp        || '',
+      email:           c.email           || '',
+      product:         c.product         || '',
+      status:          c.status          || 'New Lead',
+      priority:        c.priority        || '',
+      followupChannel: c.followupChannel || '',
+      lastContact:     c.lastContact     || '',
+      notes:           c.notes           || '',
+      fabricSupplier:  c.fabricSupplier  || '',
+      shippingAgent:   c.shippingAgent   || '',
+    };
+  });
+
+  // Build summary counts for the toast
+  const today     = new Date().toISOString().split('T')[0];
+  const overdueN  = normalised.filter(c => c.followUpDate && c.followUpDate < today).length;
+  const dueTodayN = normalised.filter(c => c.followUpDate === today).length;
+
+  const json = JSON.stringify(normalised, null, 2);
+  download('clients_data.json', json, 'application/json');
+
+  toast(
+    `✅ Exported ${clients.length} clients — ${overdueN} overdue, ${dueTodayN} due today`,
+    'success'
+  );
 }
 
 function restoreData(event) {
@@ -1831,6 +2040,8 @@ function restoreData(event) {
       clients = data.clients || [];
       suppliers = data.suppliers || [];
       save();
+      sbBulkUpsert('crm_clients', clients);
+      sbBulkUpsert('crm_suppliers', suppliers);
       renderDashboard();
       toast('Data restored!', 'success');
     } catch { toast('Invalid backup file', 'error'); }
@@ -1844,6 +2055,7 @@ function clearAllData() {
   if (!confirm('Are you absolutely sure?')) return;
   clients = []; suppliers = [];
   save();
+  sbClearAll();
   renderDashboard();
   renderClients();
   toast('All data cleared', 'success');
@@ -2122,7 +2334,8 @@ function renderEmailModal() {
       </div>
       <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
         ${daysOverdue!==null ? `<span class="email-overdue-days">${daysOverdue}d overdue</span>` : `<span style="font-size:11px;color:var(--gray-400);">${c.nextFollowup||''}</span>`}
-        <button class="btn btn-primary btn-sm" onclick="openComposeModal('${c.id}')">✉️ Compose</button>
+        <button class="btn btn-outline btn-sm" onclick="openComposeModal('${c.id}')">✏️ Edit</button>
+        ${isEJSReady()?`<button class="btn btn-sm btn-ejs-ghost" onclick="sendQuickEmail('${c.id}')">⚡ Send</button>`:''}
       </div>
     </div>`;
   }).join('');
@@ -2241,6 +2454,235 @@ function copyEmailBody() {
   navigator.clipboard.writeText(body).then(() => toast('Email body copied!', 'success'));
 }
 
+// ==================== EMAILJS AUTO-SEND ====================
+
+function getEJSConfig() {
+  try {
+    const cfg = JSON.parse(localStorage.getItem('ejs_config') || 'null');
+    return (cfg && cfg.serviceId && cfg.templateId && cfg.publicKey) ? cfg : null;
+  } catch { return null; }
+}
+
+function isEJSReady() { return !!getEJSConfig(); }
+
+function saveEJSConfig() {
+  const serviceId  = (document.getElementById('ejs-service-id').value  || '').trim();
+  const templateId = (document.getElementById('ejs-template-id').value || '').trim();
+  const publicKey  = (document.getElementById('ejs-public-key').value  || '').trim();
+  const fromName   = (document.getElementById('ejs-from-name').value   || '').trim();
+  const replyTo    = (document.getElementById('ejs-reply-to').value    || '').trim();
+  if (!serviceId || !templateId || !publicKey) {
+    toast('Please enter Service ID, Template ID, and Public Key', 'error'); return;
+  }
+  localStorage.setItem('ejs_config', JSON.stringify({ serviceId, templateId, publicKey, fromName, replyTo }));
+  try { emailjs.init(publicKey); } catch(e) { console.warn('EmailJS init:', e); }
+  updateEJSStatus();
+  toast('✅ EmailJS configured and activated!', 'success');
+}
+
+function clearEJSConfig() {
+  if (!confirm('Remove EmailJS configuration?')) return;
+  localStorage.removeItem('ejs_config');
+  updateEJSStatus();
+  loadEJSConfigToForm();
+  toast('EmailJS config cleared', 'success');
+}
+
+function loadEJSConfigToForm() {
+  const cfg = getEJSConfig();
+  const set = (id, v) => { const el = document.getElementById(id); if (el) el.value = v || ''; };
+  set('ejs-service-id',  cfg?.serviceId);
+  set('ejs-template-id', cfg?.templateId);
+  set('ejs-public-key',  cfg?.publicKey);
+  set('ejs-from-name',   cfg?.fromName || 'Mahadi');
+  set('ejs-reply-to',    cfg?.replyTo);
+}
+
+function updateEJSStatus() {
+  const cfg = getEJSConfig();
+
+  // Setup card status
+  const statusEl = document.getElementById('ejs-status-text');
+  if (statusEl) {
+    statusEl.textContent = cfg
+      ? `✅ Active — ${cfg.fromName || 'sender'} · ${cfg.serviceId}`
+      : 'Not configured — setup below';
+    statusEl.className = 'ejs-status ' + (cfg ? 'ok' : 'off');
+  }
+
+  // Compose modal badge
+  const badge = document.getElementById('ejs-compose-badge');
+  if (badge) {
+    badge.textContent   = cfg ? '⚡ EmailJS ready' : '⚠️ EmailJS not set up';
+    badge.style.background = cfg ? '#dcfce7' : '#fef9c3';
+    badge.style.color      = cfg ? 'var(--success)' : '#92400e';
+  }
+
+  // "Send All via EmailJS" button visibility
+  const sendAllBtn = document.getElementById('ejs-send-all-btn');
+  if (sendAllBtn) sendAllBtn.style.display = cfg ? 'inline-flex' : 'none';
+
+  // Email modal tip
+  const tip = document.getElementById('ejs-modal-tip');
+  if (tip) tip.textContent = cfg ? '' : 'Configure EmailJS in Tools to enable ⚡ Send buttons.';
+}
+
+// ── Compose modal: send via EmailJS ─────────────────────────────────────────
+
+function sendEmailFromCompose() {
+  const cfg = getEJSConfig();
+  if (!cfg) {
+    toast('EmailJS not configured — go to Tools → EmailJS Auto-Send Setup', 'error'); return;
+  }
+  const to      = (document.getElementById('compose-to').value      || '').trim();
+  const subject = (document.getElementById('compose-subject').value || '').trim();
+  const body    = (document.getElementById('compose-body').value    || '').trim();
+  if (!to) { toast('No recipient email address', 'error'); return; }
+
+  const btn = document.getElementById('ejs-send-btn');
+  btn.disabled = true; btn.textContent = '⏳ Sending…';
+
+  const toName = (document.getElementById('compose-title').textContent || '')
+                   .replace('Email to ', '').trim();
+
+  emailjs.send(cfg.serviceId, cfg.templateId, {
+    to_email:  to,
+    to_name:   toName || to,
+    from_name: cfg.fromName || 'Mahadi',
+    reply_to:  cfg.replyTo  || '',
+    subject,
+    message:   body,
+  })
+  .then(() => {
+    // Log followup on the client record
+    const clientId = document.getElementById('compose-modal').dataset.clientId;
+    const c = clients.find(x => x.id === clientId);
+    if (c) {
+      if (!c.followups) c.followups = [];
+      const today = new Date().toISOString().split('T')[0];
+      c.followups.push({ id:genId(), channel:'Email', date:today,
+                         note:`Auto-sent via EmailJS: "${subject}"` });
+      c.lastContact = today;
+      save();
+    }
+    toast(`✅ Email sent to ${to}!`, 'success');
+    closeModal('compose-modal');
+  })
+  .catch(err => {
+    console.error('EmailJS send error:', err);
+    toast(`❌ Send failed: ${err.text || err.message || 'Check your EmailJS settings'}`, 'error');
+    btn.disabled = false; btn.textContent = '⚡ Send Now';
+  });
+}
+
+// ── Email center: quick-send one client ──────────────────────────────────────
+
+function sendQuickEmail(clientId) {
+  const cfg = getEJSConfig();
+  if (!cfg) { toast('EmailJS not configured — go to Tools → EmailJS Setup', 'error'); return; }
+  const c = clients.find(x => x.id === clientId);
+  if (!c || !c.email) { toast('Client has no email address', 'error'); return; }
+  // Open compose (pre-fills draft), then highlight Send Now button
+  openComposeModal(clientId);
+  setTimeout(() => {
+    const btn = document.getElementById('ejs-send-btn');
+    if (!btn) return;
+    btn.scrollIntoView({ behavior:'smooth', block:'nearest' });
+    btn.style.transition = 'box-shadow .2s';
+    btn.style.boxShadow  = '0 0 0 5px rgba(234,88,12,.35)';
+    btn.focus();
+    setTimeout(() => { btn.style.boxShadow = ''; }, 2200);
+  }, 320);
+}
+
+// ── Email center: send all filtered clients via EmailJS ──────────────────────
+
+async function sendAllEmailsEJS() {
+  const cfg = getEJSConfig();
+  if (!cfg) { toast('EmailJS not configured', 'error'); return; }
+
+  const filter   = (document.getElementById('email-filter')||{}).value || 'overdue';
+  const today    = new Date().toISOString().split('T')[0];
+  const nextWeek = new Date(Date.now()+7*864e5).toISOString().split('T')[0];
+
+  let list = clients.filter(c => c.email);
+  if (filter==='overdue') list = list.filter(c => c.nextFollowup && c.nextFollowup < today);
+  if (filter==='today')   list = list.filter(c => c.nextFollowup === today);
+  if (filter==='week')    list = list.filter(c => c.nextFollowup > today && c.nextFollowup <= nextWeek);
+  if (!list.length) { toast('No clients to email in this filter', 'error'); return; }
+
+  const names = list.map(c => `• ${c.name} (${c.email})`).join('\n');
+  if (!confirm(`Send follow-up emails to ${list.length} client${list.length>1?'s':''}?\n\n${names}\n\nEmails will be sent one by one. This cannot be undone.`)) return;
+
+  const allBtn = document.getElementById('ejs-send-all-btn');
+  if (allBtn) { allBtn.disabled = true; allBtn.textContent = '⏳ Sending…'; }
+
+  let sent = 0, failed = 0;
+  for (const c of list) {
+    const draft = buildEmailDraft(c);
+    try {
+      await emailjs.send(cfg.serviceId, cfg.templateId, {
+        to_email:  c.email,
+        to_name:   c.name.split(' ')[0] || c.name,
+        from_name: cfg.fromName || 'Mahadi',
+        reply_to:  cfg.replyTo  || '',
+        subject:   draft.subject,
+        message:   draft.body,
+      });
+      if (!c.followups) c.followups = [];
+      c.followups.push({ id:genId(), channel:'Email', date:today,
+                         note:`Bulk auto-sent via EmailJS: "${draft.subject}"` });
+      c.lastContact = today;
+      sent++;
+      toast(`Sent to ${c.name} (${sent}/${list.length})`, 'success');
+      await new Promise(r => setTimeout(r, 1300)); // respect EmailJS rate limits
+    } catch(err) {
+      failed++;
+      toast(`❌ Failed for ${c.name}: ${err.text || err.message || 'Error'}`, 'error');
+      await new Promise(r => setTimeout(r, 800));
+    }
+  }
+
+  save();
+  renderEmailModal();
+  if (allBtn) { allBtn.disabled = false; allBtn.textContent = '⚡ Send All via EmailJS'; }
+  toast(`✅ Done — ${sent} sent${failed ? ` · ${failed} failed` : ''}`, sent > 0 ? 'success' : 'error');
+}
+
+// ── Test send ────────────────────────────────────────────────────────────────
+
+function testEJSSend() {
+  const cfg = getEJSConfig();
+  if (!cfg) { toast('Save your config first, then test', 'error'); return; }
+  const testEmail = prompt('Enter your own email address to receive the test:');
+  if (!testEmail || !testEmail.includes('@')) { toast('Invalid email address', 'error'); return; }
+
+  const btn = document.getElementById('ejs-test-btn');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Sending…'; }
+
+  emailjs.send(cfg.serviceId, cfg.templateId, {
+    to_email:  testEmail,
+    to_name:   'Test',
+    from_name: cfg.fromName || 'Mahadi',
+    reply_to:  cfg.replyTo  || testEmail,
+    subject:   '✅ Test — ClientCRM EmailJS is working!',
+    message:   `Hello!\n\nThis is a test email from your ClientCRM Dashboard.\n\n`
+             + `If you received this, EmailJS is configured correctly 🎉\n\n`
+             + `You can now send automated follow-up emails directly from the dashboard `
+             + `without opening your email app.\n\n`
+             + `— Sent from ClientCRM Dashboard`,
+  })
+  .then(() => {
+    toast(`✅ Test email sent to ${testEmail}! Check your inbox.`, 'success');
+    if (btn) { btn.disabled = false; btn.textContent = '🧪 Send Test Email'; }
+  })
+  .catch(err => {
+    console.error('Test send error:', err);
+    toast(`❌ Test failed: ${err.text || err.message || 'Check your EmailJS settings'}`, 'error');
+    if (btn) { btn.disabled = false; btn.textContent = '🧪 Send Test Email'; }
+  });
+}
+
 // ==================== TOAST ====================
 function toast(msg, type='') {
   const el = document.createElement('div');
@@ -2296,12 +2738,263 @@ function updateEmailBadge() {
   if (badge) badge.style.display = overdueWithEmail > 0 ? 'inline-block' : 'none';
 }
 
+function updateBotExportCount() {
+  const el = document.getElementById('bot-export-count');
+  if (!el) return;
+  if (!clients.length) {
+    el.textContent = 'No clients yet';
+    return;
+  }
+  const today     = new Date().toISOString().split('T')[0];
+  const overdueN  = clients.filter(c => {
+    const fd = c.followUpDate || c.nextFollowup || c.nextFollowUp || '';
+    return fd && fd < today;
+  }).length;
+  const dueTodayN = clients.filter(c => {
+    const fd = c.followUpDate || c.nextFollowup || c.nextFollowUp || '';
+    return fd === today;
+  }).length;
+  const parts = [`${clients.length} clients ready to export`];
+  if (overdueN)  parts.push(`${overdueN} overdue`);
+  if (dueTodayN) parts.push(`${dueTodayN} due today`);
+  el.textContent = parts.join(' · ');
+}
+
+// ==================== SUPABASE CLOUD SYNC ====================
+function getSBConfig() {
+  try { return JSON.parse(localStorage.getItem('sb_config') || 'null'); }
+  catch { return null; }
+}
+
+function saveSBConfig() {
+  const url = (document.getElementById('sb-url').value || '').trim();
+  const key = (document.getElementById('sb-anon-key').value || '').trim();
+  if (!url || !key) { toast('Enter both Project URL and Anon Key', 'error'); return; }
+  if (!url.startsWith('https://') || !url.includes('.supabase.co')) {
+    toast('URL should look like https://xxxxx.supabase.co', 'error'); return;
+  }
+  localStorage.setItem('sb_config', JSON.stringify({ url, key }));
+  initSupabase();
+  toast('Connecting to Supabase…', 'success');
+}
+
+function clearSBConfig() {
+  if (!confirm('Disconnect Supabase? Your local data stays, cloud sync will stop.')) return;
+  localStorage.removeItem('sb_config');
+  sbClient = null;
+  const pill = document.getElementById('sb-sync-pill');
+  if (pill) pill.style.display = 'none';
+  updateSBStatus('offline', 'Not connected — enter your project details below');
+  toast('Supabase disconnected', 'success');
+}
+
+function loadSBConfigToForm() {
+  const cfg = getSBConfig();
+  if (!cfg) return;
+  const urlEl = document.getElementById('sb-url');
+  const keyEl = document.getElementById('sb-anon-key');
+  if (urlEl) urlEl.value = cfg.url || '';
+  if (keyEl) keyEl.value = cfg.key || '';
+}
+
+function updateSBStatus(state, text) {
+  // Update status text in the card
+  const statusEl = document.getElementById('sb-status-text');
+  if (statusEl) statusEl.textContent = text || '';
+  // Update topbar pill
+  const pill = document.getElementById('sb-sync-pill');
+  if (!pill) return;
+  pill.className = 'sb-pill ' + (state || 'offline');
+  const dot = pill.querySelector('.sb-dot');
+  const label = pill.querySelector('.sb-label');
+  if (dot) {
+    dot.className = 'sb-dot' + (state === 'syncing' ? ' pulse' : '');
+  }
+  if (label) {
+    const labels = { synced:'Synced ✓', syncing:'Syncing…', error:'Sync Error', offline:'Offline' };
+    label.textContent = labels[state] || (text || 'Offline');
+  }
+}
+
+async function sbUpsert(table, record) {
+  if (!sbClient) return;
+  updateSBStatus('syncing', 'Saving to cloud…');
+  try {
+    const { error } = await sbClient
+      .from(table)
+      .upsert({ id: record.id, data: record, updated_at: new Date().toISOString() });
+    if (error) throw error;
+    updateSBStatus('synced', `Synced ✓ (${clients.length} clients)`);
+  } catch(e) {
+    console.error('Supabase upsert error:', e);
+    updateSBStatus('error', 'Sync error — see console');
+  }
+}
+
+async function sbDelete(table, id) {
+  if (!sbClient) return;
+  updateSBStatus('syncing', 'Deleting from cloud…');
+  try {
+    const { error } = await sbClient.from(table).delete().eq('id', id);
+    if (error) throw error;
+    updateSBStatus('synced', `Synced ✓ (${clients.length} clients)`);
+  } catch(e) {
+    console.error('Supabase delete error:', e);
+    updateSBStatus('error', 'Sync error — see console');
+  }
+}
+
+async function sbBulkUpsert(table, records) {
+  if (!sbClient || !records || !records.length) return;
+  updateSBStatus('syncing', 'Syncing to cloud…');
+  try {
+    const rows = records.map(r => ({ id: r.id, data: r, updated_at: new Date().toISOString() }));
+    // Supabase upsert accepts arrays — batch in chunks of 200 to stay within limits
+    for (let i = 0; i < rows.length; i += 200) {
+      const chunk = rows.slice(i, i + 200);
+      const { error } = await sbClient.from(table).upsert(chunk);
+      if (error) throw error;
+    }
+    updateSBStatus('synced', `Synced ✓ (${clients.length} clients)`);
+  } catch(e) {
+    console.error('Supabase bulk upsert error:', e);
+    updateSBStatus('error', 'Sync error — see console');
+  }
+}
+
+async function sbClearAll() {
+  if (!sbClient) return;
+  try {
+    await sbClient.from('crm_clients').delete().neq('id', '__none__');
+    await sbClient.from('crm_suppliers').delete().neq('id', '__none__');
+    updateSBStatus('synced', 'Cleared ✓');
+  } catch(e) {
+    console.error('Supabase clear error:', e);
+    updateSBStatus('error', 'Sync error — see console');
+  }
+}
+
+async function sbLoad() {
+  if (!sbClient) { toast('Connect Supabase first', 'error'); return; }
+  updateSBStatus('syncing', 'Loading from cloud…');
+  try {
+    const [{ data: cRows, error: cErr }, { data: sRows, error: sErr }] = await Promise.all([
+      sbClient.from('crm_clients').select('data').order('updated_at', { ascending: false }),
+      sbClient.from('crm_suppliers').select('data').order('updated_at', { ascending: false })
+    ]);
+    if (cErr) throw cErr;
+    if (sErr) throw sErr;
+    let changed = false;
+    if (cRows && cRows.length) {
+      clients = cRows.map(r => r.data);
+      localStorage.setItem('crm_clients', JSON.stringify(clients));
+      changed = true;
+    }
+    if (sRows && sRows.length) {
+      suppliers = sRows.map(r => r.data);
+      localStorage.setItem('crm_suppliers', JSON.stringify(suppliers));
+      changed = true;
+    }
+    if (changed) {
+      renderDashboard();
+      renderClients();
+    }
+    const msg = `Synced ✓ (${clients.length} clients)`;
+    updateSBStatus('synced', msg);
+    toast(`Loaded ${clients.length} clients + ${suppliers.length} suppliers from cloud`, 'success');
+  } catch(e) {
+    console.error('Supabase load error:', e);
+    updateSBStatus('error', 'Load error — check console');
+    toast('Supabase load failed — see console', 'error');
+  }
+}
+
+async function sbPushAll() {
+  if (!sbClient) { toast('Connect Supabase first', 'error'); return; }
+  await sbBulkUpsert('crm_clients', clients);
+  await sbBulkUpsert('crm_suppliers', suppliers);
+  toast(`Pushed ${clients.length} clients + ${suppliers.length} suppliers to cloud`, 'success');
+}
+
+function sbSetupRealtime() {
+  if (!sbClient) return;
+  sbClient
+    .channel('crm-realtime')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'crm_clients' }, payload => {
+      const { eventType, new: newRow, old: oldRow } = payload;
+      if (eventType === 'INSERT' || eventType === 'UPDATE') {
+        const record = newRow.data;
+        const idx = clients.findIndex(c => c.id === record.id);
+        if (idx >= 0) clients[idx] = record; else clients.unshift(record);
+      } else if (eventType === 'DELETE') {
+        clients = clients.filter(c => c.id !== (oldRow.id || (oldRow.data && oldRow.data.id)));
+      }
+      localStorage.setItem('crm_clients', JSON.stringify(clients));
+      renderDashboard(); renderClients();
+      updateSBStatus('synced', `Live sync ✓ (${clients.length} clients)`);
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'crm_suppliers' }, payload => {
+      const { eventType, new: newRow, old: oldRow } = payload;
+      if (eventType === 'INSERT' || eventType === 'UPDATE') {
+        const record = newRow.data;
+        const idx = suppliers.findIndex(s => s.id === record.id);
+        if (idx >= 0) suppliers[idx] = record; else suppliers.unshift(record);
+      } else if (eventType === 'DELETE') {
+        suppliers = suppliers.filter(s => s.id !== (oldRow.id || (oldRow.data && oldRow.data.id)));
+      }
+      localStorage.setItem('crm_suppliers', JSON.stringify(suppliers));
+      renderSuppliers();
+      updateSBStatus('synced', `Live sync ✓ (${clients.length} clients)`);
+    })
+    .subscribe(status => {
+      if (status === 'SUBSCRIBED') {
+        updateSBStatus('synced', `Live sync ✓ (${clients.length} clients)`);
+      }
+    });
+}
+
+async function initSupabase() {
+  const cfg = getSBConfig();
+  if (!cfg) {
+    updateSBStatus('offline', 'Not connected — enter your project details below');
+    return;
+  }
+  // Show pill
+  const pill = document.getElementById('sb-sync-pill');
+  if (pill) pill.style.display = 'inline-flex';
+  updateSBStatus('syncing', 'Connecting…');
+  try {
+    sbClient = supabase.createClient(cfg.url, cfg.key);
+    await sbLoad();
+    sbSetupRealtime();
+  } catch(e) {
+    console.error('Supabase init error:', e);
+    updateSBStatus('error', 'Connection failed — check your URL and key');
+    toast('Supabase connection failed — check settings in Tools', 'error');
+  }
+}
+
 // ==================== INIT ====================
 renderDashboard();
 updateSidebarStats();
 updateNavCount();
 updateEmailBadge();
+updateBotExportCount();
 renderOverdueBanner();
+
+// EmailJS — restore from localStorage and apply
+(function initEmailJS() {
+  const cfg = getEJSConfig();
+  if (cfg) {
+    try { emailjs.init(cfg.publicKey); } catch(e) { console.warn('EmailJS init:', e); }
+  }
+  updateEJSStatus();
+  loadEJSConfigToForm();
+})();
+
+// Supabase — connect if previously configured
+loadSBConfigToForm();
+initSupabase();
 
 // Auto show morning report once per day (500ms delay so dashboard renders first)
 setTimeout(() => {
@@ -2313,12 +3006,13 @@ document.querySelectorAll('.modal-overlay').forEach(overlay => {
   overlay.addEventListener('click', e => { if (e.target === overlay) overlay.classList.remove('open'); });
 });
 
-// Re-render overdue banner whenever dashboard is re-rendered
+// Re-render overdue banner + bot count whenever dashboard is re-rendered
 const _origRenderDashboard = renderDashboard;
 renderDashboard = function() {
   _origRenderDashboard();
   renderOverdueBanner();
   updateEmailBadge();
+  updateBotExportCount();
 };
 </script>
 </body>
