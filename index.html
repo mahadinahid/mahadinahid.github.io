@@ -1298,6 +1298,10 @@ let clients = JSON.parse(localStorage.getItem('crm_clients') || '[]');
 let suppliers = JSON.parse(localStorage.getItem('crm_suppliers') || '[]');
 let sbClient = null; // Supabase client instance — set by initSupabase()
 
+// ── Supabase default credentials (team-shared, auto-connects on every browser) ──
+const SB_DEFAULT_URL = 'https://zfqdkhvzhafxqvltenio.supabase.co';
+const SB_DEFAULT_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpmcWRraHZ6aGFmeHF2bHRlbmlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4MjUxOTksImV4cCI6MjA5MjQwMTE5OX0.8PZ0vrUy7zZvBneaHZ8yiBAL-AYqSfW2OEwU1V5_YwM';
+
 function save() {
   localStorage.setItem('crm_clients', JSON.stringify(clients));
   localStorage.setItem('crm_suppliers', JSON.stringify(suppliers));
@@ -2762,8 +2766,12 @@ function updateBotExportCount() {
 
 // ==================== SUPABASE CLOUD SYNC ====================
 function getSBConfig() {
-  try { return JSON.parse(localStorage.getItem('sb_config') || 'null'); }
-  catch { return null; }
+  try {
+    const saved = JSON.parse(localStorage.getItem('sb_config') || 'null');
+    if (saved && saved.url && saved.key) return saved;
+  } catch {}
+  // Fall back to hardcoded team defaults — auto-connects on every fresh browser
+  return { url: SB_DEFAULT_URL, key: SB_DEFAULT_KEY };
 }
 
 function saveSBConfig() {
