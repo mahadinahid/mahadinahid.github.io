@@ -245,16 +245,134 @@
   /* Overdue indicator */
   .overdue { color: var(--danger); font-weight: 600; }
 
-  /* Responsive */
+  /* ── Mobile bottom navigation bar ── */
+  .mobile-nav {
+    display: none;
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: var(--gray-900);
+    z-index: 200;
+    align-items: stretch;
+    border-top: 1px solid rgba(255,255,255,.1);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .mobile-nav-item {
+    flex: 1; display: flex; flex-direction: column; align-items: center;
+    justify-content: center; gap: 3px; color: var(--gray-500);
+    cursor: pointer; font-size: 9px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: .3px;
+    transition: color .15s; padding: 8px 2px 6px;
+    border: none; background: none; position: relative;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .mobile-nav-item svg { flex-shrink: 0; }
+  .mobile-nav-item.active { color: var(--primary); }
+  .mobile-nav-badge {
+    position: absolute; top: 4px; right: calc(50% - 18px);
+    background: var(--danger); color: #fff; font-size: 8px; font-weight: 700;
+    border-radius: 20px; padding: 1px 4px; min-width: 14px;
+    text-align: center; line-height: 1.5; display: none;
+  }
+
+  /* ════════════════════════════════════════════
+     RESPONSIVE — TABLET (≤ 900px)
+     ════════════════════════════════════════════ */
   @media (max-width: 900px) {
-    .sidebar { transform: translateX(-100%); }
+    .sidebar { display: none; }
     .main { margin-left: 0; }
-    .form-grid { grid-template-columns: 1fr; }
     .dashboard-grid { grid-template-columns: 1fr; }
     .detail-sections { grid-template-columns: 1fr; }
+    .form-grid { grid-template-columns: 1fr; }
   }
-  @media (max-width: 600px) {
-    .stats-grid { grid-template-columns: 1fr 1fr; }
+
+  /* ════════════════════════════════════════════
+     RESPONSIVE — MOBILE (≤ 768px)
+     ════════════════════════════════════════════ */
+  @media (max-width: 768px) {
+
+    /* Show bottom nav, push content up */
+    .mobile-nav { display: flex; }
+    .content { padding: 12px 12px 80px; }
+
+    /* Topbar — compact */
+    .topbar { padding: 0 12px; height: 52px; }
+    .page-title { font-size: 15px; }
+    .topbar-right { gap: 6px; }
+    /* Hide Morning Report, WA Bulk and Export to Bot from topbar — accessible via sections */
+    .topbar-right .btn-outline { display: none; }
+    .topbar-right .btn-telegram { display: none; }
+    .topbar-right .btn-primary { padding: 6px 12px; font-size: 13px; }
+    /* Sync pill — show dot only, hide label text */
+    .sb-pill .sb-label { display: none; }
+    .sb-pill { padding: 4px 7px; gap: 4px; }
+
+    /* Stats grid — 2 per row */
+    .stats-grid { grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+    .stat-card { padding: 12px 10px; gap: 10px; }
+    .stat-icon { width: 36px; height: 36px; border-radius: 10px; }
+    .stat-info h3 { font-size: 20px; }
+    .stat-info p { font-size: 11px; }
+    .stat-info .stat-sub { display: none; }
+
+    /* Dashboard grid — single column */
+    .dashboard-grid { grid-template-columns: 1fr; gap: 12px; margin-bottom: 14px; }
+    .card-header { padding: 12px 14px; }
+    .card-body { padding: 12px 14px; }
+
+    /* Tables — horizontal scroll with touch momentum */
+    .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    table { min-width: 600px; font-size: 12px; }
+    thead th { padding: 8px 10px; font-size: 11px; white-space: nowrap; }
+    td { padding: 9px 10px; }
+
+    /* Filter bar — search full-width on top */
+    .filter-bar { flex-wrap: wrap; gap: 6px; }
+    .search-box { min-width: 100%; order: -1; }
+    select.filter-select { flex: 1; min-width: 0; font-size: 12px; padding: 7px 8px; }
+
+    /* Modals — slide up from bottom, full width */
+    .modal-overlay { padding: 0; align-items: flex-end; }
+    .modal { border-radius: 18px 18px 0 0; max-height: 92vh; max-width: 100%; width: 100%; }
+    .modal-header { padding: 14px 16px 12px; }
+    .modal-header h2 { font-size: 15px; }
+    .modal-body { padding: 12px 16px; }
+    .modal-footer { padding: 10px 16px; gap: 8px; flex-wrap: wrap; }
+    .modal-footer .btn { flex: 1; justify-content: center; min-width: 0; }
+
+    /* Forms */
+    .form-grid { grid-template-columns: 1fr; gap: 10px; }
+    .form-grid-3 { grid-template-columns: 1fr 1fr; }
+    .form-section { margin-bottom: 16px; }
+
+    /* Detail panel */
+    .detail-header { flex-direction: column; gap: 10px; }
+    .detail-name { font-size: 18px; }
+
+    /* Follow-up add row */
+    .followup-add { flex-wrap: wrap; }
+    .followup-add select { width: 100%; }
+    .followup-add input[type="date"] { flex: 1; }
+
+    /* Kanban — horizontal scroll */
+    .kanban-board { grid-template-columns: repeat(5, 180px); min-width: unset; overflow-x: auto; }
+
+    /* Tools grid — single column */
+    .tools-grid { grid-template-columns: 1fr; gap: 12px; }
+    .tool-card[style*="grid-column:span 2"],
+    .tool-card[style*="grid-column: span 2"] { grid-column: span 1 !important; }
+    .sb-input-row { grid-template-columns: 1fr; }
+    .ejs-input-row { flex-direction: column; }
+
+    /* Toast → top of screen so bottom nav doesn't cover it */
+    .toast-container { bottom: auto; top: 58px; right: 10px; left: 10px; }
+    .toast { font-size: 12px; padding: 9px 12px; }
+
+    /* Spec grid */
+    .spec-grid { grid-template-columns: 1fr 1fr; }
+
+    /* Pipeline */
+    .pipeline-name { font-size: 12px; }
+    .pipeline-item { padding: 8px 10px; }
   }
 
   /* Animations */
@@ -1283,6 +1401,40 @@ create policy "anon all" on crm_suppliers for all using (true) with check (true)
   </div>
 </div>
 
+<!-- ── Mobile bottom navigation (hidden on desktop via CSS) ── -->
+<nav class="mobile-nav" id="mobile-nav">
+  <button class="mobile-nav-item active" data-section="dashboard" onclick="showSection('dashboard', this)">
+    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+    Home
+  </button>
+  <button class="mobile-nav-item" data-section="clients" onclick="showSection('clients', this)">
+    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    Clients
+    <span class="mobile-nav-badge" id="mob-clients-badge"></span>
+  </button>
+  <button class="mobile-nav-item" data-section="followups" onclick="showSection('followups', this)">
+    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    Follow-Ups
+    <span class="mobile-nav-badge" id="mob-overdue-badge"></span>
+  </button>
+  <button class="mobile-nav-item" data-section="pipeline" onclick="showSection('pipeline', this)">
+    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+    Pipeline
+  </button>
+  <button class="mobile-nav-item" data-section="orders" onclick="showSection('orders', this)">
+    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+    Orders
+  </button>
+  <button class="mobile-nav-item" data-section="suppliers" onclick="showSection('suppliers', this)">
+    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+    Suppliers
+  </button>
+  <button class="mobile-nav-item" data-section="tools" onclick="showSection('tools', this)">
+    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+    Tools
+  </button>
+</nav>
+
 <!-- TOAST -->
 <div class="toast-container" id="toast-container"></div>
 
@@ -1322,8 +1474,12 @@ function genId() { return Date.now().toString(36) + Math.random().toString(36).s
 function showSection(name, el) {
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelectorAll('.mobile-nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('section-' + name).classList.add('active');
   if (el) el.classList.add('active');
+  // Sync matching mobile nav item (even when triggered from sidebar)
+  const mobItem = document.querySelector(`.mobile-nav-item[data-section="${name}"]`);
+  if (mobItem) mobItem.classList.add('active');
   const titles = { dashboard:'Dashboard', clients:'All Clients', pipeline:'Pipeline', followups:'Follow-Ups', orders:'Orders', suppliers:'Suppliers', tools:'Tools' };
   document.getElementById('page-title').textContent = titles[name] || name;
   if (name === 'dashboard') renderDashboard();
@@ -1893,6 +2049,11 @@ function updateNavCount() {
   const today = new Date().toISOString().split('T')[0];
   const overdueCount = clients.filter(c=>c.nextFollowup&&c.nextFollowup<today).length;
   document.getElementById('overdue-badge').style.display = overdueCount>0?'inline-block':'none';
+  // Mobile nav badges
+  const mobClients = document.getElementById('mob-clients-badge');
+  if (mobClients) { mobClients.textContent = clients.length||''; mobClients.style.display = clients.length?'block':'none'; }
+  const mobOverdue = document.getElementById('mob-overdue-badge');
+  if (mobOverdue) { mobOverdue.textContent = overdueCount||''; mobOverdue.style.display = overdueCount?'block':'none'; }
 }
 
 // ==================== BADGES / HELPERS ====================
