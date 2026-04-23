@@ -245,40 +245,61 @@
   /* Overdue indicator */
   .overdue { color: var(--danger); font-weight: 600; }
 
-  /* ── Mobile bottom navigation bar ── */
+  /* ── Hamburger button (shown on mobile, hidden on desktop) ── */
+  .hamburger-btn {
+    display: none; background: none; border: none; padding: 7px 8px 7px 0;
+    cursor: pointer; color: var(--gray-700); border-radius: 8px;
+    align-items: center; justify-content: center; flex-shrink: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* ── Sidebar dark overlay (mobile drawer backdrop) ── */
+  .sidebar-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,.55); z-index: 99; cursor: pointer;
+  }
+  .sidebar-overlay.open { display: block; }
+
+  /* ── Mobile bottom tab bar ── */
   .mobile-nav {
-    display: none;
-    position: fixed;
-    bottom: 0; left: 0; right: 0;
-    background: var(--gray-900);
-    z-index: 200;
-    align-items: stretch;
-    border-top: 1px solid rgba(255,255,255,.1);
+    display: none; position: fixed; bottom: 0; left: 0; right: 0;
+    background: var(--gray-900); z-index: 200; align-items: stretch;
+    border-top: 1px solid rgba(255,255,255,.12);
     padding-bottom: env(safe-area-inset-bottom, 0px);
+    box-shadow: 0 -2px 12px rgba(0,0,0,.25);
   }
   .mobile-nav-item {
     flex: 1; display: flex; flex-direction: column; align-items: center;
     justify-content: center; gap: 3px; color: var(--gray-500);
     cursor: pointer; font-size: 9px; font-weight: 600;
     text-transform: uppercase; letter-spacing: .3px;
-    transition: color .15s; padding: 8px 2px 6px;
+    transition: color .15s; padding: 9px 2px 7px;
     border: none; background: none; position: relative;
-    -webkit-tap-highlight-color: transparent;
+    -webkit-tap-highlight-color: transparent; line-height: 1.2;
   }
   .mobile-nav-item svg { flex-shrink: 0; }
-  .mobile-nav-item.active { color: var(--primary); }
+  .mobile-nav-item.active { color: #60a5fa; }
+  .mobile-nav-item.active svg { stroke: #60a5fa; }
   .mobile-nav-badge {
-    position: absolute; top: 4px; right: calc(50% - 18px);
+    position: absolute; top: 5px; right: calc(50% - 18px);
     background: var(--danger); color: #fff; font-size: 8px; font-weight: 700;
     border-radius: 20px; padding: 1px 4px; min-width: 14px;
     text-align: center; line-height: 1.5; display: none;
   }
 
   /* ════════════════════════════════════════════
-     RESPONSIVE — TABLET (≤ 900px)
+     RESPONSIVE — TABLET + MOBILE (≤ 900px)
      ════════════════════════════════════════════ */
   @media (max-width: 900px) {
-    .sidebar { display: none; }
+    /* Show hamburger */
+    .hamburger-btn { display: flex; }
+    /* Sidebar slides in as drawer instead of permanent rail */
+    .sidebar {
+      transform: translateX(-100%);
+      transition: transform .28s cubic-bezier(.4,0,.2,1);
+      z-index: 100;
+    }
+    .sidebar.open { transform: translateX(0); }
     .main { margin-left: 0; }
     .dashboard-grid { grid-template-columns: 1fr; }
     .detail-sections { grid-template-columns: 1fr; }
@@ -289,24 +310,22 @@
      RESPONSIVE — MOBILE (≤ 768px)
      ════════════════════════════════════════════ */
   @media (max-width: 768px) {
-
-    /* Show bottom nav, push content up */
+    /* Show bottom tab bar; leave room at bottom */
     .mobile-nav { display: flex; }
-    .content { padding: 12px 12px 80px; }
+    .content { padding: 12px 12px 80px !important; }
 
-    /* Topbar — compact */
+    /* Topbar compact */
     .topbar { padding: 0 12px; height: 52px; }
     .page-title { font-size: 15px; }
     .topbar-right { gap: 6px; }
-    /* Hide Morning Report, WA Bulk and Export to Bot from topbar — accessible via sections */
-    .topbar-right .btn-outline { display: none; }
-    .topbar-right .btn-telegram { display: none; }
+    /* Hide extra topbar buttons — all accessible via hamburger/tabs */
+    .topbar-right .btn-outline,
+    .topbar-right .btn-telegram { display: none !important; }
     .topbar-right .btn-primary { padding: 6px 12px; font-size: 13px; }
-    /* Sync pill — show dot only, hide label text */
     .sb-pill .sb-label { display: none; }
-    .sb-pill { padding: 4px 7px; gap: 4px; }
+    .sb-pill { padding: 4px 8px; gap: 4px; }
 
-    /* Stats grid — 2 per row */
+    /* Stats 2 columns */
     .stats-grid { grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
     .stat-card { padding: 12px 10px; gap: 10px; }
     .stat-icon { width: 36px; height: 36px; border-radius: 10px; }
@@ -314,25 +333,25 @@
     .stat-info p { font-size: 11px; }
     .stat-info .stat-sub { display: none; }
 
-    /* Dashboard grid — single column */
-    .dashboard-grid { grid-template-columns: 1fr; gap: 12px; margin-bottom: 14px; }
+    /* Cards */
+    .dashboard-grid { gap: 12px; margin-bottom: 14px; }
     .card-header { padding: 12px 14px; }
     .card-body { padding: 12px 14px; }
 
-    /* Tables — horizontal scroll with touch momentum */
+    /* Tables — swipe horizontally */
     .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
     table { min-width: 600px; font-size: 12px; }
     thead th { padding: 8px 10px; font-size: 11px; white-space: nowrap; }
     td { padding: 9px 10px; }
 
-    /* Filter bar — search full-width on top */
+    /* Filter bar */
     .filter-bar { flex-wrap: wrap; gap: 6px; }
     .search-box { min-width: 100%; order: -1; }
     select.filter-select { flex: 1; min-width: 0; font-size: 12px; padding: 7px 8px; }
 
-    /* Modals — slide up from bottom, full width */
-    .modal-overlay { padding: 0; align-items: flex-end; }
-    .modal { border-radius: 18px 18px 0 0; max-height: 92vh; max-width: 100%; width: 100%; }
+    /* Modals slide up from bottom */
+    .modal-overlay { padding: 0 !important; align-items: flex-end !important; }
+    .modal { border-radius: 18px 18px 0 0 !important; max-height: 92vh; max-width: 100% !important; width: 100% !important; }
     .modal-header { padding: 14px 16px 12px; }
     .modal-header h2 { font-size: 15px; }
     .modal-body { padding: 12px 16px; }
@@ -340,39 +359,29 @@
     .modal-footer .btn { flex: 1; justify-content: center; min-width: 0; }
 
     /* Forms */
-    .form-grid { grid-template-columns: 1fr; gap: 10px; }
     .form-grid-3 { grid-template-columns: 1fr 1fr; }
     .form-section { margin-bottom: 16px; }
-
-    /* Detail panel */
     .detail-header { flex-direction: column; gap: 10px; }
     .detail-name { font-size: 18px; }
-
-    /* Follow-up add row */
     .followup-add { flex-wrap: wrap; }
     .followup-add select { width: 100%; }
-    .followup-add input[type="date"] { flex: 1; }
 
-    /* Kanban — horizontal scroll */
+    /* Kanban swipe */
     .kanban-board { grid-template-columns: repeat(5, 180px); min-width: unset; overflow-x: auto; }
 
-    /* Tools grid — single column */
-    .tools-grid { grid-template-columns: 1fr; gap: 12px; }
-    .tool-card[style*="grid-column:span 2"],
-    .tool-card[style*="grid-column: span 2"] { grid-column: span 1 !important; }
+    /* Tools grid single column — !important overrides later general rule */
+    .tools-grid { grid-template-columns: 1fr !important; gap: 12px !important; }
+    .tool-card[style*="grid-column"] { grid-column: span 1 !important; }
     .sb-input-row { grid-template-columns: 1fr; }
     .ejs-input-row { flex-direction: column; }
 
-    /* Toast → top of screen so bottom nav doesn't cover it */
-    .toast-container { bottom: auto; top: 58px; right: 10px; left: 10px; }
+    /* Toast at top so bottom nav never covers it */
+    .toast-container { bottom: auto !important; top: 58px !important; right: 10px; left: 10px; }
     .toast { font-size: 12px; padding: 9px 12px; }
 
-    /* Spec grid */
     .spec-grid { grid-template-columns: 1fr 1fr; }
-
-    /* Pipeline */
-    .pipeline-name { font-size: 12px; }
     .pipeline-item { padding: 8px 10px; }
+    .pipeline-name { font-size: 12px; }
   }
 
   /* Animations */
@@ -574,6 +583,9 @@
   <!-- Topbar -->
   <header class="topbar">
     <div class="topbar-left">
+      <button class="hamburger-btn" onclick="toggleMobileSidebar()" aria-label="Open menu">
+        <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
       <span class="page-title" id="page-title">Dashboard</span>
     </div>
     <div class="topbar-right">
@@ -1401,6 +1413,9 @@ create policy "anon all" on crm_suppliers for all using (true) with check (true)
   </div>
 </div>
 
+<!-- Sidebar overlay (mobile drawer backdrop) -->
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
+
 <!-- ── Mobile bottom navigation (hidden on desktop via CSS) ── -->
 <nav class="mobile-nav" id="mobile-nav">
   <button class="mobile-nav-item active" data-section="dashboard" onclick="showSection('dashboard', this)">
@@ -1471,15 +1486,33 @@ function save() {
 function genId() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
 
 // ==================== NAVIGATION ====================
+function toggleMobileSidebar() {
+  const sidebar = document.querySelector('.sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+  const isOpen = sidebar && sidebar.classList.contains('open');
+  if (isOpen) {
+    sidebar.classList.remove('open');
+    if (overlay) overlay.classList.remove('open');
+  } else {
+    if (sidebar) sidebar.classList.add('open');
+    if (overlay) overlay.classList.add('open');
+  }
+}
+
 function showSection(name, el) {
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.querySelectorAll('.mobile-nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('section-' + name).classList.add('active');
   if (el) el.classList.add('active');
-  // Sync matching mobile nav item (even when triggered from sidebar)
+  // Sync matching mobile nav item (even when triggered from sidebar or hamburger)
   const mobItem = document.querySelector(`.mobile-nav-item[data-section="${name}"]`);
   if (mobItem) mobItem.classList.add('active');
+  // Close mobile drawer after navigating
+  const sidebar = document.querySelector('.sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+  if (sidebar) sidebar.classList.remove('open');
+  if (overlay) overlay.classList.remove('open');
   const titles = { dashboard:'Dashboard', clients:'All Clients', pipeline:'Pipeline', followups:'Follow-Ups', orders:'Orders', suppliers:'Suppliers', tools:'Tools' };
   document.getElementById('page-title').textContent = titles[name] || name;
   if (name === 'dashboard') renderDashboard();
