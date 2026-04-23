@@ -1286,8 +1286,14 @@ create policy "anon all" on crm_suppliers for all using (true) with check (true)
 <!-- TOAST -->
 <div class="toast-container" id="toast-container"></div>
 
-<!-- Supabase JS SDK (free, real-time cloud database) -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<!-- Supabase JS SDK — version-pinned for mobile reliability -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
+<script>
+  // Fallback: if jsDelivr failed (slow mobile network), try unpkg
+  if (typeof supabase === 'undefined') {
+    document.write('<script src="https://unpkg.com/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"><\/script>');
+  }
+</script>
 
 <!-- EmailJS SDK (free, runs 100% in-browser, no server needed) -->
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
@@ -2885,6 +2891,7 @@ async function sbClearAll() {
 async function sbLoad() {
   if (!sbClient) { toast('Connect Supabase first', 'error'); return; }
   updateSBStatus('syncing', 'Loading from cloud…');
+  sbShowLoadingBanner(true);
   try {
     const [{ data: cRows, error: cErr }, { data: sRows, error: sErr }] = await Promise.all([
       sbClient.from('crm_clients').select('data').order('updated_at', { ascending: false }),
@@ -2892,28 +2899,44 @@ async function sbLoad() {
     ]);
     if (cErr) throw cErr;
     if (sErr) throw sErr;
-    let changed = false;
     if (cRows && cRows.length) {
       clients = cRows.map(r => r.data);
       localStorage.setItem('crm_clients', JSON.stringify(clients));
-      changed = true;
     }
     if (sRows && sRows.length) {
       suppliers = sRows.map(r => r.data);
       localStorage.setItem('crm_suppliers', JSON.stringify(suppliers));
-      changed = true;
     }
-    if (changed) {
-      renderDashboard();
-      renderClients();
-    }
-    const msg = `Synced ✓ (${clients.length} clients)`;
-    updateSBStatus('synced', msg);
-    toast(`Loaded ${clients.length} clients + ${suppliers.length} suppliers from cloud`, 'success');
+    // Always re-render — critical on mobile where localStorage starts empty
+    renderDashboard();
+    renderClients();
+    renderSuppliers();
+    updateSidebarStats();
+    updateNavCount();
+    sbShowLoadingBanner(false);
+    updateSBStatus('synced', `Synced ✓ (${clients.length} clients)`);
+    if (clients.length > 0) toast(`✓ ${clients.length} clients loaded`, 'success');
   } catch(e) {
     console.error('Supabase load error:', e);
-    updateSBStatus('error', 'Load error — check console');
-    toast('Supabase load failed — see console', 'error');
+    sbShowLoadingBanner(false);
+    updateSBStatus('error', 'Could not load data — tap to retry');
+    toast('Could not reach database — check your connection', 'error');
+  }
+}
+
+function sbShowLoadingBanner(show) {
+  let banner = document.getElementById('sb-loading-banner');
+  if (show) {
+    if (!banner) {
+      banner = document.createElement('div');
+      banner.id = 'sb-loading-banner';
+      banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9999;background:#6366f1;color:#fff;text-align:center;padding:10px 16px;font-size:14px;font-weight:600;letter-spacing:.01em;';
+      banner.innerHTML = '<span style="animation:sbpulse 1s ease-in-out infinite;display:inline-block;">☁️ Loading your data from cloud…</span>';
+      document.body.prepend(banner);
+    }
+    banner.style.display = 'block';
+  } else {
+    if (banner) banner.style.display = 'none';
   }
 }
 
@@ -2967,17 +2990,30 @@ async function initSupabase() {
     updateSBStatus('offline', 'Not connected — enter your project details below');
     return;
   }
-  // Show pill
+  // Show pill immediately so users know sync is in progress
   const pill = document.getElementById('sb-sync-pill');
   if (pill) pill.style.display = 'inline-flex';
   updateSBStatus('syncing', 'Connecting…');
+
+  // Guard: SDK may not have loaded yet on slow mobile connections — wait up to 5s
+  let sdkWait = 0;
+  while (typeof supabase === 'undefined' && sdkWait < 5000) {
+    await new Promise(r => setTimeout(r, 200));
+    sdkWait += 200;
+  }
+  if (typeof supabase === 'undefined') {
+    updateSBStatus('error', 'SDK failed to load — check your internet connection');
+    console.error('Supabase SDK not available after waiting');
+    return;
+  }
+
   try {
     sbClient = supabase.createClient(cfg.url, cfg.key);
     await sbLoad();
     sbSetupRealtime();
   } catch(e) {
     console.error('Supabase init error:', e);
-    updateSBStatus('error', 'Connection failed — check your URL and key');
+    updateSBStatus('error', 'Connection failed — check settings in Tools');
     toast('Supabase connection failed — check settings in Tools', 'error');
   }
 }
