@@ -582,6 +582,46 @@
   .btn-white:hover { background: #fef2f2; }
   .btn-white.wa { color: #075e54; }
   .btn-white.em { color: var(--primary); }
+
+  /* ===== TEMPLATE MANAGER ===== */
+  .tmpl-type-tabs { display:flex; gap:8px; margin-bottom:18px; }
+  .tmpl-type-tab  { padding:7px 18px; border-radius:20px; font-size:13px; font-weight:600; cursor:pointer; border:1.5px solid var(--gray-300); background:white; color:var(--gray-600); transition:all .15s; }
+  .tmpl-type-tab.wa.active    { border-color:#25d366; background:#dcfce7; color:#15803d; }
+  .tmpl-type-tab.email.active { border-color:#3b82f6; background:#dbeafe; color:#1d4ed8; }
+  .tmpl-type-tab.all.active   { border-color:#6366f1; background:#eef2ff; color:#4338ca; }
+  .tmpl-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:16px; }
+  .tmpl-card { background:white; border:1px solid var(--gray-200); border-radius:12px; overflow:hidden; transition:box-shadow .2s; display:flex; flex-direction:column; }
+  .tmpl-card:hover { box-shadow:0 4px 18px rgba(0,0,0,.09); }
+  .tmpl-card-hdr { display:flex; align-items:center; gap:10px; padding:13px 14px 10px; border-bottom:1px solid var(--gray-100); }
+  .tmpl-badge { font-size:10px; font-weight:700; padding:2px 8px; border-radius:20px; flex-shrink:0; }
+  .tmpl-badge.wa    { background:#dcfce7; color:#15803d; }
+  .tmpl-badge.email { background:#dbeafe; color:#1d4ed8; }
+  .tmpl-name { font-size:13px; font-weight:700; color:var(--gray-800); flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .tmpl-action-btn { width:28px; height:28px; border-radius:6px; border:1px solid var(--gray-200); background:white; cursor:pointer; font-size:13px; display:flex; align-items:center; justify-content:center; transition:all .15s; flex-shrink:0; }
+  .tmpl-action-btn:hover { background:var(--gray-100); }
+  .tmpl-action-btn.danger:hover { background:#fee2e2; border-color:#fca5a5; }
+  .tmpl-preview { padding:10px 14px; font-size:12px; color:var(--gray-600); line-height:1.5; max-height:76px; overflow:hidden; mask-image:linear-gradient(to bottom,black 50%,transparent 100%); white-space:pre-line; flex:1; }
+  .tmpl-footer { padding:8px 14px 12px; display:flex; flex-wrap:wrap; gap:4px; border-top:1px solid var(--gray-100); margin-top:auto; }
+  .tmpl-var-chip { font-size:10px; background:var(--gray-100); color:var(--gray-500); padding:2px 6px; border-radius:4px; font-family:monospace; }
+  .tmpl-section-hdr { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; padding-bottom:10px; border-bottom:2px solid var(--gray-100); }
+  .tmpl-section-title { font-size:15px; font-weight:700; color:var(--gray-800); display:flex; align-items:center; gap:8px; }
+  .tmpl-empty { text-align:center; padding:36px; color:var(--gray-400); }
+  /* template selector bars (inside WA Bulk + Email modals) */
+  .tmpl-sel-bar { display:flex; align-items:center; gap:10px; padding:10px 0 10px; flex-wrap:wrap; border-bottom:1px solid var(--gray-100); margin-bottom:6px; }
+  .tmpl-sel-bar label { font-size:11px; font-weight:700; color:var(--gray-500); text-transform:uppercase; letter-spacing:.5px; white-space:nowrap; }
+  .tmpl-sel-bar select { font-size:13px; padding:6px 10px; border:1.5px solid var(--gray-300); border-radius:8px; background:white; cursor:pointer; flex:1; min-width:180px; max-width:340px; }
+  .tmpl-sel-bar select:focus { border-color:#6366f1; outline:none; }
+  .tmpl-preview-box { background:#f8f9ff; border:1px solid #e0e7ff; border-radius:10px; padding:12px 14px; font-size:12px; color:var(--gray-700); white-space:pre-wrap; max-height:150px; overflow-y:auto; line-height:1.6; margin:0 0 8px; }
+  /* template edit modal */
+  .tmpl-modal-type-btn { padding:7px 18px; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; border:1.5px solid var(--gray-300); background:white; color:var(--gray-600); transition:all .15s; }
+  .tmpl-modal-type-btn.wa.active    { border-color:#25d366; background:#dcfce7; color:#15803d; }
+  .tmpl-modal-type-btn.email.active { border-color:#3b82f6; background:#dbeafe; color:#1d4ed8; }
+  .tmpl-var-ref { display:flex; flex-wrap:wrap; gap:4px; padding:8px 12px; background:var(--gray-50); border-radius:8px; margin-bottom:10px; }
+  .tmpl-var-ref span { font-size:10px; font-family:monospace; background:white; border:1px solid var(--gray-200); padding:2px 6px; border-radius:4px; color:#6366f1; cursor:pointer; }
+  .tmpl-var-ref span:hover { background:#eef2ff; }
+  /* save-as-template inline button */
+  .btn-save-tmpl { font-size:11px; padding:4px 10px; border-radius:6px; border:1.5px solid #6366f1; background:white; color:#6366f1; cursor:pointer; font-weight:600; transition:all .15s; white-space:nowrap; }
+  .btn-save-tmpl:hover { background:#eef2ff; }
 </style>
 </head>
 <body>
@@ -624,6 +664,10 @@
     <div class="nav-item" onclick="showSection('suppliers', this)">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
       Suppliers
+    </div>
+    <div class="nav-item" onclick="showSection('templates', this)">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      Templates
     </div>
     <div class="nav-item" onclick="showSection('tools', this)">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
@@ -1026,6 +1070,28 @@ create policy "anon all" on crm_suppliers for all using (true) with check (true)
       </div>
     </section>
 
+    <!-- TEMPLATES -->
+    <section id="section-templates" class="section">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px;">
+        <div>
+          <h2 style="font-size:20px;font-weight:700;margin:0 0 2px;">📄 Template Library</h2>
+          <p style="font-size:13px;color:var(--gray-500);margin:0;">Reusable WhatsApp &amp; Email templates with auto-fill variables. Use them in WA Bulk Sender and Email Reminders.</p>
+        </div>
+        <button class="btn btn-primary" onclick="openTemplateModal(null)">+ New Template</button>
+      </div>
+
+      <!-- Filter tabs -->
+      <div class="tmpl-type-tabs">
+        <button class="tmpl-type-tab all active" data-tmpl-tab="all"   onclick="setTmplTab('all')">All</button>
+        <button class="tmpl-type-tab wa"          data-tmpl-tab="whatsapp" onclick="setTmplTab('whatsapp')">💬 WhatsApp</button>
+        <button class="tmpl-type-tab email"        data-tmpl-tab="email"    onclick="setTmplTab('email')">📧 Email</button>
+      </div>
+
+      <div class="tmpl-grid" id="tmpl-grid">
+        <!-- filled by renderTemplates() -->
+      </div>
+    </section>
+
   </div><!-- /content -->
 </div><!-- /main -->
 </div><!-- /app -->
@@ -1375,6 +1441,13 @@ create policy "anon all" on crm_suppliers for all using (true) with check (true)
       </div>
       <button onclick="closeModal('wa-modal')" style="margin-left:auto;background:rgba(255,255,255,.2);border:none;color:white;border-radius:8px;padding:6px 10px;cursor:pointer;font-size:12px;">✕</button>
     </div>
+    <div style="display:flex;align-items:center;gap:8px;padding:8px 14px 0;flex-wrap:wrap;">
+      <label style="font-size:11px;font-weight:700;color:var(--gray-500);">TEMPLATE:</label>
+      <select id="wa-single-template-select" style="font-size:12px;padding:4px 8px;border:1px solid var(--gray-300);border-radius:6px;flex:1;max-width:260px;" onchange="waApplySingleTemplate()">
+        <option value="__auto__">Auto (by status)</option>
+      </select>
+      <button class="btn-save-tmpl" onclick="saveWaMessageAsTemplate()">💾 Save as Template</button>
+    </div>
     <div class="wa-template-bar">
       <span style="font-size:11px;color:var(--gray-500);font-weight:600;margin-right:4px;">Template:</span>
       <button class="wa-template-btn" onclick="setWaTemplate('followup')">General Follow-up</button>
@@ -1422,6 +1495,16 @@ create policy "anon all" on crm_suppliers for all using (true) with check (true)
         <button class="erc-tab" data-tab="week" onclick="setErcTab('week')">📆 This Week<span class="erc-badge-tab" id="erc-count-week">0</span></button>
         <button class="erc-tab" data-tab="all" onclick="setErcTab('all')">📋 All<span class="erc-badge-tab" id="erc-count-all">0</span></button>
       </div>
+      <!-- Template selector -->
+      <div class="tmpl-sel-bar">
+        <label>Template:</label>
+        <select id="erc-template-select" onchange="ercOnTemplateChange()">
+          <option value="__auto__">🤖 Auto (based on client status)</option>
+        </select>
+        <button class="btn btn-outline btn-sm" onclick="ercPreviewTemplate()">👁️ Preview</button>
+        <button class="btn btn-outline btn-sm" onclick="showSection('templates',null)">📄 Manage Templates</button>
+      </div>
+      <div class="tmpl-preview-box" id="erc-tmpl-preview"></div>
       <!-- Filters row -->
       <div class="erc-filters">
         <span style="font-size:11px;font-weight:700;color:var(--gray-500);text-transform:uppercase;letter-spacing:.5px;">Priority:</span>
@@ -1489,6 +1572,16 @@ create policy "anon all" on crm_suppliers for all using (true) with check (true)
         <button class="wab-tab" data-tab="today"   onclick="setWabTab('today')">📅 Today<span class="wab-badge-tab" id="wab-count-today">0</span></button>
         <button class="wab-tab" data-tab="week"    onclick="setWabTab('week')">📆 This Week<span class="wab-badge-tab" id="wab-count-week">0</span></button>
       </div>
+      <!-- Template selector -->
+      <div class="tmpl-sel-bar" id="wab-tmpl-bar">
+        <label>Template:</label>
+        <select id="wab-template-select" onchange="wabOnTemplateChange()">
+          <option value="__auto__">🤖 Auto (based on client status)</option>
+        </select>
+        <button class="btn btn-outline btn-sm" onclick="wabPreviewTemplate()">👁️ Preview</button>
+        <button class="btn btn-outline btn-sm" onclick="showSection('templates',null)">📄 Manage Templates</button>
+      </div>
+      <div class="tmpl-preview-box" id="wab-tmpl-preview"></div>
       <!-- Filters row -->
       <div class="erc-filters">
         <span style="font-size:11px;font-weight:700;color:var(--gray-500);text-transform:uppercase;letter-spacing:.5px;">Priority:</span>
@@ -1668,13 +1761,101 @@ create policy "anon all" on crm_suppliers for all using (true) with check (true)
         </div>
       </div>
     </div>
-    <div class="modal-footer" style="justify-content:space-between;align-items:center;">
-      <button class="btn btn-outline btn-sm" onclick="copyEmailBody()">📋 Copy Body</button>
-      <div style="display:flex;gap:8px;align-items:center;">
-        <button class="btn btn-outline btn-sm" onclick="closeModal('compose-modal')">Cancel</button>
-        <button class="btn btn-outline" onclick="openInEmailApp()" title="Opens your default email app">📧 Open in App</button>
-        <button class="btn btn-ejs" id="ejs-send-btn" onclick="sendEmailFromCompose()" title="Send directly via EmailJS — no email app needed">⚡ Send Now</button>
+    <div class="modal-footer" style="justify-content:space-between;flex-wrap:wrap;gap:8px;">
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <label style="font-size:11px;font-weight:700;color:var(--gray-500);">TEMPLATE:</label>
+        <select id="compose-template-select" style="font-size:12px;padding:4px 8px;border:1px solid var(--gray-300);border-radius:6px;max-width:200px;" onchange="composeApplyTemplate()">
+          <option value="__auto__">Auto (by status)</option>
+        </select>
+        <button class="btn-save-tmpl" onclick="saveEmailAsTemplate()">💾 Save as Template</button>
       </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button class="btn btn-outline btn-sm" onclick="copyEmailBody()">📋 Copy</button>
+        <button class="btn btn-outline" onclick="openInEmailApp()">📧 Open in App</button>
+        <button class="btn btn-ejs" id="ejs-send-btn" onclick="sendEmailFromCompose()">⚡ Send Now</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== TEMPLATE EDIT MODAL ========== -->
+<div class="modal-overlay" id="tmpl-modal">
+  <div class="modal" style="max-width:700px;">
+    <div class="modal-header">
+      <h2 id="tmpl-modal-title">New Template</h2>
+      <button class="modal-close" onclick="closeModal('tmpl-modal')">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="tmpl-edit-id">
+
+      <!-- Type toggle -->
+      <div style="display:flex;gap:8px;margin-bottom:16px;">
+        <button class="tmpl-modal-type-btn wa active" id="tmpl-type-wa"    onclick="setTmplEditType('whatsapp')">💬 WhatsApp</button>
+        <button class="tmpl-modal-type-btn email"     id="tmpl-type-email" onclick="setTmplEditType('email')">📧 Email</button>
+      </div>
+
+      <!-- Name -->
+      <div style="margin-bottom:12px;">
+        <label style="font-size:12px;font-weight:700;color:var(--gray-600);display:block;margin-bottom:4px;">Template Name *</label>
+        <input type="text" id="tmpl-edit-name" placeholder="e.g. New Lead Introduction" style="width:100%;padding:9px 12px;border:1.5px solid var(--gray-300);border-radius:8px;font-size:13px;font-family:inherit;box-sizing:border-box;">
+      </div>
+
+      <!-- Subject (email only) -->
+      <div style="margin-bottom:12px;" id="tmpl-subject-row">
+        <label style="font-size:12px;font-weight:700;color:var(--gray-600);display:block;margin-bottom:4px;">Email Subject</label>
+        <input type="text" id="tmpl-edit-subject" placeholder="e.g. Quotation for {{product}} — {{company}}" style="width:100%;padding:9px 12px;border:1.5px solid var(--gray-300);border-radius:8px;font-size:13px;font-family:inherit;box-sizing:border-box;">
+      </div>
+
+      <!-- Variables reference -->
+      <div style="margin-bottom:8px;">
+        <label style="font-size:12px;font-weight:700;color:var(--gray-600);display:block;margin-bottom:6px;">Click a variable to insert it at cursor →</label>
+        <div class="tmpl-var-ref" id="tmpl-var-ref">
+          <span onclick="insertTmplVar('{{firstName}}')">{{firstName}}</span>
+          <span onclick="insertTmplVar('{{name}}')">{{name}}</span>
+          <span onclick="insertTmplVar('{{company}}')">{{company}}</span>
+          <span onclick="insertTmplVar('{{country}}')">{{country}}</span>
+          <span onclick="insertTmplVar('{{product}}')">{{product}}</span>
+          <span onclick="insertTmplVar('{{quantity}}')">{{quantity}}</span>
+          <span onclick="insertTmplVar('{{value}}')">{{value}}</span>
+          <span onclick="insertTmplVar('{{status}}')">{{status}}</span>
+          <span onclick="insertTmplVar('{{nextFollowup}}')">{{nextFollowup}}</span>
+          <span onclick="insertTmplVar('{{lastContact}}')">{{lastContact}}</span>
+          <span onclick="insertTmplVar('{{whatsapp}}')">{{whatsapp}}</span>
+          <span onclick="insertTmplVar('{{email}}')">{{email}}</span>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div style="margin-bottom:4px;">
+        <label style="font-size:12px;font-weight:700;color:var(--gray-600);display:block;margin-bottom:4px;">Message Content *</label>
+        <textarea id="tmpl-edit-content" placeholder="Hi {{firstName}}! 👋&#10;&#10;I'm following up on your {{product}} inquiry..." style="width:100%;padding:10px 12px;border:1.5px solid var(--gray-300);border-radius:8px;font-size:13px;font-family:inherit;min-height:200px;resize:vertical;line-height:1.6;box-sizing:border-box;"></textarea>
+      </div>
+      <p style="font-size:11px;color:var(--gray-400);margin:4px 0 0;">Variables like {{firstName}} are automatically replaced with each client's real data when sending.</p>
+    </div>
+    <div class="modal-footer" style="justify-content:space-between;">
+      <button class="btn btn-outline" onclick="closeModal('tmpl-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveTemplateModal()">💾 Save Template</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== TEMPLATE PREVIEW MODAL ========== -->
+<div class="modal-overlay" id="tmpl-preview-modal">
+  <div class="modal" style="max-width:560px;">
+    <div class="modal-header">
+      <h2 id="tmpl-preview-title">Message Preview</h2>
+      <button class="modal-close" onclick="closeModal('tmpl-preview-modal')">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:12px;color:var(--gray-500);margin-bottom:10px;" id="tmpl-preview-info">Preview with first matching client's data:</p>
+      <div class="tmpl-preview-box" id="tmpl-preview-content" style="display:block;max-height:340px;"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('tmpl-preview-modal')">Close</button>
     </div>
   </div>
 </div>
@@ -1751,6 +1932,416 @@ function save() {
 
 function genId() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
 
+// ==================== TEMPLATE MANAGER ====================
+
+// ── Default templates ─────────────────────────────────────────────────────────
+function getDefaultTemplates() {
+  const sig = '\n\n— Mahadi Hasan\nCloth Factory Guangzhou\n📱 +86 19572963302\n🌐 www.clothfactory.net';
+  return [
+    // ── WhatsApp ──
+    {
+      id:'tmpl_wa_1', type:'whatsapp', name:'New Lead Introduction', isDefault:true,
+      subject:'',
+      content:`Hi {{firstName}}! 👋\n\nThank you for your interest in *{{product}}*!\n\nWe are a specialized clothing manufacturer based in Guangzhou, China. We offer:\n✅ Competitive pricing with quality guarantee\n✅ Custom designs & private label options\n✅ Flexible MOQ for new clients\n✅ 20–25 day production lead time\n\nCould you please share:\n• Required quantity\n• Target price range\n• Any specific design or material requirements\n\nLooking forward to working with {{company}}!${sig}`,
+    },
+    {
+      id:'tmpl_wa_2', type:'whatsapp', name:'Follow-Up Check-In', isDefault:true,
+      subject:'',
+      content:`Hi {{firstName}}! 👋\n\nHope you're doing well at {{company}}.\n\nI'm following up on your *{{product}}* inquiry. We're still very interested in working with you and have kept your requirements on file.\n\nDo you have any updates on your end? We're ready to move forward whenever you are! 🙏${sig}`,
+    },
+    {
+      id:'tmpl_wa_3', type:'whatsapp', name:'Price Quote', isDefault:true,
+      subject:'',
+      content:`Hi {{firstName}}! 💰\n\nHere's our updated quote for *{{product}}*:\n\n📦 Quantity: {{quantity}} pcs\n💵 Total value: ${{value}}\n🕐 Lead time: 20–25 days after deposit\n✅ Includes: QC inspection + customised packaging\n\nThis pricing is valid for 7 days. Ready to confirm?\n\n— Mahadi | Cloth Factory Guangzhou\n📱 +86 19572963302`,
+    },
+    {
+      id:'tmpl_wa_4', type:'whatsapp', name:'Sample Request Confirmation', isDefault:true,
+      subject:'',
+      content:`Hi {{firstName}}! 📦\n\nGreat news — we can prepare your *{{product}}* samples immediately!\n\nPlease confirm:\n• Colors and sizes needed\n• Delivery address in {{country}}\n• Any branding or label requirements\n\nExpress shipping: 3–5 business days ✈️\nSample cost will be credited against your first bulk order.\n\nLet's get started! 😊${sig}`,
+    },
+    {
+      id:'tmpl_wa_5', type:'whatsapp', name:'Deal Closing', isDefault:true,
+      subject:'',
+      content:`Hi {{firstName}}! 🎯\n\nI wanted to follow up one last time on your *{{product}}* order for {{company}}.\n\nWe have reserved a production slot and can offer:\n🔥 Our best pricing this month\n⚡ Priority production (starts immediately)\n📋 Flexible payment terms available\n\nThis special offer is valid until end of this week. Shall we go ahead?\n\n— Mahadi Hasan\nCloth Factory Guangzhou | 📱 +86 19572963302`,
+    },
+    // ── Email ──
+    {
+      id:'tmpl_em_1', type:'email', name:'Introduction Email', isDefault:true,
+      subject:'Introduction: Custom {{product}} Manufacturing for {{company}}',
+      content:`Dear {{firstName}},\n\nI hope this message finds you well.\n\nMy name is Mahadi Hasan from Cloth Factory Guangzhou. We are a specialized garment manufacturer with over 10 years of experience producing high-quality clothing for international buyers.\n\nWe noticed your interest in {{product}} and would love to explore how we can support {{company}}:\n\n• Competitive FOB pricing\n• Full OEM / ODM / private label capability\n• Minimum order quantity from 100 pcs\n• 20–25 day production lead time\n• Free samples before bulk order\n\nWould you be available for a brief call this week to discuss your requirements?\n\nBest regards,\nMahadi Hasan\nCloth Factory Guangzhou\nWhatsApp: +86 19572963302\nwww.clothfactory.net`,
+    },
+    {
+      id:'tmpl_em_2', type:'email', name:'Follow-Up Email', isDefault:true,
+      subject:'Following Up: {{product}} Inquiry — {{company}}',
+      content:`Dear {{firstName}},\n\nI hope you're doing well.\n\nI am following up on our previous conversation regarding {{product}} for {{company}}.\n\nWe remain very eager to support your sourcing needs and can offer:\n• Flexible quantities and pricing\n• Fast sample turnaround\n• Dedicated account manager\n\nPlease do not hesitate to reach out with any questions. I am happy to arrange a call at your convenience.\n\nBest regards,\nMahadi Hasan\nCloth Factory Guangzhou\nWhatsApp: +86 19572963302\nwww.clothfactory.net`,
+    },
+    {
+      id:'tmpl_em_3', type:'email', name:'Quotation Email', isDefault:true,
+      subject:'Quotation for {{product}} — {{company}}',
+      content:`Dear {{firstName}},\n\nThank you for your continued interest. Please find our updated quotation below.\n\nProduct: {{product}}\nQuantity: {{quantity}} pcs\nTotal Value: ${{value}} USD\nLead Time: 20–25 days after sample approval and deposit\nPayment Terms: 30% deposit, 70% before shipment\n\nThis quotation is valid for 14 days. We are confident in our quality and are ready to begin production upon your confirmation.\n\nShall we proceed with a Proforma Invoice?\n\nBest regards,\nMahadi Hasan\nCloth Factory Guangzhou\nWhatsApp: +86 19572963302\nwww.clothfactory.net`,
+    },
+    {
+      id:'tmpl_em_4', type:'email', name:'Sample Confirmation', isDefault:true,
+      subject:'{{product}} Samples — Ready to Ship to {{country}}!',
+      content:`Dear {{firstName}},\n\nGreat news — your {{product}} samples are ready to ship!\n\nShipment Details:\n• Destination: {{country}}\n• Courier: DHL Express\n• Estimated delivery: 3–5 business days\n\nThe sample cost will be fully credited against your first bulk order.\n\nPlease reply with your delivery address and preferred shipping date.\n\nLooking forward to your feedback!\n\nBest regards,\nMahadi Hasan\nCloth Factory Guangzhou\nWhatsApp: +86 19572963302\nwww.clothfactory.net`,
+    },
+    {
+      id:'tmpl_em_5', type:'email', name:'Partnership Proposal', isDefault:true,
+      subject:'Long-Term Partnership Proposal — Cloth Factory Guangzhou',
+      content:`Dear {{firstName}},\n\nI hope this email finds you well.\n\nAfter our discussions about {{product}}, I wanted to propose a formal partnership arrangement that could benefit {{company}} significantly.\n\nAs a preferred partner, you would receive:\n🎯 Reserved production capacity every season\n💰 Loyalty pricing (5–10% below standard rates)\n🚀 Priority sampling and production slots\n📊 Dedicated quality control team\n📋 Flexible payment terms\n\nThis is a limited partnership we offer to only a few select buyers each year.\n\nWould you be open to a 30-minute call to explore this further?\n\nBest regards,\nMahadi Hasan\nCloth Factory Guangzhou\nWhatsApp: +86 19572963302\nwww.clothfactory.net`,
+    },
+  ];
+}
+
+// ── Load / save templates ─────────────────────────────────────────────────────
+let templates = (function() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('crm_templates') || 'null');
+    if (saved && Array.isArray(saved) && saved.length) return saved;
+  } catch(e) {}
+  return getDefaultTemplates();
+})();
+
+function saveTemplates() {
+  localStorage.setItem('crm_templates', JSON.stringify(templates));
+}
+
+// ── Variable substitution ─────────────────────────────────────────────────────
+function applyTemplate(content, client) {
+  if (!content || !client) return content || '';
+  const first = (client.name || '').split(' ')[0];
+  return content
+    .replace(/\{\{firstName\}\}/g,   first               || '')
+    .replace(/\{\{name\}\}/g,        client.name         || '')
+    .replace(/\{\{company\}\}/g,     client.company      || '')
+    .replace(/\{\{country\}\}/g,     client.country      || '')
+    .replace(/\{\{product\}\}/g,     client.product      || '')
+    .replace(/\{\{quantity\}\}/g,    client.quantity     || '')
+    .replace(/\{\{value\}\}/g,       client.value        || '')
+    .replace(/\{\{status\}\}/g,      client.status       || '')
+    .replace(/\{\{nextFollowup\}\}/g,client.nextFollowup || '')
+    .replace(/\{\{lastContact\}\}/g, client.lastContact  || '')
+    .replace(/\{\{whatsapp\}\}/g,    client.whatsapp     || '')
+    .replace(/\{\{email\}\}/g,       client.email        || '')
+    .replace(/\{\{source\}\}/g,      client.source       || '');
+}
+
+// ── Get WA message respecting selected template (for bulk modal) ──────────────
+function getWaMessageForClient(client) {
+  const sel = document.getElementById('wab-template-select');
+  const id  = sel ? sel.value : '__auto__';
+  if (id === '__auto__') return buildWaMessage(client);
+  const t = templates.find(t => t.id === id && t.type === 'whatsapp');
+  return t ? applyTemplate(t.content, client) : buildWaMessage(client);
+}
+
+// ── Get email draft respecting selected template (for bulk send) ──────────────
+function getEmailDraftForClient(client) {
+  const sel = document.getElementById('erc-template-select');
+  const id  = sel ? sel.value : '__auto__';
+  if (id === '__auto__') return buildEmailDraft(client);
+  const t = templates.find(t => t.id === id && t.type === 'email');
+  if (!t) return buildEmailDraft(client);
+  return {
+    to:      client.email || '',
+    subject: applyTemplate(t.subject, client),
+    body:    applyTemplate(t.content, client),
+  };
+}
+
+// ── Populate template dropdowns wherever they exist ───────────────────────────
+function populateTmplSelects() {
+  const waBulk  = document.getElementById('wab-template-select');
+  const ercSel  = document.getElementById('erc-template-select');
+  const waOne   = document.getElementById('wa-single-template-select');
+  const compSel = document.getElementById('compose-template-select');
+
+  const waOptions = `<option value="__auto__">🤖 Auto (based on client status)</option>` +
+    templates.filter(t=>t.type==='whatsapp').map(t=>`<option value="${t.id}">${esc(t.name)}</option>`).join('');
+  const emOptions = `<option value="__auto__">🤖 Auto (based on client status)</option>` +
+    templates.filter(t=>t.type==='email').map(t=>`<option value="${t.id}">${esc(t.name)}</option>`).join('');
+
+  if (waBulk)  waBulk.innerHTML  = waOptions;
+  if (waOne)   waOne.innerHTML   = waOptions;
+  if (ercSel)  ercSel.innerHTML  = emOptions;
+  if (compSel) compSel.innerHTML = emOptions;
+}
+
+// ── Template tab filter ───────────────────────────────────────────────────────
+let _tmplTab = 'all';
+function setTmplTab(tab) {
+  _tmplTab = tab;
+  document.querySelectorAll('.tmpl-type-tab').forEach(b => {
+    b.classList.toggle('active', b.dataset.tmplTab === tab);
+  });
+  renderTemplates();
+}
+
+// ── Render templates section ──────────────────────────────────────────────────
+function renderTemplates() {
+  populateTmplSelects();
+  const grid = document.getElementById('tmpl-grid');
+  if (!grid) return;
+  const list = templates.filter(t => _tmplTab === 'all' || t.type === _tmplTab);
+  if (!list.length) {
+    grid.innerHTML = `<div class="tmpl-empty" style="grid-column:1/-1;"><div style="font-size:40px;margin-bottom:10px;">📄</div><strong>No templates yet</strong><br><span style="font-size:13px;">Click <strong>+ New Template</strong> to create one.</span></div>`;
+    return;
+  }
+  grid.innerHTML = list.map(t => {
+    const badge   = t.type === 'whatsapp' ? `<span class="tmpl-badge wa">💬 WhatsApp</span>` : `<span class="tmpl-badge email">📧 Email</span>`;
+    const preview = (t.content || '').substring(0, 120).replace(/\n/g, ' ');
+    const vars    = [...new Set((t.content + (t.subject||'')).match(/\{\{[a-zA-Z]+\}\}/g) || [])];
+    const varChips= vars.map(v=>`<span class="tmpl-var-chip">${v}</span>`).join('');
+    const defBadge= t.isDefault ? `<span style="font-size:10px;color:var(--gray-400);margin-left:4px;">(default)</span>` : '';
+    return `<div class="tmpl-card">
+      <div class="tmpl-card-hdr">
+        ${badge}
+        <span class="tmpl-name" title="${esc(t.name)}">${esc(t.name)}${defBadge}</span>
+        <div style="display:flex;gap:3px;">
+          <button class="tmpl-action-btn" onclick="previewTemplate('${t.id}')" title="Preview with client data">👁️</button>
+          <button class="tmpl-action-btn" onclick="openTemplateModal('${t.id}')" title="Edit">✏️</button>
+          <button class="tmpl-action-btn" onclick="duplicateTemplate('${t.id}')" title="Duplicate">📋</button>
+          <button class="tmpl-action-btn danger" onclick="deleteTemplate('${t.id}')" title="Delete">🗑️</button>
+        </div>
+      </div>
+      <div class="tmpl-preview">${esc(preview)}…</div>
+      <div class="tmpl-footer">${varChips || '<span style="font-size:11px;color:var(--gray-300);">No variables</span>'}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── CRUD ──────────────────────────────────────────────────────────────────────
+function openTemplateModal(id) {
+  const t = id ? templates.find(x => x.id === id) : null;
+  document.getElementById('tmpl-edit-id').value      = id || '';
+  document.getElementById('tmpl-modal-title').textContent = id ? 'Edit Template' : 'New Template';
+  document.getElementById('tmpl-edit-name').value    = t ? t.name    : '';
+  document.getElementById('tmpl-edit-subject').value = t ? (t.subject||'') : '';
+  document.getElementById('tmpl-edit-content').value = t ? t.content : '';
+  const type = t ? t.type : 'whatsapp';
+  setTmplEditType(type);
+  openModal('tmpl-modal');
+}
+
+function setTmplEditType(type) {
+  document.getElementById('tmpl-type-wa').classList.toggle('active',    type==='whatsapp');
+  document.getElementById('tmpl-type-email').classList.toggle('active', type==='email');
+  document.getElementById('tmpl-type-wa').dataset.type    = 'whatsapp';
+  document.getElementById('tmpl-type-email').dataset.type = 'email';
+  document.getElementById('tmpl-subject-row').style.display = type==='email' ? '' : 'none';
+}
+
+function getTmplEditType() {
+  return document.getElementById('tmpl-type-email').classList.contains('active') ? 'email' : 'whatsapp';
+}
+
+function insertTmplVar(v) {
+  const ta = document.getElementById('tmpl-edit-content');
+  const s = ta.selectionStart, e = ta.selectionEnd;
+  ta.value = ta.value.substring(0,s) + v + ta.value.substring(e);
+  ta.selectionStart = ta.selectionEnd = s + v.length;
+  ta.focus();
+}
+
+function saveTemplateModal() {
+  const id      = document.getElementById('tmpl-edit-id').value;
+  const name    = document.getElementById('tmpl-edit-name').value.trim();
+  const content = document.getElementById('tmpl-edit-content').value.trim();
+  const subject = document.getElementById('tmpl-edit-subject').value.trim();
+  const type    = getTmplEditType();
+  if (!name)    { toast('Please enter a template name', 'error'); return; }
+  if (!content) { toast('Please enter the message content', 'error'); return; }
+  if (id) {
+    const idx = templates.findIndex(t => t.id === id);
+    if (idx >= 0) { templates[idx] = { ...templates[idx], name, content, subject, type, updatedAt:new Date().toISOString().split('T')[0] }; }
+  } else {
+    templates.push({ id:`tmpl_${genId()}`, type, name, subject, content, isDefault:false, createdAt:new Date().toISOString().split('T')[0] });
+  }
+  saveTemplates();
+  closeModal('tmpl-modal');
+  renderTemplates();
+  toast(`Template "${name}" saved!`, 'success');
+}
+
+function deleteTemplate(id) {
+  const t = templates.find(x => x.id === id);
+  if (!t) return;
+  if (!confirm(`Delete template "${t.name}"? This cannot be undone.`)) return;
+  templates = templates.filter(x => x.id !== id);
+  saveTemplates();
+  renderTemplates();
+  toast('Template deleted', 'success');
+}
+
+function duplicateTemplate(id) {
+  const t = templates.find(x => x.id === id);
+  if (!t) return;
+  const copy = { ...t, id:`tmpl_${genId()}`, name:`${t.name} (copy)`, isDefault:false, createdAt:new Date().toISOString().split('T')[0] };
+  templates.push(copy);
+  saveTemplates();
+  renderTemplates();
+  toast(`"${copy.name}" created!`, 'success');
+}
+
+// ── Preview template with real client data ────────────────────────────────────
+function previewTemplate(id) {
+  const t = templates.find(x => x.id === id);
+  if (!t) return;
+  const sample = clients.find(c => c.name) || {
+    name:'John Smith', company:'ABC Textiles', country:'UAE', product:'Men Polo Shirts',
+    quantity:'500', value:'3500', status:'Contacted', nextFollowup:'2026-05-01',
+    lastContact:'2026-04-20', whatsapp:'+971501234567', email:'john@abc.com',
+  };
+  const applied = applyTemplate(t.content, sample);
+  document.getElementById('tmpl-preview-title').textContent = `Preview: ${t.name}`;
+  document.getElementById('tmpl-preview-info').textContent  = `Showing with ${sample.name}'s data:`;
+  document.getElementById('tmpl-preview-content').textContent = applied;
+  openModal('tmpl-preview-modal');
+}
+
+// ── WA Bulk modal template selector handlers ──────────────────────────────────
+function wabOnTemplateChange() {
+  const box = document.getElementById('wab-tmpl-preview');
+  if (box) box.style.display = 'none';
+}
+
+function wabPreviewTemplate() {
+  const sel  = document.getElementById('wab-template-select');
+  const id   = sel ? sel.value : '__auto__';
+  const box  = document.getElementById('wab-tmpl-preview');
+  if (!box) return;
+  const sample = wabGetFilteredList()[0] || clients.find(c=>c.whatsapp) || clients[0];
+  if (!sample) { toast('No clients to preview with', 'error'); return; }
+  const msg = getWaMessageForClient(sample);
+  box.textContent  = msg;
+  box.style.display = 'block';
+}
+
+// Update wabSendOne and bulk functions to use selected template
+// (override the calls to buildWaMessage inside those functions)
+const _origWabSendOne = wabSendOne;
+wabSendOne = function(clientId) {
+  const c = clients.find(x => x.id === clientId); if (!c) return;
+  const msg = getWaMessageForClient(c);
+  const url = `https://wa.me/${c.whatsapp.replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`;
+  window.open(url, '_blank');
+  const today = new Date().toISOString().split('T')[0];
+  if (!c.followups) c.followups = [];
+  c.followups.push({ id:genId(), channel:'WhatsApp', date:today, note:'Bulk WA sent: '+msg.substring(0,80)+'…' });
+  c.lastContact = today;
+  save();
+  toast(`WhatsApp opened for ${c.name} ✓`, 'success');
+  renderWaBulkModal();
+};
+
+// ── Email Reminders template selector handlers ────────────────────────────────
+function ercOnTemplateChange() {
+  const box = document.getElementById('erc-tmpl-preview');
+  if (box) box.style.display = 'none';
+}
+
+function ercPreviewTemplate() {
+  const box    = document.getElementById('erc-tmpl-preview');
+  if (!box) return;
+  const sample = ercGetFilteredList()[0] || clients.find(c=>c.email) || clients[0];
+  if (!sample) { toast('No clients to preview with', 'error'); return; }
+  const draft  = getEmailDraftForClient(sample);
+  box.textContent  = `Subject: ${draft.subject}\n\n${draft.body}`;
+  box.style.display = 'block';
+}
+
+// ── WA single modal: apply selected template ──────────────────────────────────
+function waApplySingleTemplate() {
+  const sel = document.getElementById('wa-single-template-select');
+  const id  = sel ? sel.value : '__auto__';
+  const c   = clients.find(x => x.id === currentWaClientId);
+  if (!c) return;
+  const msg = id === '__auto__' ? buildWaMessage(c) : (() => {
+    const t = templates.find(t => t.id === id && t.type === 'whatsapp');
+    return t ? applyTemplate(t.content, c) : buildWaMessage(c);
+  })();
+  document.getElementById('wa-message-text').value = msg;
+  updateWaPreview();
+}
+
+// Patch openWaModal to also populate the WA single template select
+const _origOpenWaModal = openWaModal;
+openWaModal = function(clientId) {
+  _origOpenWaModal(clientId);
+  populateTmplSelects();
+  const sel = document.getElementById('wa-single-template-select');
+  if (sel) sel.value = '__auto__';
+};
+
+// ── Email compose modal: apply selected template ──────────────────────────────
+function composeApplyTemplate() {
+  const sel = document.getElementById('compose-template-select');
+  const id  = sel ? sel.value : '__auto__';
+  const clientId = document.getElementById('compose-modal').dataset.clientId;
+  const c   = clients.find(x => x.id === clientId);
+  if (!c && id === '__auto__') return;
+  const draft = id === '__auto__'
+    ? buildEmailDraft(c || {name:'', status:''})
+    : (() => {
+        const t = templates.find(t => t.id === id && t.type === 'email');
+        if (!t) return buildEmailDraft(c || {});
+        return { to: c?.email||'', subject: applyTemplate(t.subject,c||{}), body: applyTemplate(t.content,c||{}) };
+      })();
+  document.getElementById('compose-subject').value = draft.subject || '';
+  document.getElementById('compose-body').value    = draft.body    || '';
+}
+
+// Patch openComposeModal to also populate email template select
+const _origOpenComposeModal = openComposeModal;
+openComposeModal = function(clientId) {
+  _origOpenComposeModal(clientId);
+  populateTmplSelects();
+  const sel = document.getElementById('compose-template-select');
+  if (sel) sel.value = '__auto__';
+};
+
+// ── Save WA message as template ───────────────────────────────────────────────
+function saveWaMessageAsTemplate() {
+  const content = document.getElementById('wa-message-text').value.trim();
+  if (!content) { toast('Nothing to save — type a message first', 'error'); return; }
+  const name = prompt('Name for this template:');
+  if (!name) return;
+  templates.push({ id:`tmpl_${genId()}`, type:'whatsapp', name:name.trim(), subject:'', content, isDefault:false, createdAt:new Date().toISOString().split('T')[0] });
+  saveTemplates();
+  populateTmplSelects();
+  toast(`✓ Template "${name}" saved!`, 'success');
+}
+
+// ── Save email as template ────────────────────────────────────────────────────
+function saveEmailAsTemplate() {
+  const subject = (document.getElementById('compose-subject').value || '').trim();
+  const body    = (document.getElementById('compose-body').value    || '').trim();
+  if (!body) { toast('Nothing to save — compose an email first', 'error'); return; }
+  const name = prompt('Name for this template:');
+  if (!name) return;
+  templates.push({ id:`tmpl_${genId()}`, type:'email', name:name.trim(), subject, content:body, isDefault:false, createdAt:new Date().toISOString().split('T')[0] });
+  saveTemplates();
+  populateTmplSelects();
+  toast(`✓ Email template "${name}" saved!`, 'success');
+}
+
+// ── Override bulkSendEmailsEJS to use selected email template ─────────────────
+// (patch getEmailDraftForClient into the existing bulk function via wrapper)
+const _origBuildEmailDraft = buildEmailDraft;
+// bulkSendEmailsEJS already calls buildEmailDraft — we patch it at call time
+// by overriding the global reference:
+const __origBulkSendEmailsEJS = bulkSendEmailsEJS;
+bulkSendEmailsEJS = async function() {
+  // Temporarily swap buildEmailDraft with template-aware version
+  window.__origBuildEmailDraft = buildEmailDraft;
+  window.buildEmailDraft = (c) => getEmailDraftForClient(c);
+  await __origBulkSendEmailsEJS();
+  window.buildEmailDraft = window.__origBuildEmailDraft;
+};
+
+// ── Init: populate selects on page load ───────────────────────────────────────
+// (called during INIT block below)
+
 // ==================== NAVIGATION ====================
 function toggleMobileSidebar() {
   const sidebar = document.querySelector('.sidebar');
@@ -1779,14 +2370,15 @@ function showSection(name, el) {
   const overlay = document.getElementById('sidebar-overlay');
   if (sidebar) sidebar.classList.remove('open');
   if (overlay) overlay.classList.remove('open');
-  const titles = { dashboard:'Dashboard', clients:'All Clients', pipeline:'Pipeline', followups:'Follow-Ups', orders:'Orders', suppliers:'Suppliers', tools:'Tools' };
+  const titles = { dashboard:'Dashboard', clients:'All Clients', pipeline:'Pipeline', followups:'Follow-Ups', orders:'Orders', suppliers:'Suppliers', tools:'Tools', templates:'Templates' };
   document.getElementById('page-title').textContent = titles[name] || name;
-  if (name === 'dashboard') renderDashboard();
-  if (name === 'clients') renderClients();
-  if (name === 'pipeline') renderKanban();
-  if (name === 'followups') renderFollowupsSection();
-  if (name === 'orders') renderOrders();
-  if (name === 'suppliers') renderSuppliers();
+  if (name === 'dashboard')  renderDashboard();
+  if (name === 'clients')    renderClients();
+  if (name === 'pipeline')   renderKanban();
+  if (name === 'followups')  renderFollowupsSection();
+  if (name === 'orders')     renderOrders();
+  if (name === 'suppliers')  renderSuppliers();
+  if (name === 'templates')  renderTemplates();
 }
 
 // ==================== MODALS ====================
@@ -4068,6 +4660,9 @@ renderOverdueBanner();
 // Supabase — connect if previously configured
 loadSBConfigToForm();
 initSupabase();
+
+// Templates — populate selects on load
+populateTmplSelects();
 
 // Auto show morning report once per day (500ms delay so dashboard renders first)
 setTimeout(() => {
