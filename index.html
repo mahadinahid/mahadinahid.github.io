@@ -496,21 +496,52 @@
   .btn-whatsapp { background: #25d366; color: white; }
   .btn-whatsapp:hover { background: #1da851; color: white; }
 
-  /* ===== EMAIL MODAL ===== */
-  .email-modal-header { background: linear-gradient(135deg, #1e40af, #3b82f6); color: white; border-radius: 12px 12px 0 0; padding: 16px 20px; }
-  .email-modal-header h3 { font-size: 16px; font-weight: 700; }
-  .email-modal-header p  { font-size: 12px; opacity: .8; margin-top: 2px; }
+  /* ===== EMAIL REMINDER CENTER (redesigned) ===== */
   .email-fields { border: 1px solid var(--gray-200); border-radius: 10px; overflow: hidden; margin-bottom: 12px; }
   .email-field-row { display: flex; align-items: flex-start; border-bottom: 1px solid var(--gray-100); }
   .email-field-row:last-child { border-bottom: none; }
   .email-field-label { font-size: 11px; font-weight: 700; color: var(--gray-500); width: 58px; flex-shrink: 0; padding: 10px 8px 10px 14px; text-transform: uppercase; letter-spacing: .4px; background: var(--gray-50); }
   .email-field-row input, .email-field-row textarea { border: none; outline: none; flex: 1; font-size: 13px; font-family: inherit; padding: 10px 12px; background: white; }
   .email-field-row textarea { min-height: 180px; resize: vertical; line-height: 1.6; }
-  .email-client-list { display: flex; flex-direction: column; gap: 8px; max-height: 300px; overflow-y: auto; }
-  .email-client-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: var(--gray-50); border-radius: 8px; border: 1px solid var(--gray-200); }
-  .email-client-info h4 { font-size: 13px; font-weight: 600; color: var(--gray-900); }
-  .email-client-info p  { font-size: 11px; color: var(--gray-500); margin-top: 2px; }
-  .email-overdue-days { font-size: 11px; font-weight: 700; color: var(--danger); background: #fee2e2; padding: 2px 8px; border-radius: 20px; }
+  /* tab bar */
+  .erc-tabs { display:flex; gap:0; border-bottom:2px solid var(--gray-200); }
+  .erc-tab { flex:1; padding:12px 6px; font-size:12px; font-weight:600; cursor:pointer; border:none; background:none; color:var(--gray-500); border-bottom:3px solid transparent; margin-bottom:-2px; transition:all .15s; text-align:center; white-space:nowrap; }
+  .erc-tab:hover { color:var(--gray-700); }
+  .erc-tab.active { color:#3b82f6; border-bottom-color:#3b82f6; }
+  .erc-tab.tab-overdue.active { color:#dc2626; border-bottom-color:#dc2626; }
+  .erc-badge-tab { display:inline-block; min-width:18px; height:18px; line-height:18px; padding:0 5px; border-radius:20px; font-size:10px; font-weight:700; background:var(--gray-200); color:var(--gray-600); margin-left:4px; vertical-align:middle; }
+  .erc-tab.active .erc-badge-tab { background:#3b82f6; color:white; }
+  .erc-tab.tab-overdue.active .erc-badge-tab { background:#dc2626; color:white; }
+  /* filters */
+  .erc-filters { display:flex; align-items:center; gap:8px; padding:12px 0 10px; flex-wrap:wrap; }
+  .erc-priority-btn { padding:5px 12px; border-radius:20px; font-size:11px; font-weight:600; cursor:pointer; border:1.5px solid var(--gray-300); background:white; color:var(--gray-600); transition:all .15s; }
+  .erc-priority-btn.active { border-color:#3b82f6; background:#eff6ff; color:#3b82f6; }
+  .erc-priority-btn.hot.active  { border-color:#dc2626; background:#fee2e2; color:#dc2626; }
+  .erc-priority-btn.warm.active { border-color:#d97706; background:#fef3c7; color:#d97706; }
+  .erc-priority-btn.cold.active { border-color:#0891b2; background:#e0f2fe; color:#0891b2; }
+  /* table */
+  .erc-table-wrap { overflow-x:auto; max-height:340px; overflow-y:auto; border:1px solid var(--gray-200); border-radius:10px; }
+  .erc-table { width:100%; border-collapse:collapse; font-size:13px; min-width:600px; }
+  .erc-table thead th { padding:9px 12px; text-align:left; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--gray-500); background:var(--gray-50); position:sticky; top:0; z-index:1; border-bottom:1px solid var(--gray-200); white-space:nowrap; }
+  .erc-table tbody tr { border-bottom:1px solid var(--gray-100); transition:background .1s; }
+  .erc-table tbody tr:last-child { border-bottom:none; }
+  .erc-table tbody tr:hover { background:#f8f9ff; }
+  .erc-table tbody tr.erc-row-selected { background:#eff6ff; }
+  .erc-table td { padding:9px 12px; vertical-align:middle; }
+  .erc-name { font-weight:600; color:var(--gray-900); font-size:13px; }
+  .erc-company { font-size:11px; color:var(--gray-500); }
+  .erc-email-link { color:#3b82f6; font-size:12px; text-decoration:none; }
+  .erc-email-link:hover { text-decoration:underline; }
+  .erc-wa-link { color:#25d366; font-size:12px; text-decoration:none; }
+  .erc-wa-link:hover { text-decoration:underline; }
+  .erc-badge-overdue { font-size:11px; font-weight:700; color:#dc2626; background:#fee2e2; padding:2px 8px; border-radius:20px; white-space:nowrap; }
+  .erc-badge-today   { font-size:11px; font-weight:700; color:#d97706; background:#fef3c7; padding:2px 8px; border-radius:20px; }
+  .erc-badge-soon    { font-size:11px; font-weight:700; color:#059669; background:#d1fae5; padding:2px 8px; border-radius:20px; }
+  /* bulk bar */
+  .erc-bulk-bar { display:flex; align-items:center; gap:8px; padding:12px 0 0; flex-wrap:wrap; }
+  .erc-select-all-label { display:flex; align-items:center; gap:6px; font-size:13px; color:var(--gray-700); font-weight:600; cursor:pointer; }
+  .erc-selected-count { font-size:12px; color:var(--gray-500); margin-right:4px; }
+  .email-overdue-days { font-size:11px; font-weight:700; color:var(--danger); background:#fee2e2; padding:2px 8px; border-radius:20px; }
 
   /* ===== OVERDUE ALERT BANNER ===== */
   .overdue-banner { background: linear-gradient(135deg, #dc2626, #ef4444); color: white; border-radius: var(--radius); padding: 14px 20px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px; animation: fadeIn .3s ease; }
@@ -1339,36 +1370,69 @@ create policy "anon all" on crm_suppliers for all using (true) with check (true)
   </div>
 </div>
 
-<!-- ========== EMAIL REMINDER MODAL ========== -->
+<!-- ========== EMAIL REMINDER MODAL (redesigned) ========== -->
 <div class="modal-overlay" id="email-modal">
-  <div class="modal" style="max-width:860px;">
+  <div class="modal" style="max-width:960px;">
     <div class="modal-header" style="background:linear-gradient(135deg,#1e40af,#3b82f6);border-radius:12px 12px 0 0;padding:20px 24px;">
       <div>
         <h2 style="color:white;font-size:18px;">📧 Email Reminder Center</h2>
-        <p style="color:rgba(255,255,255,.8);font-size:13px;margin-top:3px;" id="email-modal-subtitle">Clients with overdue follow-ups</p>
+        <p style="color:rgba(255,255,255,.8);font-size:13px;margin-top:3px;" id="email-modal-subtitle">All clients with email addresses</p>
       </div>
       <button class="modal-close" onclick="closeModal('email-modal')" style="background:rgba(255,255,255,.2);color:white;">
         <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
-    <div class="modal-body">
-      <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center;">
-        <select id="email-filter" class="filter-select" onchange="renderEmailModal()">
-          <option value="overdue">Overdue Only</option>
-          <option value="today">Due Today</option>
-          <option value="week">This Week</option>
-          <option value="all">All with Email</option>
-        </select>
-        <button class="btn btn-primary btn-sm" onclick="sendAllEmails()">📧 Open All Emails</button>
-        <button class="btn btn-sm btn-ejs-ghost" id="ejs-send-all-btn" onclick="sendAllEmailsEJS()" style="display:none;">⚡ Send All via EmailJS</button>
-        <button class="btn btn-outline btn-sm" onclick="copyAllEmails()">📋 Copy All Addresses</button>
+    <div class="modal-body" style="padding-top:0;">
+      <!-- Tab bar -->
+      <div class="erc-tabs">
+        <button class="erc-tab tab-overdue active" data-tab="overdue" onclick="setErcTab('overdue')">🔴 Overdue<span class="erc-badge-tab" id="erc-count-overdue">0</span></button>
+        <button class="erc-tab" data-tab="today" onclick="setErcTab('today')">📅 Today<span class="erc-badge-tab" id="erc-count-today">0</span></button>
+        <button class="erc-tab" data-tab="week" onclick="setErcTab('week')">📆 This Week<span class="erc-badge-tab" id="erc-count-week">0</span></button>
+        <button class="erc-tab" data-tab="all" onclick="setErcTab('all')">📋 All<span class="erc-badge-tab" id="erc-count-all">0</span></button>
       </div>
-      <div class="email-client-list" id="email-client-list">
-        <!-- filled by JS -->
+      <!-- Filters row -->
+      <div class="erc-filters">
+        <span style="font-size:11px;font-weight:700;color:var(--gray-500);text-transform:uppercase;letter-spacing:.5px;">Priority:</span>
+        <button class="erc-priority-btn active" data-priority="all"  onclick="setErcPriority('all')">All</button>
+        <button class="erc-priority-btn hot"  data-priority="Hot"  onclick="setErcPriority('Hot')">🔥 Hot</button>
+        <button class="erc-priority-btn warm" data-priority="Warm" onclick="setErcPriority('Warm')">🌡️ Warm</button>
+        <button class="erc-priority-btn cold" data-priority="Cold" onclick="setErcPriority('Cold')">❄️ Cold</button>
+        <div style="flex:1;min-width:8px;"></div>
+        <button class="btn btn-outline btn-sm" onclick="copyAllEmails()">📋 Copy Emails</button>
+      </div>
+      <!-- Client table -->
+      <div class="erc-table-wrap">
+        <table class="erc-table">
+          <thead>
+            <tr>
+              <th style="width:36px;"><input type="checkbox" id="erc-check-all" onchange="ercToggleAll(this.checked)" title="Select / deselect all"></th>
+              <th>Client</th>
+              <th>Email</th>
+              <th>WhatsApp</th>
+              <th>Last Contact</th>
+              <th>Due / Status</th>
+              <th style="min-width:120px;">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="erc-tbody">
+            <tr><td colspan="7" style="text-align:center;padding:32px;color:var(--gray-400);">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <!-- Bulk action bar -->
+      <div class="erc-bulk-bar">
+        <label class="erc-select-all-label">
+          <input type="checkbox" id="erc-check-all-2" onchange="ercToggleAll(this.checked)"> Select All
+        </label>
+        <span class="erc-selected-count" id="erc-sel-count">0 selected</span>
+        <button class="btn btn-primary btn-sm" onclick="bulkOpenEmails()">📧 Open Selected</button>
+        <button class="btn btn-sm btn-ejs-ghost" id="erc-bulk-ejs-btn" onclick="bulkSendEmailsEJS()">⚡ Bulk Send (EmailJS)</button>
+        <div style="flex:1;"></div>
+        <button class="btn btn-outline btn-sm" onclick="sendAllEmails()">📧 Open All Filtered</button>
       </div>
     </div>
-    <div style="padding:12px 24px;border-top:1px solid var(--gray-200);background:var(--gray-50);border-radius:0 0 12px 12px;font-size:12px;color:var(--gray-500);">
-      💡 <strong>Tip:</strong> Click <strong>✏️ Edit</strong> to review the template in the compose window, then <strong>⚡ Send Now</strong> to send via EmailJS — or <strong>📧 Open in App</strong> to use your email client. <span id="ejs-modal-tip" style="color:#ea580c;font-weight:600;"></span>
+    <div style="padding:10px 24px;border-top:1px solid var(--gray-200);background:var(--gray-50);border-radius:0 0 12px 12px;font-size:12px;color:var(--gray-500);">
+      💡 <strong>Tip:</strong> Tick checkboxes to select clients then use <strong>Bulk Send</strong>, or click <strong>✏️ Edit</strong> per row to personalise before sending. <span id="ejs-modal-tip" style="color:#ea580c;font-weight:600;"></span>
     </div>
   </div>
 </div>
@@ -2499,76 +2563,235 @@ function promptWhatsAppBulk() {
   });
 }
 
-// ==================== EMAIL REMINDER CENTER ====================
-function openEmailReminderModal() {
-  renderEmailModal();
-  openModal('email-modal');
+// ==================== EMAIL REMINDER CENTER (redesigned) ====================
+let _ercTab      = 'overdue';   // current tab
+let _ercPriority = 'all';       // current priority filter
+
+// ── Helper: returns filtered + sorted client list ─────────────────────────────
+function ercGetFilteredList() {
+  const today    = new Date().toISOString().split('T')[0];
+  const nextWeek = new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0];
+  let list = clients.filter(c => c.email);
+  if (_ercTab === 'overdue') list = list.filter(c => c.nextFollowup && c.nextFollowup < today);
+  if (_ercTab === 'today')   list = list.filter(c => c.nextFollowup && c.nextFollowup === today);
+  if (_ercTab === 'week')    list = list.filter(c => c.nextFollowup && c.nextFollowup > today && c.nextFollowup <= nextWeek);
+  if (_ercPriority !== 'all') list = list.filter(c => (c.priority || c.status || '') === _ercPriority ||
+                                                       (c.leadTemp || '') === _ercPriority);
+  list.sort((a, b) => (a.nextFollowup || '9').localeCompare(b.nextFollowup || '9'));
+  return list;
 }
 
+// ── Open modal ────────────────────────────────────────────────────────────────
+function openEmailReminderModal() {
+  _ercTab      = 'overdue';
+  _ercPriority = 'all';
+  openModal('email-modal');
+  renderEmailModal();
+}
+
+// ── Tab switching ─────────────────────────────────────────────────────────────
+function setErcTab(tab) {
+  _ercTab = tab;
+  document.querySelectorAll('.erc-tab').forEach(b => {
+    b.classList.toggle('active', b.dataset.tab === tab);
+  });
+  renderEmailModal();
+}
+
+// ── Priority filter ────────────────────────────────────────────────────────────
+function setErcPriority(p) {
+  _ercPriority = p;
+  document.querySelectorAll('.erc-priority-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.priority === p);
+  });
+  renderEmailModal();
+}
+
+// ── Select-all toggle ─────────────────────────────────────────────────────────
+function ercToggleAll(checked) {
+  document.querySelectorAll('.erc-row-check').forEach(cb => { cb.checked = checked; });
+  // sync both header checkboxes
+  const ca1 = document.getElementById('erc-check-all');
+  const ca2 = document.getElementById('erc-check-all-2');
+  if (ca1) ca1.checked = checked;
+  if (ca2) ca2.checked = checked;
+  ercUpdateBulkBar();
+}
+
+// ── Keep bulk-bar count + "Select All" in sync ────────────────────────────────
+function ercUpdateBulkBar() {
+  const checked = document.querySelectorAll('.erc-row-check:checked');
+  const total   = document.querySelectorAll('.erc-row-check');
+  const count   = checked.length;
+  const countEl = document.getElementById('erc-sel-count');
+  if (countEl) countEl.textContent = count === 0 ? '0 selected' : `${count} selected`;
+  const allChecked = count > 0 && count === total.length;
+  const ca1 = document.getElementById('erc-check-all');
+  const ca2 = document.getElementById('erc-check-all-2');
+  if (ca1) { ca1.checked = allChecked; ca1.indeterminate = count > 0 && !allChecked; }
+  if (ca2) { ca2.checked = allChecked; ca2.indeterminate = count > 0 && !allChecked; }
+}
+
+// ── Main render ───────────────────────────────────────────────────────────────
 function renderEmailModal() {
-  const filter = (document.getElementById('email-filter')||{}).value || 'overdue';
-  const today     = new Date().toISOString().split('T')[0];
-  const nextWeek  = new Date(Date.now()+7*86400000).toISOString().split('T')[0];
+  const today = new Date().toISOString().split('T')[0];
+  // Update tab counts (without priority filter so tabs always reflect full picture)
+  const nextWeek = new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0];
+  const withEmail = clients.filter(c => c.email);
+  const counts = {
+    overdue: withEmail.filter(c => c.nextFollowup && c.nextFollowup < today).length,
+    today:   withEmail.filter(c => c.nextFollowup && c.nextFollowup === today).length,
+    week:    withEmail.filter(c => c.nextFollowup && c.nextFollowup > today && c.nextFollowup <= nextWeek).length,
+    all:     withEmail.length,
+  };
+  ['overdue','today','week','all'].forEach(t => {
+    const el = document.getElementById(`erc-count-${t}`);
+    if (el) el.textContent = counts[t];
+  });
 
-  let list = clients.filter(c => c.email); // must have email
-  if (filter === 'overdue')  list = list.filter(c => c.nextFollowup && c.nextFollowup < today);
-  if (filter === 'today')    list = list.filter(c => c.nextFollowup && c.nextFollowup === today);
-  if (filter === 'week')     list = list.filter(c => c.nextFollowup && c.nextFollowup > today && c.nextFollowup <= nextWeek);
+  const list = ercGetFilteredList();
 
-  list.sort((a,b) => (a.nextFollowup||'').localeCompare(b.nextFollowup||''));
+  // Subtitle
+  const subtitles = { overdue:`${list.length} overdue`, today:`${list.length} due today`, week:`${list.length} due this week`, all:`${list.length} clients with email` };
+  const sub = document.getElementById('email-modal-subtitle');
+  if (sub) sub.textContent = subtitles[_ercTab] || '';
 
-  const subtitle = { overdue:`${list.length} overdue client(s)`, today:`${list.length} due today`, week:`${list.length} due this week`, all:`${list.length} client(s) with email` };
-  const el = document.getElementById('email-modal-subtitle');
-  if (el) el.textContent = subtitle[filter] || '';
+  // Show/hide EmailJS bulk button
+  const ejsBtn = document.getElementById('erc-bulk-ejs-btn');
+  if (ejsBtn) ejsBtn.style.display = isEJSReady() ? 'inline-flex' : 'none';
 
-  const container = document.getElementById('email-client-list');
-  if (!container) return;
+  const tbody = document.getElementById('erc-tbody');
+  if (!tbody) return;
 
   if (!list.length) {
-    container.innerHTML = `<div class="empty-state" style="padding:30px;"><h3>No clients found</h3><p>Try changing the filter above.</p></div>`;
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:36px;color:var(--gray-400);">
+      <div style="font-size:32px;margin-bottom:8px;">📭</div>
+      <strong style="display:block;color:var(--gray-600);">No clients found</strong>
+      <span style="font-size:12px;">Try a different tab or priority filter.</span>
+    </td></tr>`;
+    ercUpdateBulkBar();
     return;
   }
 
-  container.innerHTML = list.map(c => {
-    const daysOverdue = (filter==='overdue' && c.nextFollowup) ? Math.floor((new Date(today)-new Date(c.nextFollowup))/86400000) : null;
-    return `<div class="email-client-item">
-      <div class="email-client-info">
-        <h4>${esc(c.name)}${c.company?` <span style="font-weight:400;color:var(--gray-500);">· ${esc(c.company)}</span>`:''}</h4>
-        <p>${esc(c.email)} · ${esc(c.status||'—')} · ${c.product?esc(c.product):'No product'}</p>
-      </div>
-      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
-        ${daysOverdue!==null ? `<span class="email-overdue-days">${daysOverdue}d overdue</span>` : `<span style="font-size:11px;color:var(--gray-400);">${c.nextFollowup||''}</span>`}
-        <button class="btn btn-outline btn-sm" onclick="openComposeModal('${c.id}')">✏️ Edit</button>
-        ${isEJSReady()?`<button class="btn btn-sm btn-ejs-ghost" onclick="sendQuickEmail('${c.id}')">⚡ Send</button>`:''}
-      </div>
-    </div>`;
+  tbody.innerHTML = list.map(c => {
+    const fd          = c.nextFollowup || '';
+    const daysOverdue = (fd && fd < today) ? Math.floor((new Date(today) - new Date(fd)) / 86400000) : null;
+    const daysSoon    = (fd && fd > today) ? Math.ceil((new Date(fd) - new Date(today)) / 86400000)  : null;
+    const isToday     = fd === today;
+
+    let dueBadge = '';
+    if (daysOverdue !== null) dueBadge = `<span class="erc-badge-overdue">${daysOverdue}d overdue</span>`;
+    else if (isToday)         dueBadge = `<span class="erc-badge-today">Due today</span>`;
+    else if (daysSoon !== null) dueBadge = `<span class="erc-badge-soon">In ${daysSoon}d</span>`;
+    else if (fd)              dueBadge = `<span style="font-size:11px;color:var(--gray-400);">${fd}</span>`;
+    else                      dueBadge = `<span style="font-size:11px;color:var(--gray-300);">—</span>`;
+
+    const priority   = c.priority || c.leadTemp || c.status || '';
+    const priColor   = priority === 'Hot' ? '#dc2626' : priority === 'Warm' ? '#d97706' : priority === 'Cold' ? '#0891b2' : 'var(--gray-400)';
+    const priLabel   = priority ? `<span style="font-size:10px;font-weight:700;color:${priColor};">${priority}</span>` : '';
+    const lastC      = c.lastContact ? `<span style="font-size:12px;color:var(--gray-600);">${c.lastContact}</span>` : `<span style="font-size:11px;color:var(--gray-300);">—</span>`;
+    const waNum      = c.whatsapp || c.phone || '';
+    const waLink     = waNum
+      ? `<a class="erc-wa-link" href="https://wa.me/${waNum.replace(/\D/g,'')}" target="_blank" title="WhatsApp">${waNum}</a>`
+      : `<span style="font-size:11px;color:var(--gray-300);">—</span>`;
+
+    return `<tr class="erc-row" data-id="${c.id}">
+      <td><input type="checkbox" class="erc-row-check" data-id="${c.id}" onchange="ercUpdateBulkBar()"></td>
+      <td>
+        <div class="erc-name">${esc(c.name)}</div>
+        ${c.company ? `<div class="erc-company">${esc(c.company)}</div>` : ''}
+        ${priLabel}
+      </td>
+      <td><a class="erc-email-link" href="mailto:${esc(c.email)}">${esc(c.email)}</a></td>
+      <td>${waLink}</td>
+      <td>${lastC}</td>
+      <td>${dueBadge}</td>
+      <td style="white-space:nowrap;">
+        <button class="btn btn-outline btn-sm" style="font-size:11px;padding:4px 9px;" onclick="openComposeModal('${c.id}')">✏️ Edit</button>
+        ${isEJSReady() ? `<button class="btn btn-sm btn-ejs-ghost" style="font-size:11px;padding:4px 9px;margin-left:4px;" onclick="sendQuickEmail('${c.id}')">⚡ Send</button>` : ''}
+      </td>
+    </tr>`;
   }).join('');
+
+  ercUpdateBulkBar();
 }
 
+// ── Get checked client IDs ────────────────────────────────────────────────────
+function ercGetSelectedIds() {
+  return Array.from(document.querySelectorAll('.erc-row-check:checked')).map(cb => cb.dataset.id);
+}
+
+// ── Bulk: open compose for selected (one by one with delay) ───────────────────
+function bulkOpenEmails() {
+  const ids = ercGetSelectedIds();
+  if (!ids.length) { toast('Select at least one client first', 'error'); return; }
+  ids.forEach((id, i) => setTimeout(() => openComposeModal(id), i * 350));
+  toast(`Opening ${ids.length} email draft(s)…`, 'success');
+}
+
+// ── Bulk send via EmailJS (respects checkbox selection) ───────────────────────
+async function bulkSendEmailsEJS() {
+  const cfg = getEJSConfig();
+  if (!cfg) { toast('EmailJS not configured — go to Tools → EmailJS Setup', 'error'); return; }
+  const ids  = ercGetSelectedIds();
+  const list = ids.length ? clients.filter(c => ids.includes(c.id) && c.email) : ercGetFilteredList();
+  if (!list.length) { toast('No clients selected / no emails in current filter', 'error'); return; }
+
+  const names = list.map(c => `• ${c.name} (${c.email})`).join('\n');
+  if (!confirm(`Send follow-up emails to ${list.length} client${list.length > 1 ? 's' : ''}?\n\n${names}\n\nThis cannot be undone.`)) return;
+
+  const btn = document.getElementById('erc-bulk-ejs-btn');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Sending…'; }
+
+  const today = new Date().toISOString().split('T')[0];
+  let sent = 0, failed = 0;
+  for (const c of list) {
+    const draft = buildEmailDraft(c);
+    try {
+      await emailjs.send(cfg.serviceId, cfg.templateId, {
+        to_email:  c.email,
+        to_name:   c.name.split(' ')[0] || c.name,
+        from_name: cfg.fromName || 'Mahadi',
+        reply_to:  cfg.replyTo  || '',
+        subject:   draft.subject,
+        message:   draft.body,
+      });
+      if (!c.followups) c.followups = [];
+      c.followups.push({ id: genId(), channel: 'Email', date: today,
+                         note: `Bulk auto-sent via EmailJS: "${draft.subject}"` });
+      c.lastContact = today;
+      sent++;
+      toast(`✓ Sent to ${c.name} (${sent}/${list.length})`, 'success');
+      await new Promise(r => setTimeout(r, 1300));
+    } catch(err) {
+      failed++;
+      toast(`❌ Failed for ${c.name}: ${err.text || err.message || 'Error'}`, 'error');
+      await new Promise(r => setTimeout(r, 800));
+    }
+  }
+
+  save();
+  renderEmailModal();
+  if (btn) { btn.disabled = false; btn.textContent = '⚡ Bulk Send (EmailJS)'; }
+  toast(`✅ Done — ${sent} sent${failed ? ` · ${failed} failed` : ''}`, sent > 0 ? 'success' : 'error');
+}
+
+// ── sendAllEmails: open all filtered (no selection needed) ────────────────────
 function sendAllEmails() {
-  const filter = (document.getElementById('email-filter')||{}).value || 'overdue';
-  const today    = new Date().toISOString().split('T')[0];
-  const nextWeek = new Date(Date.now()+7*86400000).toISOString().split('T')[0];
-  let list = clients.filter(c => c.email);
-  if (filter==='overdue') list = list.filter(c => c.nextFollowup && c.nextFollowup < today);
-  if (filter==='today')   list = list.filter(c => c.nextFollowup && c.nextFollowup === today);
-  if (filter==='week')    list = list.filter(c => c.nextFollowup && c.nextFollowup > today && c.nextFollowup <= nextWeek);
-  if (!list.length) { toast('No clients to email', 'error'); return; }
-  // Open first one via compose; show toast for rest
-  if (list[0]) openComposeModal(list[0].id);
-  if (list.length > 1) toast(`Opened draft for ${list[0].name}. Open individually for the remaining ${list.length-1}.`, 'success');
+  const list = ercGetFilteredList();
+  if (!list.length) { toast('No clients to email in this filter', 'error'); return; }
+  list.forEach((c, i) => setTimeout(() => openComposeModal(c.id), i * 350));
+  toast(`Opening ${list.length} email draft(s)…`, 'success');
 }
 
+// ── sendAllEmailsEJS: kept for backward-compat, delegates to bulk ─────────────
+async function sendAllEmailsEJS() { await bulkSendEmailsEJS(); }
+
+// ── copyAllEmails: copy filtered emails to clipboard ──────────────────────────
 function copyAllEmails() {
-  const filter = (document.getElementById('email-filter')||{}).value || 'overdue';
-  const today    = new Date().toISOString().split('T')[0];
-  const nextWeek = new Date(Date.now()+7*86400000).toISOString().split('T')[0];
-  let list = clients.filter(c => c.email);
-  if (filter==='overdue') list = list.filter(c => c.nextFollowup && c.nextFollowup < today);
-  if (filter==='today')   list = list.filter(c => c.nextFollowup && c.nextFollowup === today);
-  if (filter==='week')    list = list.filter(c => c.nextFollowup && c.nextFollowup > today && c.nextWeek <= nextWeek);
-  const emails = list.map(c=>c.email).join(', ');
-  if (!emails) { toast('No email addresses found', 'error'); return; }
+  const list = ercGetFilteredList();
+  const emails = list.map(c => c.email).join(', ');
+  if (!emails) { toast('No email addresses in current filter', 'error'); return; }
   navigator.clipboard.writeText(emails).then(() => toast(`${list.length} email address(es) copied!`, 'success'));
 }
 
