@@ -543,6 +543,25 @@
   .erc-selected-count { font-size:12px; color:var(--gray-500); margin-right:4px; }
   .email-overdue-days { font-size:11px; font-weight:700; color:var(--danger); background:#fee2e2; padding:2px 8px; border-radius:20px; }
 
+  /* ===== SMART CSV IMPORTER ===== */
+  .csv-drop-zone { border:2px dashed var(--gray-300); border-radius:12px; padding:36px 20px; text-align:center; cursor:pointer; transition:all .2s; background:var(--gray-50); }
+  .csv-drop-zone:hover,.csv-drop-zone.drag-over { border-color:#6366f1; background:#eef2ff; }
+  .csv-drop-zone svg { display:block; margin:0 auto 12px; color:#6366f1; }
+  .csv-drop-zone p { font-size:14px; color:var(--gray-600); margin:0 0 4px; font-weight:500; }
+  .csv-drop-zone small { font-size:12px; color:var(--gray-400); }
+  .csv-map-table { width:100%; border-collapse:collapse; font-size:13px; }
+  .csv-map-table th { padding:8px 10px; text-align:left; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--gray-500); background:var(--gray-50); border-bottom:1px solid var(--gray-200); }
+  .csv-map-table td { padding:7px 10px; border-bottom:1px solid var(--gray-100); vertical-align:middle; }
+  .csv-map-table select { font-size:12px; padding:4px 6px; border:1px solid var(--gray-300); border-radius:6px; background:white; cursor:pointer; max-width:180px; }
+  .csv-map-table select.mapped { border-color:#6366f1; background:#eef2ff; color:#4338ca; font-weight:600; }
+  .csv-preview-table { width:100%; border-collapse:collapse; font-size:12px; }
+  .csv-preview-table th { padding:6px 10px; background:var(--gray-800); color:white; text-align:left; font-size:11px; font-weight:600; position:sticky; top:0; }
+  .csv-preview-table td { padding:6px 10px; border-bottom:1px solid var(--gray-100); color:var(--gray-700); max-width:160px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .csv-preview-table tr:hover td { background:#f8f9ff; }
+  .csv-step-header { display:flex; align-items:center; gap:10px; margin-bottom:14px; }
+  .csv-step-badge { width:24px; height:24px; border-radius:50%; background:#6366f1; color:white; font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .csv-section-title { font-size:13px; font-weight:700; color:var(--gray-700); margin:0; }
+  .csv-import-stat { display:inline-flex; align-items:center; gap:6px; padding:6px 12px; border-radius:20px; font-size:12px; font-weight:600; }
   /* ===== OVERDUE ALERT BANNER ===== */
   .overdue-banner { background: linear-gradient(135deg, #dc2626, #ef4444); color: white; border-radius: var(--radius); padding: 14px 20px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px; animation: fadeIn .3s ease; }
   .overdue-banner-text h3 { font-size: 14px; font-weight: 700; }
@@ -883,14 +902,15 @@ create policy "anon all" on crm_suppliers for all using (true) with check (true)
           <p>Download all client data as a CSV file for use in Excel or Google Sheets.</p>
           <button class="btn btn-primary" onclick="exportCSV()">Export CSV</button>
         </div>
-        <div class="tool-card">
-          <h3>Import Clients (CSV)</h3>
-          <p>Upload a CSV file to bulk-import clients. Download the template first.</p>
+        <div class="tool-card" style="border:2px solid #6366f1;background:linear-gradient(135deg,#fff 70%,#eef2ff);">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+            <span style="font-size:22px;">📥</span>
+            <h3 style="margin:0;">Import Clients (CSV)</h3>
+          </div>
+          <p>Upload <em>any</em> CSV — columns are auto-detected. Preview and map fields before importing.</p>
           <div style="display:flex;gap:8px;flex-wrap:wrap;">
-            <button class="btn btn-outline" onclick="downloadTemplate()">Download Template</button>
-            <label class="btn btn-primary" style="cursor:pointer;">
-              Import CSV <input type="file" accept=".csv" style="display:none;" onchange="importCSV(event)">
-            </label>
+            <button class="btn btn-primary" onclick="openCSVImporter()">📥 Import CSV</button>
+            <button class="btn btn-outline" onclick="downloadTemplate()">⬇️ Download Template</button>
           </div>
         </div>
         <div class="tool-card">
@@ -1433,6 +1453,110 @@ create policy "anon all" on crm_suppliers for all using (true) with check (true)
     </div>
     <div style="padding:10px 24px;border-top:1px solid var(--gray-200);background:var(--gray-50);border-radius:0 0 12px 12px;font-size:12px;color:var(--gray-500);">
       💡 <strong>Tip:</strong> Tick checkboxes to select clients then use <strong>Bulk Send</strong>, or click <strong>✏️ Edit</strong> per row to personalise before sending. <span id="ejs-modal-tip" style="color:#ea580c;font-weight:600;"></span>
+    </div>
+  </div>
+</div>
+
+<!-- ========== CSV IMPORT MODAL ========== -->
+<div class="modal-overlay" id="csv-import-modal">
+  <div class="modal" style="max-width:960px;">
+    <div class="modal-header" style="background:linear-gradient(135deg,#4338ca,#6366f1);border-radius:12px 12px 0 0;padding:20px 24px;">
+      <div>
+        <h2 style="color:white;font-size:18px;">📥 Smart CSV Importer</h2>
+        <p style="color:rgba(255,255,255,.8);font-size:13px;margin-top:3px;" id="csv-modal-subtitle">Upload any CSV — columns are detected automatically</p>
+      </div>
+      <button class="modal-close" onclick="closeCSVImporter()" style="background:rgba(255,255,255,.2);color:white;">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+
+      <!-- ── Step 1: Upload ── -->
+      <div id="csv-step-1">
+        <div class="csv-drop-zone" id="csv-drop-zone"
+             onclick="document.getElementById('csv-file-input').click()"
+             ondragover="event.preventDefault();this.classList.add('drag-over')"
+             ondragleave="this.classList.remove('drag-over')"
+             ondrop="csvDropped(event)">
+          <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 16V4m0 0L8 8m4-4 4 4"/><rect x="3" y="14" width="18" height="7" rx="2"/></svg>
+          <p>Click to choose a CSV file, or drag &amp; drop here</p>
+          <small>Supports any column names — we'll help you map them</small>
+          <input type="file" id="csv-file-input" accept=".csv,.txt" style="display:none;" onchange="csvFileChosen(event)">
+        </div>
+        <div style="margin-top:12px;font-size:12px;color:var(--gray-500);text-align:center;">
+          Don't have a file yet? <button class="btn btn-outline btn-sm" style="font-size:11px;" onclick="downloadTemplate()">⬇️ Download template CSV</button>
+        </div>
+      </div>
+
+      <!-- ── Step 2: Map + Preview ── -->
+      <div id="csv-step-2" style="display:none;">
+        <!-- Stats bar -->
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
+          <span class="csv-import-stat" style="background:#e0f2fe;color:#0369a1;">📄 <span id="csv-stat-rows">0</span> rows found</span>
+          <span class="csv-import-stat" style="background:#dcfce7;color:#15803d;">✅ <span id="csv-stat-mapped">0</span> fields mapped</span>
+          <span class="csv-import-stat" style="background:#fef3c7;color:#b45309;">⚠️ <span id="csv-stat-dupe">0</span> possible duplicates</span>
+          <div style="flex:1;"></div>
+          <button class="btn btn-outline btn-sm" onclick="csvRestart()">← Upload different file</button>
+        </div>
+
+        <!-- Options row -->
+        <div style="display:flex;gap:16px;align-items:center;margin-bottom:14px;flex-wrap:wrap;">
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;cursor:pointer;">
+            <input type="checkbox" id="csv-opt-update" checked> Update existing clients (match by name)
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;cursor:pointer;">
+            <input type="checkbox" id="csv-opt-skip-empty" checked> Skip rows with no name
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;cursor:pointer;">
+            <input type="checkbox" id="csv-opt-push-supabase" checked> Push to Supabase after import
+          </label>
+        </div>
+
+        <!-- Column mapping -->
+        <div class="csv-step-header">
+          <div class="csv-step-badge">1</div>
+          <p class="csv-section-title">Map your CSV columns to CRM fields</p>
+          <span style="font-size:12px;color:var(--gray-400);margin-left:auto;">Auto-detected where possible — adjust any that are wrong</span>
+        </div>
+        <div style="border:1px solid var(--gray-200);border-radius:10px;overflow:hidden;margin-bottom:18px;">
+          <table class="csv-map-table">
+            <thead><tr><th>Your CSV Column</th><th>Sample Data</th><th>Maps to CRM Field →</th></tr></thead>
+            <tbody id="csv-map-tbody"></tbody>
+          </table>
+        </div>
+
+        <!-- Data preview -->
+        <div class="csv-step-header">
+          <div class="csv-step-badge">2</div>
+          <p class="csv-section-title">Preview (first 5 rows)</p>
+        </div>
+        <div style="border:1px solid var(--gray-200);border-radius:10px;overflow:hidden;max-height:200px;overflow-y:auto;margin-bottom:16px;">
+          <div style="overflow-x:auto;">
+            <table class="csv-preview-table" id="csv-preview-table"></table>
+          </div>
+        </div>
+
+        <!-- Import button -->
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+          <button class="btn btn-primary" style="font-size:14px;padding:10px 24px;" onclick="runCSVImport()">
+            📥 Import <span id="csv-import-count">0</span> Clients
+          </button>
+          <button class="btn btn-outline" onclick="closeCSVImporter()">Cancel</button>
+          <span id="csv-import-progress" style="font-size:13px;color:var(--gray-500);"></span>
+        </div>
+      </div>
+
+      <!-- ── Step 3: Done ── -->
+      <div id="csv-step-3" style="display:none;text-align:center;padding:30px 20px;">
+        <div style="font-size:52px;margin-bottom:12px;">✅</div>
+        <h3 id="csv-done-title" style="font-size:20px;margin-bottom:6px;">Import Complete!</h3>
+        <p id="csv-done-body" style="color:var(--gray-500);font-size:14px;margin-bottom:20px;"></p>
+        <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+          <button class="btn btn-primary" onclick="closeCSVImporter();showSection('clients',null)">View All Clients</button>
+          <button class="btn btn-outline" onclick="csvRestart()">Import Another File</button>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
@@ -2205,43 +2329,322 @@ function exportCSV() {
 }
 
 function downloadTemplate() {
-  const headers = ['Name','Company','Country','Source','Priority','Status','WhatsApp','Email','Alibaba','Product','Quantity','Value USD','Fabric Supplier','Fabric Type','Shipping Agent','Shipping Method','Notes'];
-  const example = ['John Smith','ABC Textiles','UAE','Alibaba','Hot','Contacted','+971501234567','john@abc.com','abc_textiles','Men Polo Shirts','500','3500','Suzhou Textile Co','100% Cotton','Sinotrans','Sea Freight (LCL)','Needs quick delivery'];
+  const headers = ['Name','Company','Country','Source','Priority','Status','WhatsApp','Email','Product','Quantity','Value USD','Notes','Next Followup','Last Contact'];
+  const example = ['John Smith','ABC Textiles','UAE','Alibaba','Hot','Contacted','+971501234567','john@abc.com','Men Polo Shirts','500','3500','Needs quick delivery','2026-05-01','2026-04-20'];
   const csv = [headers.map(h=>`"${h}"`).join(','), example.map(v=>`"${v}"`).join(',')].join('\n');
   download('clients_template.csv', csv, 'text/csv');
+  toast('Template downloaded!', 'success');
 }
 
-function importCSV(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    const lines = e.target.result.split('\n').filter(l=>l.trim());
-    const headers = lines[0].split(',').map(h=>h.replace(/"/g,'').trim());
-    let added = 0;
-    for (let i=1;i<lines.length;i++) {
-      const vals = lines[i].match(/(".*?"|[^,]+)/g)||[];
-      const row = {};
-      headers.forEach((h,idx)=>{ row[h] = (vals[idx]||'').replace(/^"|"$/g,'').trim(); });
-      if (!row['Name']) continue;
-      clients.unshift({
-        id:genId(), name:row['Name']||'', company:row['Company']||'', country:row['Country']||'',
-        source:row['Source']||'Other', priority:row['Priority']||'Warm', status:row['Status']||'New Lead',
-        whatsapp:row['WhatsApp']||'', email:row['Email']||'', alibaba:row['Alibaba']||'',
-        product:row['Product']||'', quantity:row['Quantity']||'', value:row['Value USD']||'',
-        fabricSupplier:row['Fabric Supplier']||'', fabricType:row['Fabric Type']||'',
-        shippingAgent:row['Shipping Agent']||'', shippingMethod:row['Shipping Method']||'',
-        notes:row['Notes']||'', channels:[], followups:[], createdAt:new Date().toISOString(), updatedAt:new Date().toISOString()
-      });
-      added++;
+// ==================== SMART CSV IMPORTER ====================
+let _csvRows    = [];   // parsed rows (array of objects keyed by CSV header)
+let _csvHeaders = [];   // original CSV column names
+
+// ── CRM field definitions + aliases for auto-detection ───────────────────────
+const CSV_FIELDS = [
+  { key:'name',           label:'Name *',           aliases:['name','client name','full name','contact name','buyer','buyer name','contact','customer'] },
+  { key:'company',        label:'Company',           aliases:['company','company name','business','firm','organization','organisation','business name'] },
+  { key:'country',        label:'Country',           aliases:['country','location','region','market','territory'] },
+  { key:'source',         label:'Source',            aliases:['source','lead source','channel','origin','platform','where from'] },
+  { key:'priority',       label:'Priority',          aliases:['priority','lead priority','temperature','lead temp','hot warm cold','importance'] },
+  { key:'status',         label:'Status / Stage',    aliases:['status','stage','pipeline','pipeline stage','lead status','deal stage'] },
+  { key:'whatsapp',       label:'WhatsApp',          aliases:['whatsapp','wa','whatsapp number','phone','mobile','phone number','mobile number','contact number','telephone','tel','cell'] },
+  { key:'email',          label:'Email',             aliases:['email','email address','e-mail','mail','email id'] },
+  { key:'product',        label:'Product',           aliases:['product','item','product name','goods','merchandise','product interest','interested in','enquiry','inquiry','category'] },
+  { key:'quantity',       label:'Quantity',          aliases:['quantity','qty','pieces','pcs','units','order qty','volume','amount'] },
+  { key:'value',          label:'Value (USD)',        aliases:['value','order value','amount usd','total','value usd','usd','price','deal value','revenue'] },
+  { key:'notes',          label:'Notes',             aliases:['notes','note','comments','comment','remark','remarks','description','details','memo'] },
+  { key:'nextFollowup',   label:'Next Follow-Up',    aliases:['next followup','follow up date','followup date','next contact','due date','next follow up','follow-up date','follow up'] },
+  { key:'lastContact',    label:'Last Contact',      aliases:['last contact','last contacted','last interaction','last follow up','last followup','last call','date contacted'] },
+  { key:'alibaba',        label:'Alibaba Profile',   aliases:['alibaba','alibaba link','alibaba url','alibaba profile','store link'] },
+  { key:'fabricSupplier', label:'Fabric Supplier',   aliases:['fabric supplier','fabric vendor','material supplier'] },
+  { key:'fabricType',     label:'Fabric Type',       aliases:['fabric type','fabric','material','material type','fabric composition'] },
+  { key:'shippingAgent',  label:'Shipping Agent',    aliases:['shipping agent','forwarder','freight forwarder','agent','logistics'] },
+  { key:'shippingMethod', label:'Shipping Method',   aliases:['shipping method','shipping','shipment method','incoterms','freight type'] },
+];
+
+// ── Proper RFC-4180 CSV parser (handles quotes, commas inside fields, newlines) ─
+function parseCSV(text) {
+  const rows = [];
+  let i = 0, col = '', row = [], inQ = false;
+  // Normalise line endings
+  text = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  while (i < text.length) {
+    const ch = text[i];
+    if (inQ) {
+      if (ch === '"') {
+        if (text[i+1] === '"') { col += '"'; i += 2; }   // escaped quote
+        else { inQ = false; i++; }
+      } else { col += ch; i++; }
+    } else {
+      if (ch === '"') { inQ = true; i++; }
+      else if (ch === ',') { row.push(col.trim()); col = ''; i++; }
+      else if (ch === '\n') {
+        row.push(col.trim()); col = '';
+        if (row.some(v => v !== '')) rows.push(row);
+        row = []; i++;
+      } else { col += ch; i++; }
     }
-    save();
-    renderClients();
-    renderDashboard();
-    toast(`Imported ${added} client(s)!`, 'success');
-  };
-  reader.readAsText(file);
-  event.target.value='';
+  }
+  if (col.trim() || row.length) { row.push(col.trim()); if (row.some(v=>v!=='')) rows.push(row); }
+  return rows;
+}
+
+// ── Auto-detect which CSV column → which CRM field ───────────────────────────
+function csvAutoDetect(headers) {
+  const mapping = {};  // csvHeader → crmFieldKey (or '')
+  const usedFields = new Set();
+  headers.forEach(h => {
+    const norm = h.toLowerCase().replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g,' ').trim();
+    let bestKey = '';
+    for (const field of CSV_FIELDS) {
+      if (usedFields.has(field.key)) continue;
+      if (field.aliases.some(alias => norm === alias || norm.includes(alias) || alias.includes(norm))) {
+        bestKey = field.key;
+        break;
+      }
+    }
+    mapping[h] = bestKey;
+    if (bestKey) usedFields.add(bestKey);
+  });
+  return mapping;
+}
+
+// ── Open / close importer ─────────────────────────────────────────────────────
+function openCSVImporter() {
+  csvRestart();
+  openModal('csv-import-modal');
+}
+function closeCSVImporter() {
+  closeModal('csv-import-modal');
+}
+function csvRestart() {
+  _csvRows = []; _csvHeaders = [];
+  document.getElementById('csv-step-1').style.display = '';
+  document.getElementById('csv-step-2').style.display = 'none';
+  document.getElementById('csv-step-3').style.display = 'none';
+  const fi = document.getElementById('csv-file-input');
+  if (fi) fi.value = '';
+  document.getElementById('csv-modal-subtitle').textContent = 'Upload any CSV — columns are detected automatically';
+}
+
+// ── File chosen / dropped ─────────────────────────────────────────────────────
+function csvDropped(e) {
+  e.preventDefault();
+  document.getElementById('csv-drop-zone').classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file) csvReadFile(file);
+}
+function csvFileChosen(e) {
+  const file = e.target.files[0];
+  if (file) csvReadFile(file);
+}
+function csvReadFile(file) {
+  const reader = new FileReader();
+  reader.onload = ev => csvFileLoaded(ev.target.result, file.name);
+  reader.readAsText(file, 'UTF-8');
+}
+
+function csvFileLoaded(text, filename) {
+  const raw = parseCSV(text);
+  if (raw.length < 2) { toast('CSV appears empty or has no data rows', 'error'); return; }
+
+  _csvHeaders = raw[0];
+  _csvRows    = raw.slice(1).map(r => {
+    const obj = {};
+    _csvHeaders.forEach((h, i) => { obj[h] = r[i] || ''; });
+    return obj;
+  });
+
+  document.getElementById('csv-modal-subtitle').textContent = `"${filename}" — ${_csvRows.length} rows loaded`;
+  document.getElementById('csv-stat-rows').textContent  = _csvRows.length;
+  document.getElementById('csv-import-count').textContent = _csvRows.length;
+
+  csvBuildMapping();
+
+  document.getElementById('csv-step-1').style.display = 'none';
+  document.getElementById('csv-step-2').style.display = '';
+}
+
+// ── Build the mapping table ───────────────────────────────────────────────────
+function csvBuildMapping() {
+  const mapping = csvAutoDetect(_csvHeaders);
+
+  const fieldOptions = `<option value="">— skip —</option>` +
+    CSV_FIELDS.map(f => `<option value="${f.key}">${f.label}</option>`).join('');
+
+  const tbody = document.getElementById('csv-map-tbody');
+  tbody.innerHTML = _csvHeaders.map(h => {
+    const mapped = mapping[h] || '';
+    const sample = _csvRows.slice(0,3).map(r => esc(r[h]||'')).filter(Boolean).join(', ');
+    const selClass = mapped ? 'mapped' : '';
+    return `<tr>
+      <td style="font-weight:600;color:var(--gray-800);">${esc(h)}</td>
+      <td style="color:var(--gray-500);font-size:11px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${esc(sample)}">${sample||'<em style="color:var(--gray-300);">empty</em>'}</td>
+      <td>
+        <select class="csv-field-select ${selClass}" data-col="${esc(h)}" onchange="csvMappingChanged(this)">
+          ${fieldOptions.replace(`value="${mapped}"`, `value="${mapped}" selected`)}
+        </select>
+      </td>
+    </tr>`;
+  }).join('');
+
+  csvUpdateStats();
+  csvBuildPreview();
+}
+
+function csvMappingChanged(sel) {
+  // If a field is already used elsewhere, clear the old one
+  const newVal = sel.value;
+  if (newVal) {
+    document.querySelectorAll('.csv-field-select').forEach(s => {
+      if (s !== sel && s.value === newVal) { s.value = ''; s.classList.remove('mapped'); }
+    });
+  }
+  sel.classList.toggle('mapped', !!newVal);
+  csvUpdateStats();
+  csvBuildPreview();
+}
+
+// ── Get current mapping from dropdowns ────────────────────────────────────────
+function csvGetCurrentMapping() {
+  const m = {};
+  document.querySelectorAll('.csv-field-select').forEach(s => {
+    if (s.value) m[s.dataset.col] = s.value;
+  });
+  return m;
+}
+
+// ── Update stat badges ────────────────────────────────────────────────────────
+function csvUpdateStats() {
+  const m      = csvGetCurrentMapping();
+  const mapped = Object.keys(m).length;
+  document.getElementById('csv-stat-mapped').textContent = mapped;
+
+  // Count duplicates (same name as existing client)
+  const nameCol = Object.keys(m).find(k => m[k] === 'name');
+  let dupes = 0;
+  if (nameCol) {
+    const existingNames = new Set(clients.map(c => (c.name||'').toLowerCase().trim()));
+    dupes = _csvRows.filter(r => existingNames.has((r[nameCol]||'').toLowerCase().trim())).length;
+  }
+  document.getElementById('csv-stat-dupe').textContent = dupes;
+  document.getElementById('csv-import-count').textContent = _csvRows.length;
+}
+
+// ── Build preview table ───────────────────────────────────────────────────────
+function csvBuildPreview() {
+  const m       = csvGetCurrentMapping();
+  const preview = _csvRows.slice(0, 5);
+  const mappedCols = Object.keys(m);
+  if (!mappedCols.length) {
+    document.getElementById('csv-preview-table').innerHTML = '<tr><td style="padding:20px;color:var(--gray-400);">Map at least one column above to see a preview.</td></tr>';
+    return;
+  }
+  const thead = `<thead><tr>${mappedCols.map(c=>`<th>${esc(m[c])}</th>`).join('')}</tr></thead>`;
+  const tbody = `<tbody>${preview.map(r=>`<tr>${mappedCols.map(c=>`<td title="${esc(r[c]||'')}">${esc(r[c]||'')}</td>`).join('')}</tr>`).join('')}</tbody>`;
+  document.getElementById('csv-preview-table').innerHTML = thead + tbody;
+}
+
+// ── Run the actual import ─────────────────────────────────────────────────────
+async function runCSVImport() {
+  const m          = csvGetCurrentMapping();
+  const nameCol    = Object.keys(m).find(k => m[k] === 'name');
+  if (!nameCol) { toast('Please map a "Name" column first', 'error'); return; }
+
+  const updateExisting  = document.getElementById('csv-opt-update').checked;
+  const skipEmpty       = document.getElementById('csv-opt-skip-empty').checked;
+  const pushToSupabase  = document.getElementById('csv-opt-push-supabase').checked;
+
+  const today = new Date().toISOString().split('T')[0];
+  const existingByName  = {};
+  clients.forEach(c => { existingByName[(c.name||'').toLowerCase().trim()] = c; });
+
+  let added = 0, updated = 0, skipped = 0;
+  const newClients = [];
+
+  for (const row of _csvRows) {
+    const name = (row[nameCol] || '').trim();
+    if (!name && skipEmpty) { skipped++; continue; }
+    if (!name) { skipped++; continue; }
+
+    // Build client object from mapping
+    const mapped = {};
+    Object.keys(m).forEach(col => { mapped[m[col]] = (row[col] || '').trim(); });
+
+    const nameKey = name.toLowerCase();
+    const existing = existingByName[nameKey];
+
+    if (existing && updateExisting) {
+      // Merge: only overwrite fields that are non-empty in the CSV
+      Object.keys(mapped).forEach(field => {
+        if (field !== 'name' && mapped[field]) existing[field] = mapped[field];
+      });
+      existing.updatedAt = today;
+      updated++;
+    } else if (!existing) {
+      const client = {
+        id:              genId(),
+        name:            mapped.name            || name,
+        company:         mapped.company         || '',
+        country:         mapped.country         || '',
+        source:          mapped.source          || 'Other',
+        priority:        mapped.priority        || 'Warm',
+        status:          mapped.status          || 'New Lead',
+        whatsapp:        mapped.whatsapp        || '',
+        email:           mapped.email           || '',
+        alibaba:         mapped.alibaba         || '',
+        product:         mapped.product         || '',
+        quantity:        mapped.quantity        || '',
+        value:           mapped.value           || '',
+        fabricSupplier:  mapped.fabricSupplier  || '',
+        fabricType:      mapped.fabricType      || '',
+        shippingAgent:   mapped.shippingAgent   || '',
+        shippingMethod:  mapped.shippingMethod  || '',
+        notes:           mapped.notes           || '',
+        nextFollowup:    mapped.nextFollowup    || '',
+        lastContact:     mapped.lastContact     || '',
+        channels:        [],
+        followups:       [],
+        createdAt:       new Date().toISOString(),
+        updatedAt:       new Date().toISOString(),
+      };
+      clients.unshift(client);
+      newClients.push(client);
+      existingByName[nameKey] = client;
+      added++;
+    } else {
+      skipped++;
+    }
+  }
+
+  save();
+  renderClients();
+  renderDashboard();
+  updateSidebarStats();
+  updateNavCount();
+
+  // Push to Supabase
+  const prog = document.getElementById('csv-import-progress');
+  if (pushToSupabase && sbClient && (added + updated) > 0) {
+    if (prog) prog.textContent = 'Pushing to cloud…';
+    try {
+      await sbPushAll();
+      if (prog) prog.textContent = '☁️ Synced to Supabase!';
+    } catch(e) {
+      if (prog) prog.textContent = '⚠️ Cloud sync failed — data saved locally';
+    }
+  }
+
+  // Show done screen
+  document.getElementById('csv-step-2').style.display = 'none';
+  document.getElementById('csv-step-3').style.display = '';
+  document.getElementById('csv-done-title').textContent = `Import Complete — ${added + updated} clients processed`;
+  document.getElementById('csv-done-body').innerHTML =
+    `<strong style="color:#15803d;">✅ ${added} new clients added</strong>&nbsp;&nbsp;` +
+    (updated ? `<strong style="color:#0369a1;">🔄 ${updated} existing clients updated</strong>&nbsp;&nbsp;` : '') +
+    (skipped ? `<span style="color:var(--gray-400);">⏩ ${skipped} rows skipped</span>` : '') +
+    (pushToSupabase && sbClient ? '<br><span style="color:#6366f1;">☁️ Data pushed to Supabase cloud</span>' : '');
 }
 
 function backupData() {
