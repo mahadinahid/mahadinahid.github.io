@@ -3022,60 +3022,6 @@ function sendQuickEmail(clientId) {
   }, 320);
 }
 
-// ── Email center: send all filtered clients via EmailJS ──────────────────────
-
-async function sendAllEmailsEJS() {
-  const cfg = getEJSConfig();
-  if (!cfg) { toast('EmailJS not configured', 'error'); return; }
-
-  const filter   = (document.getElementById('email-filter')||{}).value || 'overdue';
-  const today    = new Date().toISOString().split('T')[0];
-  const nextWeek = new Date(Date.now()+7*864e5).toISOString().split('T')[0];
-
-  let list = clients.filter(c => c.email);
-  if (filter==='overdue') list = list.filter(c => c.nextFollowup && c.nextFollowup < today);
-  if (filter==='today')   list = list.filter(c => c.nextFollowup === today);
-  if (filter==='week')    list = list.filter(c => c.nextFollowup > today && c.nextFollowup <= nextWeek);
-  if (!list.length) { toast('No clients to email in this filter', 'error'); return; }
-
-  const names = list.map(c => `• ${c.name} (${c.email})`).join('\n');
-  if (!confirm(`Send follow-up emails to ${list.length} client${list.length>1?'s':''}?\n\n${names}\n\nEmails will be sent one by one. This cannot be undone.`)) return;
-
-  const allBtn = document.getElementById('ejs-send-all-btn');
-  if (allBtn) { allBtn.disabled = true; allBtn.textContent = '⏳ Sending…'; }
-
-  let sent = 0, failed = 0;
-  for (const c of list) {
-    const draft = buildEmailDraft(c);
-    try {
-      await emailjs.send(cfg.serviceId, cfg.templateId, {
-        to_email:  c.email,
-        to_name:   c.name.split(' ')[0] || c.name,
-        from_name: cfg.fromName || 'Mahadi',
-        reply_to:  cfg.replyTo  || '',
-        subject:   draft.subject,
-        message:   draft.body,
-      });
-      if (!c.followups) c.followups = [];
-      c.followups.push({ id:genId(), channel:'Email', date:today,
-                         note:`Bulk auto-sent via EmailJS: "${draft.subject}"` });
-      c.lastContact = today;
-      sent++;
-      toast(`Sent to ${c.name} (${sent}/${list.length})`, 'success');
-      await new Promise(r => setTimeout(r, 1300)); // respect EmailJS rate limits
-    } catch(err) {
-      failed++;
-      toast(`❌ Failed for ${c.name}: ${err.text || err.message || 'Error'}`, 'error');
-      await new Promise(r => setTimeout(r, 800));
-    }
-  }
-
-  save();
-  renderEmailModal();
-  if (allBtn) { allBtn.disabled = false; allBtn.textContent = '⚡ Send All via EmailJS'; }
-  toast(`✅ Done — ${sent} sent${failed ? ` · ${failed} failed` : ''}`, sent > 0 ? 'success' : 'error');
-}
-
 // ── Test send ────────────────────────────────────────────────────────────────
 
 function testEJSSend() {
