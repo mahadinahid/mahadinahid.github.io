@@ -496,6 +496,18 @@
   .btn-whatsapp { background: #25d366; color: white; }
   .btn-whatsapp:hover { background: #1da851; color: white; }
 
+  /* ===== WA BULK MODAL ===== */
+  .wab-tab-bar { display:flex; gap:0; border-bottom:2px solid var(--gray-200); }
+  .wab-tab { flex:1; padding:11px 6px; font-size:12px; font-weight:600; cursor:pointer; border:none; background:none; color:var(--gray-500); border-bottom:3px solid transparent; margin-bottom:-2px; transition:all .15s; text-align:center; white-space:nowrap; }
+  .wab-tab:hover { color:#25d366; }
+  .wab-tab.active { color:#25d366; border-bottom-color:#25d366; }
+  .wab-tab.tab-overdue.active { color:#dc2626; border-bottom-color:#dc2626; }
+  .wab-badge-tab { display:inline-block; min-width:18px; height:18px; line-height:18px; padding:0 5px; border-radius:20px; font-size:10px; font-weight:700; background:var(--gray-200); color:var(--gray-600); margin-left:4px; vertical-align:middle; }
+  .wab-tab.active .wab-badge-tab { background:#25d366; color:white; }
+  .wab-tab.tab-overdue.active .wab-badge-tab { background:#dc2626; color:white; }
+  .wab-msg-preview { font-size:11px; color:var(--gray-500); max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .wab-bulk-bar { display:flex; align-items:center; gap:8px; padding:12px 0 0; flex-wrap:wrap; }
+
   /* ===== EMAIL REMINDER CENTER (redesigned) ===== */
   .email-fields { border: 1px solid var(--gray-200); border-radius: 10px; overflow: hidden; margin-bottom: 12px; }
   .email-field-row { display: flex; align-items: flex-start; border-bottom: 1px solid var(--gray-100); }
@@ -1453,6 +1465,72 @@ create policy "anon all" on crm_suppliers for all using (true) with check (true)
     </div>
     <div style="padding:10px 24px;border-top:1px solid var(--gray-200);background:var(--gray-50);border-radius:0 0 12px 12px;font-size:12px;color:var(--gray-500);">
       💡 <strong>Tip:</strong> Tick checkboxes to select clients then use <strong>Bulk Send</strong>, or click <strong>✏️ Edit</strong> per row to personalise before sending. <span id="ejs-modal-tip" style="color:#ea580c;font-weight:600;"></span>
+    </div>
+  </div>
+</div>
+
+<!-- ========== WA BULK MODAL ========== -->
+<div class="modal-overlay" id="wa-bulk-modal">
+  <div class="modal" style="max-width:960px;">
+    <div class="modal-header" style="background:linear-gradient(135deg,#075e54,#128c7e);border-radius:12px 12px 0 0;padding:20px 24px;">
+      <div>
+        <h2 style="color:white;font-size:18px;">💬 WhatsApp Bulk Sender</h2>
+        <p style="color:rgba(255,255,255,.8);font-size:13px;margin-top:3px;" id="wab-modal-subtitle">All clients with WhatsApp numbers</p>
+      </div>
+      <button class="modal-close" onclick="closeModal('wa-bulk-modal')" style="background:rgba(255,255,255,.2);color:white;">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" style="padding-top:0;">
+      <!-- Tab bar -->
+      <div class="wab-tab-bar">
+        <button class="wab-tab active" data-tab="all"     onclick="setWabTab('all')">📋 All<span class="wab-badge-tab" id="wab-count-all">0</span></button>
+        <button class="wab-tab tab-overdue" data-tab="overdue" onclick="setWabTab('overdue')">🔴 Overdue<span class="wab-badge-tab" id="wab-count-overdue">0</span></button>
+        <button class="wab-tab" data-tab="today"   onclick="setWabTab('today')">📅 Today<span class="wab-badge-tab" id="wab-count-today">0</span></button>
+        <button class="wab-tab" data-tab="week"    onclick="setWabTab('week')">📆 This Week<span class="wab-badge-tab" id="wab-count-week">0</span></button>
+      </div>
+      <!-- Filters row -->
+      <div class="erc-filters">
+        <span style="font-size:11px;font-weight:700;color:var(--gray-500);text-transform:uppercase;letter-spacing:.5px;">Priority:</span>
+        <button class="erc-priority-btn active" data-priority="all"  onclick="setWabPriority('all')">All</button>
+        <button class="erc-priority-btn hot"  data-priority="Hot"  onclick="setWabPriority('Hot')">🔥 Hot</button>
+        <button class="erc-priority-btn warm" data-priority="Warm" onclick="setWabPriority('Warm')">🌡️ Warm</button>
+        <button class="erc-priority-btn cold" data-priority="Cold" onclick="setWabPriority('Cold')">❄️ Cold</button>
+        <div style="flex:1;min-width:8px;"></div>
+        <button class="btn btn-outline btn-sm" onclick="wabCopyNumbers()">📋 Copy Numbers</button>
+      </div>
+      <!-- Table -->
+      <div class="erc-table-wrap">
+        <table class="erc-table" style="min-width:640px;">
+          <thead>
+            <tr>
+              <th style="width:36px;"><input type="checkbox" id="wab-check-all" onchange="wabToggleAll(this.checked)" title="Select / deselect all"></th>
+              <th>Client</th>
+              <th>WhatsApp</th>
+              <th>Last Contact</th>
+              <th>Due / Status</th>
+              <th>Auto-Message Preview</th>
+              <th style="min-width:90px;">Action</th>
+            </tr>
+          </thead>
+          <tbody id="wab-tbody">
+            <tr><td colspan="7" style="text-align:center;padding:32px;color:var(--gray-400);">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <!-- Bulk action bar -->
+      <div class="wab-bulk-bar">
+        <label class="erc-select-all-label">
+          <input type="checkbox" id="wab-check-all-2" onchange="wabToggleAll(this.checked)"> Select All
+        </label>
+        <span class="erc-selected-count" id="wab-sel-count">0 selected</span>
+        <button class="btn btn-whatsapp btn-sm" onclick="wabSendSelected()">💬 Send Selected</button>
+        <div style="flex:1;"></div>
+        <button class="btn btn-outline btn-sm" onclick="wabSendAllFiltered()">💬 Open All Filtered</button>
+      </div>
+    </div>
+    <div style="padding:10px 24px;border-top:1px solid var(--gray-200);background:var(--gray-50);border-radius:0 0 12px 12px;font-size:12px;color:var(--gray-500);">
+      💡 <strong>Tip:</strong> Tick checkboxes then <strong>Send Selected</strong> to open WhatsApp Web for each — messages are pre-filled and follow-ups logged automatically.
     </div>
   </div>
 </div>
@@ -2956,14 +3034,199 @@ function copyWaMessage() {
   navigator.clipboard.writeText(msg).then(() => toast('Message copied to clipboard!', 'success'));
 }
 
-function promptWhatsAppBulk() {
-  const today = new Date().toISOString().split('T')[0];
-  const overdue = clients.filter(c => c.nextFollowup && c.nextFollowup < today && c.whatsapp);
-  if (!overdue.length) { toast('No overdue clients with WhatsApp numbers', 'error'); return; }
-  toast(`Opening WhatsApp for ${overdue.length} overdue client(s)...`, 'success');
-  overdue.forEach((c, i) => {
-    setTimeout(() => openWaModal(c.id), i * 400);
+// ==================== WA BULK SENDER ====================
+let _wabTab      = 'all';
+let _wabPriority = 'all';
+
+function wabGetFilteredList() {
+  const today    = new Date().toISOString().split('T')[0];
+  const nextWeek = new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0];
+  let list = clients.filter(c => c.whatsapp);
+  if (_wabTab === 'overdue') list = list.filter(c => c.nextFollowup && c.nextFollowup < today);
+  if (_wabTab === 'today')   list = list.filter(c => c.nextFollowup && c.nextFollowup === today);
+  if (_wabTab === 'week')    list = list.filter(c => c.nextFollowup && c.nextFollowup > today && c.nextFollowup <= nextWeek);
+  if (_wabPriority !== 'all') list = list.filter(c => (c.priority||c.leadTemp||'') === _wabPriority);
+  list.sort((a,b) => (a.nextFollowup||'9').localeCompare(b.nextFollowup||'9'));
+  return list;
+}
+
+function openWaBulkModal() {
+  _wabTab = 'all'; _wabPriority = 'all';
+  openModal('wa-bulk-modal');
+  renderWaBulkModal();
+}
+// kept for backward-compat (topbar button, morning report button)
+function promptWhatsAppBulk() { openWaBulkModal(); }
+
+function setWabTab(tab) {
+  _wabTab = tab;
+  document.querySelectorAll('.wab-tab').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+  renderWaBulkModal();
+}
+
+function setWabPriority(p) {
+  _wabPriority = p;
+  // reuse erc-priority-btn styling — reset all then activate chosen
+  const bar = document.getElementById('wa-bulk-modal');
+  if (bar) bar.querySelectorAll('.erc-priority-btn').forEach(b => b.classList.toggle('active', b.dataset.priority === p));
+  renderWaBulkModal();
+}
+
+function wabToggleAll(checked) {
+  document.querySelectorAll('.wab-row-check').forEach(cb => cb.checked = checked);
+  const ca1 = document.getElementById('wab-check-all');
+  const ca2 = document.getElementById('wab-check-all-2');
+  if (ca1) ca1.checked = checked;
+  if (ca2) ca2.checked = checked;
+  wabUpdateBulkBar();
+}
+
+function wabUpdateBulkBar() {
+  const checked = document.querySelectorAll('.wab-row-check:checked');
+  const total   = document.querySelectorAll('.wab-row-check');
+  const count   = checked.length;
+  const el = document.getElementById('wab-sel-count');
+  if (el) el.textContent = count === 0 ? '0 selected' : `${count} selected`;
+  const allChecked = count > 0 && count === total.length;
+  ['wab-check-all','wab-check-all-2'].forEach(id => {
+    const cb = document.getElementById(id);
+    if (cb) { cb.checked = allChecked; cb.indeterminate = count > 0 && !allChecked; }
   });
+}
+
+function wabGetSelectedIds() {
+  return Array.from(document.querySelectorAll('.wab-row-check:checked')).map(cb => cb.dataset.id);
+}
+
+function renderWaBulkModal() {
+  const today    = new Date().toISOString().split('T')[0];
+  const nextWeek = new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0];
+  const withWa   = clients.filter(c => c.whatsapp);
+
+  // Update tab counts (unfiltered by priority)
+  const counts = {
+    all:     withWa.length,
+    overdue: withWa.filter(c => c.nextFollowup && c.nextFollowup < today).length,
+    today:   withWa.filter(c => c.nextFollowup && c.nextFollowup === today).length,
+    week:    withWa.filter(c => c.nextFollowup && c.nextFollowup > today && c.nextFollowup <= nextWeek).length,
+  };
+  ['all','overdue','today','week'].forEach(t => {
+    const el = document.getElementById(`wab-count-${t}`); if (el) el.textContent = counts[t];
+  });
+
+  const list = wabGetFilteredList();
+  const subtitles = { all:`${list.length} clients with WhatsApp`, overdue:`${list.length} overdue`, today:`${list.length} due today`, week:`${list.length} due this week` };
+  const sub = document.getElementById('wab-modal-subtitle'); if (sub) sub.textContent = subtitles[_wabTab]||'';
+
+  const tbody = document.getElementById('wab-tbody'); if (!tbody) return;
+
+  if (!list.length) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:36px;color:var(--gray-400);">
+      <div style="font-size:32px;margin-bottom:8px;">📭</div>
+      <strong style="display:block;color:var(--gray-600);">No clients found</strong>
+      <span style="font-size:12px;">Try a different tab or priority filter.</span>
+    </td></tr>`;
+    wabUpdateBulkBar(); return;
+  }
+
+  tbody.innerHTML = list.map(c => {
+    const fd          = c.nextFollowup || '';
+    const daysOverdue = fd && fd < today ? Math.floor((new Date(today)-new Date(fd))/86400000) : null;
+    const daysSoon    = fd && fd > today ? Math.ceil((new Date(fd)-new Date(today))/86400000)   : null;
+    const isToday     = fd === today;
+    let dueBadge = '';
+    if (daysOverdue !== null) dueBadge = `<span class="erc-badge-overdue">${daysOverdue}d overdue</span>`;
+    else if (isToday)         dueBadge = `<span class="erc-badge-today">Due today</span>`;
+    else if (daysSoon !== null) dueBadge = `<span class="erc-badge-soon">In ${daysSoon}d</span>`;
+    else if (fd)              dueBadge = `<span style="font-size:11px;color:var(--gray-400);">${fd}</span>`;
+    else                      dueBadge = `<span style="font-size:11px;color:var(--gray-300);">—</span>`;
+
+    const priority = c.priority||c.leadTemp||'';
+    const priColor = priority==='Hot'?'#dc2626':priority==='Warm'?'#d97706':priority==='Cold'?'#0891b2':'var(--gray-400)';
+    const priLabel = priority ? `<span style="font-size:10px;font-weight:700;color:${priColor};">${priority}</span>` : '';
+    const lastC    = c.lastContact ? `<span style="font-size:12px;color:var(--gray-600);">${c.lastContact}</span>` : `<span style="font-size:11px;color:var(--gray-300);">—</span>`;
+    const preview  = buildWaMessage(c).replace(/\n/g,' ').substring(0, 60) + '…';
+    const waNum    = c.whatsapp;
+
+    return `<tr class="erc-row" data-id="${c.id}">
+      <td><input type="checkbox" class="wab-row-check" data-id="${c.id}" onchange="wabUpdateBulkBar()"></td>
+      <td>
+        <div class="erc-name">${esc(c.name)}</div>
+        ${c.company?`<div class="erc-company">${esc(c.company)}</div>`:''}
+        ${priLabel}
+      </td>
+      <td>
+        <a class="erc-wa-link" href="https://wa.me/${waNum.replace(/\D/g,'')}?text=${encodeURIComponent(buildWaMessage(c))}" target="_blank" title="Open chat">${esc(waNum)}</a>
+      </td>
+      <td>${lastC}</td>
+      <td>${dueBadge}</td>
+      <td><span class="wab-msg-preview" title="${esc(buildWaMessage(c))}">${esc(preview)}</span></td>
+      <td>
+        <button class="btn btn-whatsapp btn-sm" style="font-size:11px;padding:4px 10px;" onclick="wabSendOne('${c.id}')">💬 Send</button>
+      </td>
+    </tr>`;
+  }).join('');
+  wabUpdateBulkBar();
+}
+
+// ── Send one client from bulk modal (opens WA Web + logs follow-up) ───────────
+function wabSendOne(clientId) {
+  const c = clients.find(x => x.id === clientId); if (!c) return;
+  const msg = buildWaMessage(c);
+  const url = `https://wa.me/${c.whatsapp.replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`;
+  window.open(url, '_blank');
+  const today = new Date().toISOString().split('T')[0];
+  if (!c.followups) c.followups = [];
+  c.followups.push({ id:genId(), channel:'WhatsApp', date:today, note:'Bulk WA sent: '+msg.substring(0,80)+'…' });
+  c.lastContact = today;
+  save();
+  toast(`WhatsApp opened for ${c.name} ✓`, 'success');
+  renderWaBulkModal();
+}
+
+// ── Send all selected (staggered to avoid popup blockers) ─────────────────────
+function wabSendSelected() {
+  const ids  = wabGetSelectedIds();
+  const list = ids.length ? clients.filter(c => ids.includes(c.id) && c.whatsapp) : [];
+  if (!list.length) { toast('Select at least one client first', 'error'); return; }
+  if (!confirm(`Open WhatsApp for ${list.length} client${list.length>1?'s':''}?\n\nMessages will be pre-filled. You just need to press Send in WhatsApp Web for each tab.`)) return;
+  const today = new Date().toISOString().split('T')[0];
+  list.forEach((c, i) => {
+    setTimeout(() => {
+      const msg = buildWaMessage(c);
+      window.open(`https://wa.me/${c.whatsapp.replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`, '_blank');
+      if (!c.followups) c.followups = [];
+      c.followups.push({ id:genId(), channel:'WhatsApp', date:today, note:'Bulk WA sent: '+msg.substring(0,80)+'…' });
+      c.lastContact = today;
+    }, i * 1200);
+  });
+  setTimeout(() => { save(); renderWaBulkModal(); toast(`Opened WhatsApp for ${list.length} client(s) ✓`, 'success'); }, list.length * 1200 + 200);
+}
+
+// ── Open all filtered (no selection needed) ───────────────────────────────────
+function wabSendAllFiltered() {
+  const list = wabGetFilteredList();
+  if (!list.length) { toast('No clients in current filter', 'error'); return; }
+  if (!confirm(`Open WhatsApp Web for all ${list.length} filtered clients?\n\nTip: Use tabs or select specific clients for a smaller batch.`)) return;
+  const today = new Date().toISOString().split('T')[0];
+  list.forEach((c, i) => {
+    setTimeout(() => {
+      const msg = buildWaMessage(c);
+      window.open(`https://wa.me/${c.whatsapp.replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`, '_blank');
+      if (!c.followups) c.followups = [];
+      c.followups.push({ id:genId(), channel:'WhatsApp', date:today, note:'Bulk WA sent: '+msg.substring(0,80)+'…' });
+      c.lastContact = today;
+    }, i * 1200);
+  });
+  setTimeout(() => { save(); toast(`Opened WhatsApp for ${list.length} client(s) ✓`, 'success'); }, list.length * 1200 + 200);
+}
+
+// ── Copy all filtered WA numbers ──────────────────────────────────────────────
+function wabCopyNumbers() {
+  const list = wabGetFilteredList();
+  const nums = list.map(c => c.whatsapp).join(', ');
+  if (!nums) { toast('No numbers in current filter', 'error'); return; }
+  navigator.clipboard.writeText(nums).then(() => toast(`${list.length} WhatsApp number(s) copied!`, 'success'));
 }
 
 // ==================== EMAIL REMINDER CENTER (redesigned) ====================
