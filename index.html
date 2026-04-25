@@ -2217,22 +2217,8 @@ function wabPreviewTemplate() {
   box.style.display = 'block';
 }
 
-// Update wabSendOne and bulk functions to use selected template
-// (override the calls to buildWaMessage inside those functions)
-const _origWabSendOne = wabSendOne;
-wabSendOne = function(clientId) {
-  const c = clients.find(x => x.id === clientId); if (!c) return;
-  const msg = getWaMessageForClient(c);
-  const url = `https://wa.me/${c.whatsapp.replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`;
-  window.open(url, '_blank');
-  const today = new Date().toISOString().split('T')[0];
-  if (!c.followups) c.followups = [];
-  c.followups.push({ id:genId(), channel:'WhatsApp', date:today, note:'Bulk WA sent: '+msg.substring(0,80)+'…' });
-  c.lastContact = today;
-  save();
-  toast(`WhatsApp opened for ${c.name} ✓`, 'success');
-  renderWaBulkModal();
-};
+// wabSendOne, wabSendSelected, wabSendAllFiltered are edited directly below
+// to use getWaMessageForClient() instead of buildWaMessage().
 
 // ── Email Reminders template selector handlers ────────────────────────────────
 function ercOnTemplateChange() {
@@ -2264,14 +2250,7 @@ function waApplySingleTemplate() {
   updateWaPreview();
 }
 
-// Patch openWaModal to also populate the WA single template select
-const _origOpenWaModal = openWaModal;
-openWaModal = function(clientId) {
-  _origOpenWaModal(clientId);
-  populateTmplSelects();
-  const sel = document.getElementById('wa-single-template-select');
-  if (sel) sel.value = '__auto__';
-};
+// populateTmplSelects() is now called directly inside openWaModal() below.
 
 // ── Email compose modal: apply selected template ──────────────────────────────
 function composeApplyTemplate() {
@@ -2291,14 +2270,7 @@ function composeApplyTemplate() {
   document.getElementById('compose-body').value    = draft.body    || '';
 }
 
-// Patch openComposeModal to also populate email template select
-const _origOpenComposeModal = openComposeModal;
-openComposeModal = function(clientId) {
-  _origOpenComposeModal(clientId);
-  populateTmplSelects();
-  const sel = document.getElementById('compose-template-select');
-  if (sel) sel.value = '__auto__';
-};
+// populateTmplSelects() is now called directly inside openComposeModal() below.
 
 // ── Save WA message as template ───────────────────────────────────────────────
 function saveWaMessageAsTemplate() {
@@ -2325,19 +2297,7 @@ function saveEmailAsTemplate() {
   toast(`✓ Email template "${name}" saved!`, 'success');
 }
 
-// ── Override bulkSendEmailsEJS to use selected email template ─────────────────
-// (patch getEmailDraftForClient into the existing bulk function via wrapper)
-const _origBuildEmailDraft = buildEmailDraft;
-// bulkSendEmailsEJS already calls buildEmailDraft — we patch it at call time
-// by overriding the global reference:
-const __origBulkSendEmailsEJS = bulkSendEmailsEJS;
-bulkSendEmailsEJS = async function() {
-  // Temporarily swap buildEmailDraft with template-aware version
-  window.__origBuildEmailDraft = buildEmailDraft;
-  window.buildEmailDraft = (c) => getEmailDraftForClient(c);
-  await __origBulkSendEmailsEJS();
-  window.buildEmailDraft = window.__origBuildEmailDraft;
-};
+// bulkSendEmailsEJS now calls getEmailDraftForClient() directly (edited below).
 
 // ── Init: populate selects on page load ───────────────────────────────────────
 // (called during INIT block below)
@@ -3552,6 +3512,9 @@ function openWaModal(clientId) {
   const msg = buildWaMessage(c);
   document.getElementById('wa-message-text').value = msg;
   updateWaPreview();
+  populateTmplSelects();
+  const _waSel = document.getElementById('wa-single-template-select');
+  if (_waSel) _waSel.value = '__auto__';
   openModal('wa-modal');
 }
 
@@ -3645,6 +3608,7 @@ function wabGetFilteredList() {
 function openWaBulkModal() {
   _wabTab = 'all'; _wabPriority = 'all';
   openModal('wa-bulk-modal');
+  populateTmplSelects();
   renderWaBulkModal();
 }
 // kept for backward-compat (topbar button, morning report button)
@@ -3764,7 +3728,7 @@ function renderWaBulkModal() {
 // ── Send one client from bulk modal (opens WA Web + logs follow-up) ───────────
 function wabSendOne(clientId) {
   const c = clients.find(x => x.id === clientId); if (!c) return;
-  const msg = buildWaMessage(c);
+  const msg = getWaMessageForClient(c);
   const url = `https://wa.me/${c.whatsapp.replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`;
   window.open(url, '_blank');
   const today = new Date().toISOString().split('T')[0];
@@ -3785,7 +3749,7 @@ function wabSendSelected() {
   const today = new Date().toISOString().split('T')[0];
   list.forEach((c, i) => {
     setTimeout(() => {
-      const msg = buildWaMessage(c);
+      const msg = getWaMessageForClient(c);
       window.open(`https://wa.me/${c.whatsapp.replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`, '_blank');
       if (!c.followups) c.followups = [];
       c.followups.push({ id:genId(), channel:'WhatsApp', date:today, note:'Bulk WA sent: '+msg.substring(0,80)+'…' });
@@ -3803,7 +3767,7 @@ function wabSendAllFiltered() {
   const today = new Date().toISOString().split('T')[0];
   list.forEach((c, i) => {
     setTimeout(() => {
-      const msg = buildWaMessage(c);
+      const msg = getWaMessageForClient(c);
       window.open(`https://wa.me/${c.whatsapp.replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`, '_blank');
       if (!c.followups) c.followups = [];
       c.followups.push({ id:genId(), channel:'WhatsApp', date:today, note:'Bulk WA sent: '+msg.substring(0,80)+'…' });
@@ -3844,6 +3808,7 @@ function openEmailReminderModal() {
   _ercTab      = 'overdue';
   _ercPriority = 'all';
   openModal('email-modal');
+  populateTmplSelects();
   renderEmailModal();
 }
 
@@ -4004,7 +3969,7 @@ async function bulkSendEmailsEJS() {
   const today = new Date().toISOString().split('T')[0];
   let sent = 0, failed = 0;
   for (const c of list) {
-    const draft = buildEmailDraft(c);
+    const draft = getEmailDraftForClient(c);
     try {
       await emailjs.send(cfg.serviceId, cfg.templateId, {
         to_email:  c.email,
@@ -4064,6 +4029,9 @@ function openComposeModal(clientId) {
   document.getElementById('compose-body').value    = draft.body;
   // Store clientId for logging
   document.getElementById('compose-modal').dataset.clientId = clientId;
+  populateTmplSelects();
+  const _cSel = document.getElementById('compose-template-select');
+  if (_cSel) _cSel.value = '__auto__';
   openModal('compose-modal');
 }
 
