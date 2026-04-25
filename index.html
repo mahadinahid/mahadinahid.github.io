@@ -1151,10 +1151,10 @@ create policy "anon all" on crm_suppliers for all using (true) with check (true)
           <p style="color:rgba(255,255,255,.8);font-size:13px;margin:3px 0 0;" id="rerc-subtitle">All clients with email addresses</p>
         </div>
         <div class="erc-tabs">
-          <button class="erc-tab tab-overdue active" data-tab="overdue" onclick="setRercTab('overdue')">🔴 Overdue<span class="erc-badge-tab" id="rerc-count-overdue">0</span></button>
+          <button class="erc-tab tab-overdue" data-tab="overdue" onclick="setRercTab('overdue')">🔴 Overdue<span class="erc-badge-tab" id="rerc-count-overdue">0</span></button>
           <button class="erc-tab" data-tab="today" onclick="setRercTab('today')">📅 Today<span class="erc-badge-tab" id="rerc-count-today">0</span></button>
           <button class="erc-tab" data-tab="week" onclick="setRercTab('week')">📆 This Week<span class="erc-badge-tab" id="rerc-count-week">0</span></button>
-          <button class="erc-tab" data-tab="all" onclick="setRercTab('all')">📋 All<span class="erc-badge-tab" id="rerc-count-all">0</span></button>
+          <button class="erc-tab active" data-tab="all" onclick="setRercTab('all')">📋 All<span class="erc-badge-tab" id="rerc-count-all">0</span></button>
         </div>
         <div class="tmpl-sel-bar">
           <label>Template:</label>
@@ -3090,17 +3090,20 @@ function renderDashboard() {
     ${statCard('#ede9fe','#7c3aed', svgDollar, '$'+totalValue.toLocaleString(), 'Total Order Value', '')}
   `;
 
-  // Recently Added (last 7 days)
+  // Recently Added — show clients with addedAt in last 7 days; fall back to last 5 by array order
   const sevenDaysAgo = new Date(Date.now() - 7*86400000).toISOString().split('T')[0];
-  const recent = clients.filter(c => c.addedAt && c.addedAt >= sevenDaysAgo)
+  const withDate = clients.filter(c => c.addedAt && c.addedAt >= sevenDaysAgo)
     .sort((a,b) => (b.addedAt||'').localeCompare(a.addedAt||'')).slice(0,10);
+  const recent = withDate.length > 0 ? withDate : [...clients].slice(-5).reverse();
+  const isFallback = withDate.length === 0 && recent.length > 0;
   document.getElementById('dash-recent-list').innerHTML = recent.length ? `
+    ${isFallback ? `<div style="padding:8px 14px 0;font-size:11px;color:var(--gray-400);">Showing latest ${recent.length} clients (no recent-date info — future adds will show date)</div>` : ''}
     <table style="width:100%;border-collapse:collapse;font-size:13px;">
       <tbody>
         ${recent.map(c=>{
           const isNew = c.addedAt === today;
           return `<tr style="border-bottom:1px solid var(--gray-100);">
-            <td style="padding:10px 14px;font-weight:600;">${esc(c.name)}<span class="date-chip ${isNew?'new':''}">${c.addedAt}</span></td>
+            <td style="padding:10px 14px;font-weight:600;">${esc(c.name)}${c.addedAt?`<span class="date-chip ${isNew?'new':''}">${c.addedAt}</span>`:''}</td>
             <td style="padding:10px 6px;">${getSourceBadge(c.source)}</td>
             <td style="padding:10px 6px;">${getStatusBadge(c.status)}</td>
             <td style="padding:10px 14px;"><button class="btn btn-outline btn-sm" onclick="viewClient('${c.id}')">View</button></td>
@@ -3108,7 +3111,7 @@ function renderDashboard() {
         }).join('')}
       </tbody>
     </table>
-  ` : `<div class="empty-state" style="padding:24px;"><p style="font-size:13px;color:var(--gray-400);">No clients added in the last 7 days. <a href="#" onclick="openClientModal()" style="color:var(--primary);">Add one now</a></p></div>`;
+  ` : `<div class="empty-state" style="padding:24px;"><p style="font-size:13px;color:var(--gray-400);">No clients yet. <a href="#" onclick="openClientModal()" style="color:var(--primary);">Add your first client</a></p></div>`;
 
   // Dashboard followups — rendered by renderDashFollowups()
   renderDashFollowups();
@@ -3123,6 +3126,7 @@ function renderDashboard() {
   const srcDetail = document.getElementById('src-breakdown-detail');
   if (srcDetail) srcDetail.style.display = 'none';
   const breakdownContainer = document.getElementById('source-breakdown');
+  if (!breakdownContainer) return; // guard: dashboard section not yet visible
   // Remove old cards, keep detail div
   Array.from(breakdownContainer.children).forEach(child => {
     if (child.id !== 'src-breakdown-detail') child.remove();
@@ -3130,8 +3134,8 @@ function renderDashboard() {
   if (!Object.keys(srcCounts).length) {
     const p = document.createElement('p');
     p.style.cssText = 'color:var(--gray-400);font-size:13px;grid-column:1/-1;';
-    p.textContent = 'No data yet.';
-    breakdownContainer.insertBefore(p, srcDetail);
+    p.textContent = clients.length ? 'No source data — edit clients to add source.' : 'No clients yet.';
+    breakdownContainer.insertBefore(p, srcDetail || null);
   } else {
     Object.entries(srcCounts).sort((a,b)=>b[1]-a[1]).forEach(([src,count]) => {
       const pct = Math.round(count/totalClients*100);
@@ -3145,7 +3149,7 @@ function renderDashboard() {
         <div class="src-mini-bar"><div class="src-mini-bar-fill" style="width:${pct}%;"></div></div>
         <div style="font-size:10px;color:var(--gray-400);">${pct}%</div>
       `;
-      breakdownContainer.insertBefore(card, srcDetail);
+      breakdownContainer.insertBefore(card, srcDetail || null);
     });
   }
 
@@ -3982,7 +3986,7 @@ function openWaModal(clientId) {
 }
 
 function buildWaMessage(c, templateType) {
-  const first   = c.name.split(' ')[0];
+  const first   = ((c && c.name) ? c.name : 'Client').split(' ')[0];
   const product = c.product || 'your inquiry';
   const company = c.company ? ` at ${c.company}` : '';
   const qty     = c.quantity ? `*${Number(c.quantity).toLocaleString()} pcs*` : '';
@@ -4499,7 +4503,7 @@ function openComposeModal(clientId) {
 }
 
 function buildEmailDraft(c) {
-  const first   = c.name.split(' ')[0];
+  const first   = ((c && c.name) ? c.name : 'Client').split(' ')[0];
   const product = c.product || 'your inquiry';
   const company = c.company || 'your company';
 
@@ -4747,16 +4751,21 @@ function testEJSSend() {
 
 // ==================== REMINDERS SECTION ====================
 let _remTab = 'email';
-let _rercTab = 'overdue';
+let _rercTab = 'all';
 let _rercPriority = 'all';
 let _rwaTab = 'all';
 let _rwaPriority = 'all';
 
 function setRemTab(tab) {
   _remTab = tab;
-  document.querySelectorAll('.rem-tab').forEach(b => b.classList.toggle('active', b.dataset.remTab === tab));
-  document.getElementById('rem-email-panel').style.display   = tab === 'email'    ? '' : 'none';
-  document.getElementById('rem-whatsapp-panel').style.display = tab === 'whatsapp' ? '' : 'none';
+  document.querySelectorAll('.rem-tab').forEach(b => {
+    const bTab = b.getAttribute('data-rem-tab') || b.dataset.remTab;
+    b.classList.toggle('active', bTab === tab);
+  });
+  const emailPanel = document.getElementById('rem-email-panel');
+  const waPanel    = document.getElementById('rem-whatsapp-panel');
+  if (emailPanel) emailPanel.style.display    = tab === 'email'    ? 'block' : 'none';
+  if (waPanel)    waPanel.style.display       = tab === 'whatsapp' ? 'block' : 'none';
   if (tab === 'email')    renderRemEmailPanel();
   if (tab === 'whatsapp') renderRemWaPanel();
 }
@@ -4868,7 +4877,7 @@ async function rercBulkSendEJS() {
   for (const c of list) {
     const draft = getEmailDraftForClient(c);
     try {
-      await emailjs.send(cfg.serviceId, cfg.templateId, {to_email:c.email,to_name:c.name.split(' ')[0]||c.name,from_name:cfg.fromName||'Mahadi',reply_to:cfg.replyTo||'',subject:draft.subject,message:draft.body});
+      await emailjs.send(cfg.serviceId, cfg.templateId, {to_email:c.email,to_name:((c.name||'').split(' ')[0])||c.name||'Client',from_name:cfg.fromName||'Mahadi',reply_to:cfg.replyTo||'',subject:draft.subject,message:draft.body});
       if (!c.followups) c.followups=[];
       c.followups.push({id:genId(),channel:'Email',date:today,note:`Bulk auto-sent: "${draft.subject}"`});
       c.lastContact=today; sent++;
@@ -5662,6 +5671,11 @@ async function sbLoad() {
     renderDashboard();
     renderClients();
     renderSuppliers();
+    // Re-render reminders section if it is currently open
+    if (document.getElementById('section-reminders') &&
+        document.getElementById('section-reminders').classList.contains('active')) {
+      renderReminders();
+    }
     updateSidebarStats();
     updateNavCount();
     sbShowLoadingBanner(false);
@@ -5713,6 +5727,10 @@ function sbSetupRealtime() {
       }
       localStorage.setItem('crm_clients', JSON.stringify(clients));
       renderDashboard(); renderClients();
+      if (document.getElementById('section-reminders') &&
+          document.getElementById('section-reminders').classList.contains('active')) {
+        renderReminders();
+      }
       updateSBStatus('synced', `Live sync ✓ (${clients.length} clients)`);
     })
     .on('postgres_changes', { event: '*', schema: 'public', table: 'crm_suppliers' }, payload => {
