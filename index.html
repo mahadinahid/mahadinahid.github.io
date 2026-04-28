@@ -563,6 +563,16 @@
   .erc-selected-count { font-size:12px; color:var(--gray-500); margin-right:4px; }
   .email-overdue-days { font-size:11px; font-weight:700; color:var(--danger); background:#fee2e2; padding:2px 8px; border-radius:20px; }
 
+  /* ===== IMPORT BATCH MANAGEMENT ===== */
+  .batch-tag { display:inline-flex; align-items:center; gap:4px; padding:2px 7px; border-radius:10px; font-size:10px; font-weight:700; background:#ede9fe; color:#5b21b6; white-space:nowrap; }
+  .batch-history-card { background:#fff; border:1.5px solid var(--gray-200); border-radius:12px; padding:14px 16px; transition:box-shadow .15s,border-color .15s; }
+  .batch-history-card:hover { border-color:#6366f1; box-shadow:0 4px 12px rgba(99,102,241,.12); }
+  .batch-history-card.active-filter { border-color:#6366f1; background:#eef2ff; }
+  .batch-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:12px; margin-top:12px; }
+  .batch-active-pill { display:inline-flex; align-items:center; gap:6px; background:#ede9fe; color:#5b21b6; border:1.5px solid #c4b5fd; border-radius:20px; padding:4px 12px; font-size:12px; font-weight:700; }
+  .batch-active-pill button { background:none; border:none; cursor:pointer; color:#7c3aed; font-size:14px; line-height:1; padding:0 0 0 4px; }
+  #batch-filter-bar { display:none; align-items:center; gap:10px; padding:8px 14px; background:#f5f3ff; border-radius:10px; margin-bottom:10px; }
+
   /* ===== SMART CSV IMPORTER ===== */
   .csv-drop-zone { border:2px dashed var(--gray-300); border-radius:12px; padding:36px 20px; text-align:center; cursor:pointer; transition:all .2s; background:var(--gray-50); }
   .csv-drop-zone:hover,.csv-drop-zone.drag-over { border-color:#6366f1; background:#eef2ff; }
@@ -840,6 +850,18 @@
           <option value="Warm">Warm</option>
           <option value="Cold">Cold</option>
         </select>
+        <select class="filter-select" id="filter-batch" onchange="applyBatchFilter(this.value)" style="max-width:180px;">
+          <option value="">📦 All Imports</option>
+        </select>
+        <button class="btn btn-outline btn-sm" onclick="showSection('import-batches',null)" style="white-space:nowrap;">📋 Import History</button>
+      </div>
+      <!-- Active batch filter indicator -->
+      <div id="batch-filter-bar" style="display:none;align-items:center;gap:10px;padding:8px 14px;background:#f5f3ff;border-radius:10px;margin-bottom:10px;">
+        <span style="font-size:12px;color:#5b21b6;font-weight:600;">📦 Filtering by import batch:</span>
+        <span class="batch-active-pill" id="batch-active-pill-label">—
+          <button onclick="clearBatchFilter()" title="Clear filter">✕</button>
+        </span>
+        <span style="font-size:12px;color:var(--gray-500);" id="batch-filter-count"></span>
       </div>
       <div class="card">
         <div class="table-wrap">
@@ -973,6 +995,34 @@
         <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
         <h3>No suppliers yet</h3>
         <p>Add your fabric suppliers and shipping agents here.</p>
+      </div>
+    </section>
+
+    <!-- IMPORT BATCHES -->
+    <section id="section-import-batches" class="section">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px;">
+        <div>
+          <h2 style="font-size:20px;font-weight:700;margin:0 0 2px;">📦 Import History</h2>
+          <p style="font-size:13px;color:var(--gray-500);margin:0;">Every CSV import is tracked as a batch. Filter, export, or delete clients by import session.</p>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-outline btn-sm" onclick="showSection('clients',null)">← Back to All Clients</button>
+          <button class="btn btn-primary btn-sm" onclick="openModal('csv-import-modal');csvRestart();">+ New Import</button>
+        </div>
+      </div>
+
+      <!-- Summary stats -->
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:18px;" id="batch-summary-stats"></div>
+
+      <!-- Batch cards grid -->
+      <div id="batch-grid-container">
+        <div id="batch-grid" class="batch-grid"></div>
+        <div id="batch-empty" style="display:none;text-align:center;padding:48px 20px;color:var(--gray-400);">
+          <div style="font-size:48px;margin-bottom:12px;">📭</div>
+          <strong style="display:block;font-size:16px;color:var(--gray-600);">No import history yet</strong>
+          <p style="font-size:13px;margin:8px 0 16px;">Use the CSV Importer to import clients in batches. Each import will appear here with full details.</p>
+          <button class="btn btn-primary" onclick="openModal('csv-import-modal');csvRestart();">📥 Import Clients from CSV</button>
+        </div>
       </div>
     </section>
 
@@ -2289,6 +2339,7 @@ create policy "anon all" on crm_suppliers for all using (true) with check (true)
 // ==================== DATA ====================
 let clients = JSON.parse(localStorage.getItem('crm_clients') || '[]');
 let suppliers = JSON.parse(localStorage.getItem('crm_suppliers') || '[]');
+let importBatches = JSON.parse(localStorage.getItem('crm_import_batches') || '[]');
 let sbClient = null; // Supabase client instance — set by initSupabase()
 
 // ── Supabase default credentials (team-shared, auto-connects on every browser) ──
@@ -2298,6 +2349,7 @@ const SB_DEFAULT_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmF
 function save() {
   localStorage.setItem('crm_clients', JSON.stringify(clients));
   localStorage.setItem('crm_suppliers', JSON.stringify(suppliers));
+  localStorage.setItem('crm_import_batches', JSON.stringify(importBatches));
   updateSidebarStats();
   updateNavCount();
   updateBotExportCount();
@@ -2707,7 +2759,7 @@ function showSection(name, el) {
   const overlay = document.getElementById('sidebar-overlay');
   if (sidebar) sidebar.classList.remove('open');
   if (overlay) overlay.classList.remove('open');
-  const titles = { dashboard:'Dashboard', clients:'All Clients', pipeline:'Pipeline', followups:'Follow-Ups', orders:'Orders', suppliers:'Suppliers', tools:'Tools', templates:'Templates', reminders:'Reminders' };
+  const titles = { dashboard:'Dashboard', clients:'All Clients', pipeline:'Pipeline', followups:'Follow-Ups', orders:'Orders', suppliers:'Suppliers', tools:'Tools', templates:'Templates', reminders:'Reminders', 'import-batches':'Import History' };
   document.getElementById('page-title').textContent = titles[name] || name;
   if (name === 'dashboard')  renderDashboard();
   if (name === 'clients')    renderClients();
@@ -2715,8 +2767,9 @@ function showSection(name, el) {
   if (name === 'followups')  renderFollowupsSection();
   if (name === 'orders')     renderOrders();
   if (name === 'suppliers')  renderSuppliers();
-  if (name === 'templates')  renderTemplates();
-  if (name === 'reminders')  openRemindersSection();
+  if (name === 'templates')      renderTemplates();
+  if (name === 'reminders')      openRemindersSection();
+  if (name === 'import-batches') renderImportBatches();
 }
 
 // ==================== MODALS ====================
@@ -3019,16 +3072,17 @@ function saveSupplier() {
 // ==================== RENDER CLIENTS ====================
 function renderClients() {
   const search = (document.getElementById('search-input')||{}).value||'';
-  const src = (document.getElementById('filter-source')||{}).value||'';
+  const src  = (document.getElementById('filter-source')||{}).value||'';
   const stat = (document.getElementById('filter-status')||{}).value||'';
   const prio = (document.getElementById('filter-priority')||{}).value||'';
   let filtered = clients.filter(c => {
     const q = search.toLowerCase();
     const matchSearch = !q || [c.name,c.company,c.country,c.email,c.product,c.fabricSupplier].some(v => v&&v.toLowerCase().includes(q));
-    const matchSrc = !src || normalizeSrc(c.source) === src || c.source === src;
-    const matchStat = !stat || c.status === stat;
-    const matchPrio = !prio || c.priority === prio;
-    return matchSearch && matchSrc && matchStat && matchPrio;
+    const matchSrc   = !src  || normalizeSrc(c.source) === src || c.source === src;
+    const matchStat  = !stat || c.status === stat;
+    const matchPrio  = !prio || c.priority === prio;
+    const matchBatch = !_activeBatchId || c.importBatch === _activeBatchId;
+    return matchSearch && matchSrc && matchStat && matchPrio && matchBatch;
   });
   const tbody = document.getElementById('clients-tbody');
   const empty = document.getElementById('clients-empty');
@@ -3037,10 +3091,19 @@ function renderClients() {
   const today = new Date().toISOString().split('T')[0];
   tbody.innerHTML = filtered.map(c => {
     const isOverdue = c.nextFollowup && c.nextFollowup < today;
+    // Batch tag
+    let batchTag = '';
+    if (c.importBatch) {
+      const clr = getBatchColor(c.importBatch);
+      const b   = importBatches.find(x => x.id === c.importBatch);
+      const lbl = b ? `📦 ${b.date}` : '📦 Imported';
+      batchTag  = `<span class="batch-tag" style="background:${clr.bg};color:${clr.color};cursor:pointer;" onclick="filterClientsByBatch('${c.importBatch}')" title="Click to filter by this batch">${lbl}</span>`;
+    }
     return `<tr>
       <td>
         <div class="td-name">${esc(c.name)}</div>
         <div class="td-company">${esc(c.company||'')}${c.country?' · '+esc(c.country):''}</div>
+        ${batchTag}
       </td>
       <td>${getSourceBadge(c.source)}</td>
       <td style="font-size:12px;color:var(--gray-600);">${esc(c.country||'—')}</td>
@@ -3433,8 +3496,9 @@ function downloadTemplate() {
 }
 
 // ==================== SMART CSV IMPORTER ====================
-let _csvRows    = [];   // parsed rows (array of objects keyed by CSV header)
-let _csvHeaders = [];   // original CSV column names
+let _csvRows     = [];   // parsed rows (array of objects keyed by CSV header)
+let _csvHeaders  = [];   // original CSV column names
+let _csvFileName = '';   // original file name for batch tracking
 
 // ── CRM field definitions + aliases for auto-detection ───────────────────────
 const CSV_FIELDS = [
@@ -3515,7 +3579,7 @@ function closeCSVImporter() {
   closeModal('csv-import-modal');
 }
 function csvRestart() {
-  _csvRows = []; _csvHeaders = [];
+  _csvRows = []; _csvHeaders = []; _csvFileName = '';
   document.getElementById('csv-step-1').style.display = '';
   document.getElementById('csv-step-2').style.display = 'none';
   document.getElementById('csv-step-3').style.display = 'none';
@@ -3542,6 +3606,7 @@ function csvReadFile(file) {
 }
 
 function csvFileLoaded(text, filename) {
+  _csvFileName = filename || 'import.csv';
   const raw = parseCSV(text);
   if (raw.length < 2) { toast('CSV appears empty or has no data rows', 'error'); return; }
 
@@ -3653,6 +3718,12 @@ async function runCSVImport() {
   const pushToSupabase  = document.getElementById('csv-opt-push-supabase').checked;
 
   const today = new Date().toISOString().split('T')[0];
+  const now   = new Date();
+  // Generate a unique batch ID for this import session
+  const batchSeq = (importBatches.length + 1).toString().padStart(3, '0');
+  const batchId  = `batch_${today.replace(/-/g,'')}_${now.getHours().toString().padStart(2,'0')}${now.getMinutes().toString().padStart(2,'0')}_${batchSeq}`;
+  const fileName = _csvFileName || 'unknown.csv';
+
   const existingByName  = {};
   clients.forEach(c => { existingByName[(c.name||'').toLowerCase().trim()] = c; });
 
@@ -3705,6 +3776,8 @@ async function runCSVImport() {
         createdAt:       new Date().toISOString(),
         updatedAt:       new Date().toISOString(),
         addedAt:         today,
+        importBatch:     batchId,
+        importedAt:      now.toISOString(),
       };
       clients.unshift(client);
       newClients.push(client);
@@ -3715,9 +3788,24 @@ async function runCSVImport() {
     }
   }
 
+  // Record this import batch in history
+  if (added > 0 || updated > 0) {
+    importBatches.unshift({
+      id:        batchId,
+      date:      today,
+      time:      `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`,
+      fileName:  fileName,
+      added:     added,
+      updated:   updated,
+      skipped:   skipped,
+      totalRows: _csvRows.length,
+    });
+  }
+
   save();
   renderClients();
   renderDashboard();
+  populateBatchFilter();
   updateSidebarStats();
   updateNavCount();
 
@@ -3742,6 +3830,164 @@ async function runCSVImport() {
     (updated ? `<strong style="color:#0369a1;">🔄 ${updated} existing clients updated</strong>&nbsp;&nbsp;` : '') +
     (skipped ? `<span style="color:var(--gray-400);">⏩ ${skipped} rows skipped</span>` : '') +
     (pushToSupabase && sbClient ? '<br><span style="color:#6366f1;">☁️ Data pushed to Supabase cloud</span>' : '');
+}
+
+// ==================== IMPORT BATCH MANAGEMENT ====================
+
+// Batch colour palette — cycles through distinct hues per batch
+const BATCH_COLORS = [
+  {bg:'#ede9fe',color:'#5b21b6',border:'#c4b5fd'},
+  {bg:'#dbeafe',color:'#1d4ed8',border:'#93c5fd'},
+  {bg:'#dcfce7',color:'#15803d',border:'#86efac'},
+  {bg:'#fef3c7',color:'#b45309',border:'#fcd34d'},
+  {bg:'#fee2e2',color:'#b91c1c',border:'#fca5a5'},
+  {bg:'#e0f2fe',color:'#0369a1',border:'#7dd3fc'},
+  {bg:'#fce7f3',color:'#9d174d',border:'#f9a8d4'},
+  {bg:'#f0fdf4',color:'#166534',border:'#6ee7b7'},
+];
+function getBatchColor(batchId) {
+  const idx = importBatches.findIndex(b => b.id === batchId);
+  return BATCH_COLORS[(idx < 0 ? 0 : idx) % BATCH_COLORS.length];
+}
+
+// Populate the "📦 All Imports" dropdown in All Clients filter bar
+function populateBatchFilter() {
+  const sel = document.getElementById('filter-batch');
+  if (!sel) return;
+  const current = sel.value;
+  sel.innerHTML = '<option value="">📦 All Imports</option>' +
+    importBatches.map(b => {
+      const count = clients.filter(c => c.importBatch === b.id).length;
+      return `<option value="${b.id}">${b.date} ${b.time} — ${b.fileName} (${count})</option>`;
+    }).join('');
+  if (current) sel.value = current;
+}
+
+// Active batch filter state
+let _activeBatchId = '';
+
+function applyBatchFilter(batchId) {
+  _activeBatchId = batchId;
+  const bar   = document.getElementById('batch-filter-bar');
+  const pill  = document.getElementById('batch-active-pill-label');
+  const count = document.getElementById('batch-filter-count');
+  if (batchId) {
+    const b = importBatches.find(x => x.id === batchId);
+    if (bar)  bar.style.display  = 'flex';
+    if (pill) pill.childNodes[0].textContent = b ? `${b.date} ${b.time} · ${b.fileName}` : batchId;
+    const n = clients.filter(c => c.importBatch === batchId).length;
+    if (count) count.textContent = `${n} client${n!==1?'s':''}`;
+  } else {
+    if (bar) bar.style.display = 'none';
+  }
+  renderClients();
+}
+
+function clearBatchFilter() {
+  _activeBatchId = '';
+  const sel = document.getElementById('filter-batch');
+  if (sel) sel.value = '';
+  const bar = document.getElementById('batch-filter-bar');
+  if (bar) bar.style.display = 'none';
+  renderClients();
+}
+
+// Render the Import Batches section
+function renderImportBatches() {
+  const grid  = document.getElementById('batch-grid');
+  const empty = document.getElementById('batch-empty');
+  const stats = document.getElementById('batch-summary-stats');
+  if (!grid) return;
+
+  // Summary stats
+  const totalImported = importBatches.reduce((s,b) => s + b.added, 0);
+  const totalUpdated  = importBatches.reduce((s,b) => s + b.updated, 0);
+  if (stats) {
+    stats.innerHTML = [
+      ['📦', importBatches.length, 'Import Sessions', '#ede9fe','#5b21b6'],
+      ['👥', totalImported,        'Clients Imported', '#dbeafe','#1d4ed8'],
+      ['🔄', totalUpdated,         'Records Updated',  '#dcfce7','#15803d'],
+    ].map(([icon,val,label,bg,color]) =>
+      `<div style="background:${bg};color:${color};border-radius:10px;padding:10px 18px;font-weight:700;">
+        <div style="font-size:20px;">${icon} ${val}</div>
+        <div style="font-size:11px;font-weight:600;opacity:.8;margin-top:2px;">${label}</div>
+      </div>`
+    ).join('');
+  }
+
+  if (!importBatches.length) {
+    grid.innerHTML  = '';
+    if (empty) empty.style.display = 'block';
+    return;
+  }
+  if (empty) empty.style.display = 'none';
+
+  grid.innerHTML = importBatches.map((b, i) => {
+    const clr   = BATCH_COLORS[i % BATCH_COLORS.length];
+    const count = clients.filter(c => c.importBatch === b.id).length;
+    const isActive = _activeBatchId === b.id;
+    return `<div class="batch-history-card${isActive?' active-filter':''}" style="border-color:${clr.border};">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:10px;">
+        <div>
+          <div style="font-size:13px;font-weight:700;color:${clr.color};">📦 ${b.date} at ${b.time}</div>
+          <div style="font-size:12px;color:var(--gray-500);margin-top:2px;word-break:break-all;">📄 ${esc(b.fileName)}</div>
+        </div>
+        <span class="batch-tag" style="background:${clr.bg};color:${clr.color};">#${importBatches.length - i}</span>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;font-size:12px;">
+        <span style="background:#dcfce7;color:#15803d;padding:3px 8px;border-radius:8px;font-weight:600;">✅ ${b.added} added</span>
+        ${b.updated ? `<span style="background:#dbeafe;color:#1d4ed8;padding:3px 8px;border-radius:8px;font-weight:600;">🔄 ${b.updated} updated</span>` : ''}
+        ${b.skipped ? `<span style="background:#f3f4f6;color:#6b7280;padding:3px 8px;border-radius:8px;font-weight:600;">⏩ ${b.skipped} skipped</span>` : ''}
+        <span style="background:${clr.bg};color:${clr.color};padding:3px 8px;border-radius:8px;font-weight:600;">👥 ${count} live</span>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        <button class="btn btn-outline btn-sm" style="font-size:11px;" onclick="filterClientsByBatch('${b.id}')">🔍 Filter Clients</button>
+        <button class="btn btn-outline btn-sm" style="font-size:11px;" onclick="exportBatchCSV('${b.id}')">⬇️ Export CSV</button>
+        <button class="btn btn-sm" style="font-size:11px;background:#fee2e2;color:#b91c1c;border:1.5px solid #fca5a5;" onclick="confirmDeleteBatch('${b.id}')">🗑️ Delete Batch</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function filterClientsByBatch(batchId) {
+  // Switch to All Clients and apply filter
+  showSection('clients', document.querySelector('.nav-item[onclick*="clients"]'));
+  const sel = document.getElementById('filter-batch');
+  if (sel) sel.value = batchId;
+  applyBatchFilter(batchId);
+}
+
+function exportBatchCSV(batchId) {
+  const b    = importBatches.find(x => x.id === batchId);
+  const list = clients.filter(c => c.importBatch === batchId);
+  if (!list.length) { toast('No clients found in this batch', 'error'); return; }
+  const fields = ['name','company','country','source','priority','status','whatsapp','email','product','quantity','value','nextFollowup','lastContact','notes'];
+  const rows   = [fields, ...list.map(c => fields.map(f => `"${String(c[f]||'').replace(/"/g,'""')}"` ))];
+  const csv    = rows.map(r => r.join(',')).join('\n');
+  const fname  = `batch_${b ? b.date : batchId}_${list.length}clients.csv`;
+  download(fname, csv, 'text/csv');
+  toast(`✅ Exported ${list.length} clients from this batch`, 'success');
+}
+
+function confirmDeleteBatch(batchId) {
+  const b     = importBatches.find(x => x.id === batchId);
+  const count = clients.filter(c => c.importBatch === batchId).length;
+  const label = b ? `${b.date} at ${b.time} (${b.fileName})` : batchId;
+  if (!confirm(`Delete the import batch:\n"${label}"\n\nThis will permanently remove ${count} client(s) from this batch.\n\nThis action cannot be undone.`)) return;
+  deleteBatch(batchId);
+}
+
+function deleteBatch(batchId) {
+  const before = clients.length;
+  clients       = clients.filter(c => c.importBatch !== batchId);
+  importBatches = importBatches.filter(b => b.id !== batchId);
+  if (_activeBatchId === batchId) clearBatchFilter();
+  save();
+  renderClients();
+  renderDashboard();
+  renderImportBatches();
+  populateBatchFilter();
+  toast(`🗑️ Batch deleted — ${before - clients.length} clients removed`, 'success');
 }
 
 function backupData() {
@@ -5671,6 +5917,7 @@ async function sbLoad() {
     renderDashboard();
     renderClients();
     renderSuppliers();
+    populateBatchFilter();
     // Re-render reminders section if it is currently open
     if (document.getElementById('section-reminders') &&
         document.getElementById('section-reminders').classList.contains('active')) {
@@ -5789,6 +6036,7 @@ async function initSupabase() {
 
 // ==================== INIT ====================
 renderDashboard();
+populateBatchFilter();
 updateSidebarStats();
 updateNavCount();
 updateEmailBadge();
