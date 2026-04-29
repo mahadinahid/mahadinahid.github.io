@@ -573,6 +573,26 @@
   .batch-active-pill button { background:none; border:none; cursor:pointer; color:#7c3aed; font-size:14px; line-height:1; padding:0 0 0 4px; }
   #batch-filter-bar { display:none; align-items:center; gap:10px; padding:8px 14px; background:#f5f3ff; border-radius:10px; margin-bottom:10px; }
 
+  /* ===== AI GENERATE MESSAGES ===== */
+  .ai-btn { background:linear-gradient(135deg,#7c3aed,#6366f1); color:white; border:none; border-radius:8px; padding:6px 14px; font-size:12px; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; gap:5px; transition:opacity .2s,transform .15s; white-space:nowrap; }
+  .ai-btn:hover { opacity:.88; transform:translateY(-1px); }
+  .ai-btn:disabled { opacity:.5; cursor:not-allowed; transform:none; }
+  .ai-btn.loading { animation:ai-pulse 1s ease-in-out infinite; }
+  @keyframes ai-pulse { 0%,100%{opacity:1}50%{opacity:.45} }
+  .ai-modal-body { padding:20px 24px; }
+  .ai-key-input { width:100%; padding:10px 14px; border:1.5px solid var(--gray-300); border-radius:8px; font-size:13px; font-family:monospace; box-sizing:border-box; margin-top:2px; }
+  .ai-key-input:focus { border-color:#6366f1; outline:none; box-shadow:0 0 0 3px rgba(99,102,241,.1); }
+  .ai-progress-wrap { background:#e0e7ff; border-radius:8px; height:7px; overflow:hidden; margin:6px 0; }
+  .ai-progress-fill { height:100%; background:linear-gradient(90deg,#6366f1,#7c3aed); border-radius:8px; transition:width .4s ease; }
+  .ai-result-row { display:flex; align-items:flex-start; gap:8px; padding:7px 0; border-bottom:1px solid var(--gray-100); font-size:12px; }
+  .ai-result-row:last-child { border-bottom:none; }
+  .ai-result-name { font-weight:700; color:var(--gray-800); min-width:110px; }
+  .ai-result-status { font-size:10px; padding:2px 7px; border-radius:10px; font-weight:700; white-space:nowrap; }
+  .ai-result-status.ok { background:#dcfce7; color:#166534; }
+  .ai-result-status.err { background:#fee2e2; color:#dc2626; }
+  .ai-row-btn { background:linear-gradient(135deg,#7c3aed,#6366f1); color:white; border:none; border-radius:6px; padding:3px 8px; font-size:10px; font-weight:700; cursor:pointer; margin-left:4px; transition:opacity .15s; }
+  .ai-row-btn:hover { opacity:.85; }
+
   /* ===== SMART CSV IMPORTER ===== */
   .csv-drop-zone { border:2px dashed var(--gray-300); border-radius:12px; padding:36px 20px; text-align:center; cursor:pointer; transition:all .2s; background:var(--gray-50); }
   .csv-drop-zone:hover,.csv-drop-zone.drag-over { border-color:#6366f1; background:#eef2ff; }
@@ -1317,11 +1337,13 @@ create policy "anon all" on crm_suppliers for all using (true) with check (true)
         <div class="rem-automation-box" style="margin-top:18px;">
           <h4>🤖 Bot &amp; AI Automation</h4>
           <p>The <strong>whatsapp_bot/index.js</strong> bot can auto-send messages to your WhatsApp contacts. Export client data below and load it into the bot.</p>
-          <p>Connect an AI API (GPT-4, Claude) to auto-generate personalized messages based on each client's history and status.</p>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
+          <p>Use <strong>Google Gemini AI</strong> (free) to auto-generate personalized WhatsApp messages for each client based on their history, status, and product interest.</p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;align-items:center;">
             <button class="btn btn-primary btn-sm" onclick="exportForWABot()">📤 Export for WA Bot</button>
-            <button class="btn btn-outline btn-sm" disabled title="Coming soon" style="opacity:.6;">⚡ AI Generate Messages (coming soon)</button>
+            <button class="ai-btn" onclick="aiGenerateBulkMessages()" style="padding:7px 16px;font-size:12px;">⚡ AI Generate Messages</button>
+            <button class="btn btn-outline btn-sm" onclick="openAISettingsModal(null)" style="font-size:11px;">🔑 AI Settings</button>
           </div>
+          <p style="font-size:11px;color:#0369a1;margin:8px 0 0;">💡 Uses <strong>Google Gemini 2.0 Flash</strong> — free tier, no credit card needed. Get your key at <a href="https://aistudio.google.com/apikey" target="_blank" style="color:#7c3aed;font-weight:700;">aistudio.google.com</a></p>
         </div>
         <div style="padding:10px 0;font-size:12px;color:var(--gray-500);">
           💡 <strong>Tip:</strong> Tick checkboxes then <strong>Open Selected</strong> to open WhatsApp Web for each — messages are pre-filled and follow-ups logged automatically.
@@ -1706,6 +1728,7 @@ create policy "anon all" on crm_suppliers for all using (true) with check (true)
         <option value="__auto__">Auto (by status)</option>
       </select>
       <button class="btn-save-tmpl" onclick="saveWaMessageAsTemplate()">💾 Save as Template</button>
+      <button class="ai-btn" id="wa-ai-generate-btn" onclick="aiGenerateSingleMessage()" title="Generate a personalized message with Google Gemini AI (free)">⚡ AI Write</button>
     </div>
     <div class="wa-template-bar">
       <span style="font-size:11px;color:var(--gray-500);font-weight:600;margin-right:4px;">Template:</span>
@@ -1729,6 +1752,69 @@ create policy "anon all" on crm_suppliers for all using (true) with check (true)
         <button class="btn btn-whatsapp btn-sm" id="wa-send-btn" onclick="sendWhatsApp()">
           💬 Open WhatsApp Web
         </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== AI SETTINGS MODAL ========== -->
+<div class="modal-overlay" id="ai-settings-modal">
+  <div class="modal" style="max-width:460px;">
+    <div class="modal-header" style="background:linear-gradient(135deg,#4c1d95,#7c3aed,#6366f1);border-radius:12px 12px 0 0;padding:20px 24px;">
+      <div>
+        <h2 style="color:white;font-size:18px;margin:0;">⚡ AI Message Generator</h2>
+        <p style="color:rgba(255,255,255,.8);font-size:12px;margin:4px 0 0;">Powered by Google Gemini · 100% Free</p>
+      </div>
+      <button class="modal-close" onclick="closeModal('ai-settings-modal')" style="background:rgba(255,255,255,.18);color:white;">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="ai-modal-body">
+      <div id="ai-key-status-banner" style="background:#fef3c7;border:1.5px solid #fcd34d;border-radius:10px;padding:10px 14px;font-size:13px;color:#92400e;margin-bottom:16px;">
+        ⚠️ No API key set. Get your free key below.
+      </div>
+      <label style="font-size:11px;font-weight:700;color:var(--gray-600);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:4px;">Google Gemini API Key</label>
+      <input type="password" class="ai-key-input" id="ai-api-key-input" placeholder="AIzaSy..." autocomplete="off">
+      <div style="background:#f8fafc;border:1px solid var(--gray-200);border-radius:10px;padding:12px 14px;margin-top:14px;font-size:12px;color:var(--gray-700);line-height:1.7;">
+        <strong style="color:var(--gray-800);">🆓 Get a free key in 30 seconds:</strong><br>
+        1. Go to <a href="https://aistudio.google.com/apikey" target="_blank" style="color:#6366f1;font-weight:700;">aistudio.google.com/apikey</a><br>
+        2. Sign in with Google → Click <strong>Create API key</strong><br>
+        3. Copy &amp; paste it in the field above
+      </div>
+      <div style="background:#f0fdf4;border:1.5px solid #6ee7b7;border-radius:10px;padding:10px 14px;font-size:12px;color:#166534;margin-top:10px;">
+        ✅ <strong>Free tier:</strong> 15 requests/min · 1,500 req/day · No credit card
+      </div>
+      <div style="display:flex;gap:8px;margin-top:18px;justify-content:flex-end;">
+        <button class="btn btn-outline" onclick="closeModal('ai-settings-modal')">Cancel</button>
+        <button class="ai-btn" onclick="saveAISettings()" style="padding:8px 20px;font-size:13px;">💾 Save &amp; Continue</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== AI BULK GENERATE MODAL ========== -->
+<div class="modal-overlay" id="ai-bulk-modal">
+  <div class="modal" style="max-width:500px;">
+    <div class="modal-header" style="background:linear-gradient(135deg,#4c1d95,#7c3aed);border-radius:12px 12px 0 0;padding:20px 24px;">
+      <div>
+        <h2 style="color:white;font-size:18px;margin:0;">⚡ AI Bulk Generate</h2>
+        <p style="color:rgba(255,255,255,.8);font-size:12px;margin:4px 0 0;" id="ai-bulk-subtitle">Generating personalized messages…</p>
+      </div>
+    </div>
+    <div class="ai-modal-body">
+      <div style="margin-bottom:14px;">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--gray-600);margin-bottom:4px;">
+          <span id="ai-bulk-progress-label">Starting…</span>
+          <span id="ai-bulk-progress-pct">0%</span>
+        </div>
+        <div class="ai-progress-wrap">
+          <div class="ai-progress-fill" id="ai-bulk-progress-fill" style="width:0%"></div>
+        </div>
+      </div>
+      <div id="ai-bulk-results" style="max-height:280px;overflow-y:auto;border:1px solid var(--gray-200);border-radius:8px;padding:8px 12px;background:white;min-height:60px;"></div>
+      <p style="font-size:11px;color:var(--gray-500);margin-top:10px;line-height:1.5;">💡 Generated messages are saved per client. Open the ✏️ Edit button or WA modal to view &amp; send them. Rate-limited to avoid API throttling.</p>
+      <div style="display:flex;gap:8px;margin-top:14px;justify-content:flex-end;">
+        <button class="btn btn-outline" id="ai-bulk-close-btn" onclick="closeModal('ai-bulk-modal')">Close</button>
       </div>
     </div>
   </div>
@@ -4222,12 +4308,17 @@ function openWaModal(clientId) {
   document.getElementById('wa-avatar-initials').textContent = initials;
   document.getElementById('wa-contact-name').textContent = c.name + (c.company ? ` · ${c.company}` : '');
   document.getElementById('wa-contact-num').textContent  = c.whatsapp || 'No number';
-  const msg = buildWaMessage(c);
+  // Use AI-generated message if available, otherwise build default
+  const msg = c._aiGeneratedWaMsg || buildWaMessage(c);
   document.getElementById('wa-message-text').value = msg;
   updateWaPreview();
   populateTmplSelects();
   const _waSel = document.getElementById('wa-single-template-select');
   if (_waSel) _waSel.value = '__auto__';
+  // Show AI badge if message was AI-generated
+  const aiBtn = document.getElementById('wa-ai-generate-btn');
+  if (aiBtn) aiBtn.title = c._aiGeneratedWaMsg
+    ? 'AI message loaded — click to regenerate' : 'Generate a personalized message with Google Gemini AI (free)';
   openModal('wa-modal');
 }
 
@@ -5366,6 +5457,7 @@ function renderRemWaPanel() {
       <td>
         <button class="btn btn-whatsapp btn-sm" style="font-size:11px;padding:4px 10px;" onclick="rwaSendOne('${c.id}')">💬 Send</button>
         <button class="btn-icon" style="margin-left:4px;" title="Edit Message" onclick="openWaModal('${c.id}')">✏️</button>
+        <button class="ai-row-btn" title="AI Generate personalized message" onclick="aiGenerateForRow('${c.id}')">⚡</button>
       </td>
     </tr>`;
   }).join('');
@@ -5385,6 +5477,245 @@ function exportForWABot() {
   }));
   download('wa_bot_data.json', JSON.stringify(data,null,2), 'application/json');
   toast(`✅ Exported ${data.length} WhatsApp contacts for WA Bot`,'success');
+}
+
+// ==================== AI MESSAGE GENERATOR (Google Gemini — Free) ====================
+
+function getGeminiKey()      { return localStorage.getItem('crm_gemini_key') || ''; }
+function storeGeminiKey(k)   { localStorage.setItem('crm_gemini_key', k.trim()); }
+
+function openAISettingsModal(afterSaveCb) {
+  const k = getGeminiKey();
+  const inp    = document.getElementById('ai-api-key-input');
+  const banner = document.getElementById('ai-key-status-banner');
+  if (inp) inp.value = '';   // always clear — user re-enters to update
+  if (banner) {
+    if (k) {
+      banner.style.background = '#f0fdf4'; banner.style.borderColor = '#6ee7b7'; banner.style.color = '#166534';
+      banner.innerHTML = `✅ API key is saved (ends …${k.slice(-6)}). Enter a new one below to replace it.`;
+    } else {
+      banner.style.background = '#fef3c7'; banner.style.borderColor = '#fcd34d'; banner.style.color = '#92400e';
+      banner.innerHTML = '⚠️ No API key set. Get your free key below.';
+    }
+  }
+  window._aiAfterSave = afterSaveCb || null;
+  openModal('ai-settings-modal');
+}
+
+function saveAISettings() {
+  const inp = document.getElementById('ai-api-key-input');
+  const val = (inp ? inp.value : '').trim();
+  if (!val) {
+    // No new value entered — if key already exists, just close
+    if (getGeminiKey()) {
+      closeModal('ai-settings-modal');
+      if (typeof window._aiAfterSave === 'function') window._aiAfterSave();
+    } else {
+      toast('Please enter your Gemini API key', 'error');
+    }
+    return;
+  }
+  if (!val.startsWith('AIza') || val.length < 30) {
+    toast('That doesn\'t look like a valid Gemini key (should start with AIza…)', 'error');
+    return;
+  }
+  storeGeminiKey(val);
+  toast('✅ Gemini API key saved!', 'success');
+  closeModal('ai-settings-modal');
+  if (typeof window._aiAfterSave === 'function') window._aiAfterSave();
+}
+
+// ── Core Gemini API call ──────────────────────────────────────────────────────
+async function callGemini(prompt) {
+  const key = getGeminiKey();
+  if (!key) throw new Error('no_key');
+  const res = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${encodeURIComponent(key)}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+    }
+  );
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    const msg = err?.error?.message || `HTTP ${res.status}`;
+    throw new Error(msg);
+  }
+  const data = await res.json();
+  return (data?.candidates?.[0]?.content?.parts?.[0]?.text || '').trim();
+}
+
+// ── Build prompt for a single client ─────────────────────────────────────────
+function buildAIPrompt(c) {
+  const today = new Date().toISOString().split('T')[0];
+  const daysSinceLast = c.lastContact
+    ? Math.floor((new Date(today) - new Date(c.lastContact)) / 86400000) : null;
+  const daysOverdue = (c.nextFollowup && c.nextFollowup < today)
+    ? Math.floor((new Date(today) - new Date(c.nextFollowup)) / 86400000) : null;
+  const lines = [
+    `Name: ${c.name}`,
+    c.company   ? `Company: ${c.company}` : null,
+    c.product   ? `Product interest: ${c.product}` : null,
+    c.status    ? `Status: ${c.status}` : null,
+    c.priority  ? `Priority: ${c.priority}` : null,
+    c.country   ? `Country: ${c.country}` : null,
+    daysSinceLast !== null ? `Days since last contact: ${daysSinceLast}` : null,
+    daysOverdue  !== null ? `Overdue by: ${daysOverdue} days` : null,
+    c.notes ? `Notes: ${c.notes.substring(0, 200)}` : null,
+  ].filter(Boolean).join('\n');
+  return `You are a professional B2B sales assistant helping write a WhatsApp follow-up message.
+
+Client info:
+${lines}
+
+Write a brief, warm, personalized WhatsApp message to this client.
+Rules:
+- Under 150 words
+- Greet them by first name
+- Naturally mention their product or business context if available
+- Tone: friendly and professional — like a trusted partner, not a pushy salesperson
+- End with one clear, easy-to-answer question or call to action
+- Plain text only (no markdown), 1-2 emojis max if natural
+- If they are overdue, gently acknowledge the time gap
+
+Return ONLY the message. No labels, no subject line, no explanation.`;
+}
+
+// ── Generate for single client in WA modal ───────────────────────────────────
+async function aiGenerateSingleMessage() {
+  const key = getGeminiKey();
+  if (!key) { openAISettingsModal(() => aiGenerateSingleMessage()); return; }
+  const c = clients.find(x => x.id === currentWaClientId);
+  if (!c) return;
+  const btn = document.getElementById('wa-ai-generate-btn');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Writing…'; btn.classList.add('loading'); }
+  try {
+    const msg = await callGemini(buildAIPrompt(c));
+    if (msg) {
+      document.getElementById('wa-message-text').value = msg;
+      updateWaPreview();
+      toast('✅ AI message ready — review &amp; send!', 'success');
+    } else {
+      toast('AI returned empty response — try again', 'error');
+    }
+  } catch (e) {
+    if (e.message === 'no_key') {
+      openAISettingsModal(() => aiGenerateSingleMessage());
+    } else if (e.message.includes('API_KEY_INVALID') || e.message.includes('401')) {
+      toast('❌ Invalid API key — update it in AI Settings', 'error');
+      openAISettingsModal(() => aiGenerateSingleMessage());
+    } else if (e.message.includes('429') || e.message.includes('RESOURCE_EXHAUSTED')) {
+      toast('⏳ Rate limit hit — wait a minute and try again', 'error');
+    } else {
+      toast(`❌ AI error: ${e.message.substring(0, 80)}`, 'error');
+    }
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '⚡ AI Write'; btn.classList.remove('loading'); }
+  }
+}
+
+// ── Generate for a single row in WA Reminders (opens WA modal with AI msg) ──
+async function aiGenerateForRow(clientId) {
+  const key = getGeminiKey();
+  if (!key) { openAISettingsModal(() => aiGenerateForRow(clientId)); return; }
+  const c = clients.find(x => x.id === clientId);
+  if (!c) return;
+  // Find the row button and show loading
+  const rowBtn = document.querySelector(`button.ai-row-btn[onclick="aiGenerateForRow('${clientId}')"]`);
+  if (rowBtn) { rowBtn.textContent = '⏳'; rowBtn.disabled = true; }
+  try {
+    const msg = await callGemini(buildAIPrompt(c));
+    if (msg) {
+      // Open WA modal and pre-fill with AI message
+      openWaModal(clientId);
+      // Wait a tick for modal to render
+      setTimeout(() => {
+        const ta = document.getElementById('wa-message-text');
+        if (ta) { ta.value = msg; updateWaPreview(); }
+        toast('✅ AI message ready — review &amp; send!', 'success');
+      }, 120);
+    } else {
+      toast('AI returned empty — try again', 'error');
+    }
+  } catch (e) {
+    if (e.message === 'no_key') {
+      openAISettingsModal(() => aiGenerateForRow(clientId));
+    } else if (e.message.includes('API_KEY_INVALID') || e.message.includes('401')) {
+      toast('❌ Invalid API key — update in AI Settings', 'error');
+      openAISettingsModal();
+    } else if (e.message.includes('429') || e.message.includes('RESOURCE_EXHAUSTED')) {
+      toast('⏳ Rate limit — wait a moment and try again', 'error');
+    } else {
+      toast(`❌ AI error: ${e.message.substring(0, 80)}`, 'error');
+    }
+  } finally {
+    if (rowBtn) { rowBtn.textContent = '⚡'; rowBtn.disabled = false; }
+  }
+}
+
+// ── Bulk AI generate for WA Reminders panel ──────────────────────────────────
+async function aiGenerateBulkMessages() {
+  const key = getGeminiKey();
+  if (!key) { openAISettingsModal(() => aiGenerateBulkMessages()); return; }
+  const fullList = rwaGetFilteredList();
+  if (!fullList.length) { toast('No clients in current filter', 'error'); return; }
+  // Cap at 15 to stay within free tier rate limits (15 req/min)
+  const list = fullList.slice(0, 15);
+  const skipped = fullList.length - list.length;
+
+  const resultsEl    = document.getElementById('ai-bulk-results');
+  const progressFill = document.getElementById('ai-bulk-progress-fill');
+  const progressLbl  = document.getElementById('ai-bulk-progress-label');
+  const progressPct  = document.getElementById('ai-bulk-progress-pct');
+  const subtitle     = document.getElementById('ai-bulk-subtitle');
+  const closeBtn     = document.getElementById('ai-bulk-close-btn');
+
+  if (resultsEl)    resultsEl.innerHTML = '';
+  if (progressFill) progressFill.style.width = '0%';
+  if (progressPct)  progressPct.textContent  = '0%';
+  if (subtitle)     subtitle.textContent = `Generating for ${list.length} client(s)…${skipped ? ` (${skipped} skipped — 15 max/batch)` : ''}`;
+  if (closeBtn)     closeBtn.disabled = true;
+  openModal('ai-bulk-modal');
+
+  let done = 0, ok = 0, fail = 0;
+  for (const c of list) {
+    if (progressLbl) progressLbl.textContent = `✍️ Writing for ${c.name}…`;
+    try {
+      const msg = await callGemini(buildAIPrompt(c));
+      if (msg) {
+        c._aiGeneratedWaMsg = msg;   // stash on client object
+        ok++;
+        if (resultsEl) resultsEl.innerHTML += `<div class="ai-result-row">
+          <div class="ai-result-name">${esc(c.name)}</div>
+          <span class="ai-result-status ok">✓ Done</span>
+          <div style="flex:1;color:var(--gray-600);font-size:11px;word-break:break-word;overflow:hidden;">${esc(msg.substring(0,90))}…</div>
+        </div>`;
+        if (resultsEl) resultsEl.scrollTop = resultsEl.scrollHeight;
+      } else { throw new Error('Empty response'); }
+    } catch (e) {
+      fail++;
+      const errLabel = e.message.includes('429') || e.message.includes('RESOURCE_EXHAUSTED')
+        ? 'Rate limited' : e.message.includes('API_KEY_INVALID') ? 'Bad API key' : 'Failed';
+      if (resultsEl) resultsEl.innerHTML += `<div class="ai-result-row">
+        <div class="ai-result-name">${esc(c.name)}</div>
+        <span class="ai-result-status err">✗ ${errLabel}</span>
+      </div>`;
+      if (e.message.includes('API_KEY_INVALID')) break;   // no point continuing
+    }
+    done++;
+    const pct = Math.round((done / list.length) * 100);
+    if (progressFill) progressFill.style.width = pct + '%';
+    if (progressPct)  progressPct.textContent = pct + '%';
+    // ~4s delay to respect 15 req/min free tier
+    if (done < list.length) await new Promise(r => setTimeout(r, 4200));
+  }
+  save();
+  if (subtitle)  subtitle.textContent = `Done! ${ok} generated · ${fail} failed${skipped ? ` · ${skipped} skipped` : ''}`;
+  if (progressLbl) progressLbl.textContent = 'Complete ✓';
+  if (closeBtn)  closeBtn.disabled = false;
+  renderRemWaPanel();
+  toast(`⚡ AI generated ${ok} message(s)${fail ? ` — ${fail} failed` : ''}`, ok > 0 ? 'success' : 'error');
 }
 
 // ==================== SUPPLIER UPGRADE — CARD-BASED RENDER ====================
