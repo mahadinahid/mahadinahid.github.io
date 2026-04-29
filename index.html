@@ -612,6 +612,27 @@
   .ai-key-panel-title { font-size:12px; font-weight:700; color:var(--gray-700); margin-bottom:8px; }
   .ai-key-guide { font-size:11px; color:var(--gray-600); line-height:1.7; background:white; border:1px solid var(--gray-200); border-radius:8px; padding:10px 12px; margin-top:8px; }
   .ai-active-chip { display:inline-flex; align-items:center; gap:5px; background:linear-gradient(135deg,#7c3aed,#6366f1); color:white; border-radius:20px; padding:3px 10px; font-size:11px; font-weight:700; }
+  /* ===== FONNTE BULK SENDER ===== */
+  .fonnte-status-dot { display:inline-block; width:9px; height:9px; border-radius:50%; background:#d1d5db; flex-shrink:0; }
+  .fonnte-status-dot.connected { background:#22c55e; box-shadow:0 0 0 3px rgba(34,197,94,.2); }
+  .fonnte-status-dot.error { background:#ef4444; }
+  .fonnte-btn { background:linear-gradient(135deg,#25d366,#128c7e); color:white; border:none; border-radius:8px; padding:7px 16px; font-size:12px; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; gap:6px; transition:opacity .15s,transform .1s; white-space:nowrap; }
+  .fonnte-btn:hover { opacity:.88; transform:translateY(-1px); }
+  .fonnte-btn:disabled { opacity:.45; cursor:not-allowed; transform:none; }
+  .fonnte-section { border-top:1.5px dashed #7dd3fc; margin-top:14px; padding-top:14px; }
+  .fonnte-section h5 { font-size:13px; font-weight:700; color:#0369a1; margin:0 0 4px; display:flex; align-items:center; gap:7px; }
+  .fonnte-step { display:flex; gap:10px; align-items:flex-start; padding:8px 0; border-bottom:1px solid var(--gray-100); font-size:12px; }
+  .fonnte-step:last-child { border-bottom:none; }
+  .fonnte-step-num { background:#25d366; color:white; border-radius:50%; width:20px; height:20px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:800; flex-shrink:0; margin-top:1px; }
+  .fonnte-progress-modal .modal { max-width:520px; }
+  .fonnte-result-row { display:flex; align-items:center; gap:8px; padding:6px 0; border-bottom:1px solid var(--gray-100); font-size:12px; }
+  .fonnte-result-row:last-child { border-bottom:none; }
+  .fonnte-result-name { font-weight:700; color:var(--gray-800); min-width:120px; }
+  .fonnte-result-status { font-size:10px; padding:2px 7px; border-radius:10px; font-weight:700; white-space:nowrap; }
+  .fonnte-result-status.ok { background:#dcfce7; color:#166534; }
+  .fonnte-result-status.err { background:#fee2e2; color:#dc2626; }
+  .fonnte-token-input { width:100%; padding:9px 14px; border:1.5px solid var(--gray-300); border-radius:8px; font-size:13px; font-family:monospace; box-sizing:border-box; }
+  .fonnte-token-input:focus { border-color:#25d366; outline:none; box-shadow:0 0 0 3px rgba(37,211,102,.12); }
 
   /* ===== SMART CSV IMPORTER ===== */
   .csv-drop-zone { border:2px dashed var(--gray-300); border-radius:12px; padding:36px 20px; text-align:center; cursor:pointer; transition:all .2s; background:var(--gray-50); }
@@ -1350,20 +1371,37 @@ create policy "anon all" on crm_suppliers for all using (true) with check (true)
           </label>
           <span class="erc-selected-count" id="rwa-sel-count">0 selected</span>
           <button class="btn btn-whatsapp btn-sm" onclick="rwaSendSelected()">💬 Open Selected</button>
+          <button class="fonnte-btn" id="fonnte-bar-btn" onclick="fonnteBulkSend('selected')" disabled title="Connect Fonnte first" style="padding:5px 12px;font-size:11px;">📨 Bulk Send (Fonnte)</button>
           <div style="flex:1;"></div>
           <button class="btn btn-outline btn-sm" onclick="rwaSendAllFiltered()">💬 Open All Filtered</button>
         </div>
         <!-- Bot & AI Automation -->
         <div class="rem-automation-box" style="margin-top:18px;">
-          <h4>🤖 Bot &amp; AI Automation</h4>
-          <p>The <strong>whatsapp_bot/index.js</strong> bot can auto-send messages to your WhatsApp contacts. Export client data below and load it into the bot.</p>
-          <p>Use <strong>Google Gemini AI</strong> (free) to auto-generate personalized WhatsApp messages for each client based on their history, status, and product interest.</p>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;align-items:center;">
-            <button class="btn btn-primary btn-sm" onclick="exportForWABot()">📤 Export for WA Bot</button>
+          <h4>🤖 AI &amp; Bulk WhatsApp Automation</h4>
+
+          <!-- ── AI Generate row ── -->
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:6px;">
             <button class="ai-btn" onclick="aiGenerateBulkMessages()" style="padding:7px 16px;font-size:12px;">⚡ AI Generate Messages</button>
-            <button class="btn btn-outline btn-sm" onclick="openAISettingsModal(null)" style="font-size:11px;">🔑 AI Settings</button>
+            <button class="btn btn-outline btn-sm" onclick="openAISettingsModal(null)" style="font-size:11px;">🤖 AI Provider</button>
+            <button class="btn btn-primary btn-sm" onclick="exportForWABot()" style="font-size:11px;">📤 Export JSON</button>
           </div>
-          <p style="font-size:11px;color:#0369a1;margin:8px 0 0;">💡 Uses <strong>Google Gemini 2.0 Flash</strong> — free tier, no credit card needed. Get your key at <a href="https://aistudio.google.com/apikey" target="_blank" style="color:#7c3aed;font-weight:700;">aistudio.google.com</a></p>
+          <p style="font-size:11px;color:#0369a1;margin:0 0 0;">💡 AI writes personalised messages for each client — click ⚡ then send them below without opening WhatsApp Web.</p>
+
+          <!-- ── Fonnte Bulk Sender ── -->
+          <div class="fonnte-section">
+            <h5>
+              <span class="fonnte-status-dot" id="fonnte-dot"></span>
+              📨 Bulk WhatsApp Sender
+              <span id="fonnte-status-text" style="font-size:11px;font-weight:500;color:var(--gray-500);">Not connected</span>
+              <button class="btn btn-outline btn-sm" onclick="openFontteModal()" style="margin-left:auto;font-size:11px;">⚙️ Setup / Connect</button>
+            </h5>
+            <p style="font-size:12px;color:#075985;margin:4px 0 8px;">Send personalised messages to ALL selected clients automatically — no opening tabs, no copy-paste. Uses <a href="https://fonnte.com" target="_blank" style="color:#25d366;font-weight:700;">Fonnte.com</a> free API.</p>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+              <button class="fonnte-btn" id="fonnte-send-sel-btn" onclick="fonnteBulkSend('selected')" disabled title="Select clients first">📨 Send to Selected</button>
+              <button class="fonnte-btn" id="fonnte-send-all-btn" onclick="fonnteBulkSend('all')" disabled>📨 Send to All Filtered</button>
+              <span style="font-size:11px;color:var(--gray-500);" id="fonnte-send-hint">Connect Fonnte first →</span>
+            </div>
+          </div>
         </div>
         <div style="padding:10px 0;font-size:12px;color:var(--gray-500);">
           💡 <strong>Tip:</strong> Tick checkboxes then <strong>Open Selected</strong> to open WhatsApp Web for each — messages are pre-filled and follow-ups logged automatically.
@@ -1849,6 +1887,106 @@ create policy "anon all" on crm_suppliers for all using (true) with check (true)
       <p style="font-size:11px;color:var(--gray-500);margin-top:10px;line-height:1.5;">💡 Generated messages are saved per client. Open the ✏️ Edit button or WA modal to view &amp; send them. Rate-limited to avoid API throttling.</p>
       <div style="display:flex;gap:8px;margin-top:14px;justify-content:flex-end;">
         <button class="btn btn-outline" id="ai-bulk-close-btn" onclick="closeModal('ai-bulk-modal')">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== FONNTE SETUP MODAL ========== -->
+<div class="modal-overlay" id="fonnte-modal">
+  <div class="modal" style="max-width:520px;">
+    <div class="modal-header" style="background:linear-gradient(135deg,#075e54,#128c7e,#25d366);border-radius:12px 12px 0 0;padding:20px 24px;">
+      <div>
+        <h2 style="color:white;font-size:18px;margin:0;">📨 Bulk WhatsApp Sender</h2>
+        <p style="color:rgba(255,255,255,.85);font-size:12px;margin:4px 0 0;">Powered by Fonnte.com — free, no WhatsApp ban risk</p>
+      </div>
+      <button class="modal-close" onclick="closeModal('fonnte-modal')" style="background:rgba(255,255,255,.18);color:white;">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="ai-modal-body">
+
+      <!-- Status banner -->
+      <div id="fonnte-modal-banner" style="border-radius:10px;padding:10px 14px;font-size:13px;margin-bottom:16px;background:#fef3c7;border:1.5px solid #fcd34d;color:#92400e;">
+        🔌 Not connected — follow the steps below to connect your WhatsApp
+      </div>
+
+      <!-- Setup steps -->
+      <div style="margin-bottom:16px;">
+        <div style="font-size:12px;font-weight:700;color:var(--gray-700);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;">Setup Guide (5 minutes, free)</div>
+        <div class="fonnte-step">
+          <div class="fonnte-step-num">1</div>
+          <div>Go to <a href="https://fonnte.com" target="_blank" style="color:#25d366;font-weight:700;">fonnte.com</a> → <strong>Register free</strong> (no credit card)</div>
+        </div>
+        <div class="fonnte-step">
+          <div class="fonnte-step-num">2</div>
+          <div>In your dashboard → <strong>Add Device</strong> → scan the QR code with your WhatsApp (Settings → Linked Devices)</div>
+        </div>
+        <div class="fonnte-step">
+          <div class="fonnte-step-num">3</div>
+          <div>Go to <strong>Device → Token</strong> — copy your API token</div>
+        </div>
+        <div class="fonnte-step">
+          <div class="fonnte-step-num">4</div>
+          <div>Paste the token below → click <strong>Save & Connect</strong></div>
+        </div>
+      </div>
+
+      <!-- Token input -->
+      <label style="font-size:11px;font-weight:700;color:var(--gray-600);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:5px;">Fonnte API Token</label>
+      <input type="password" class="fonnte-token-input" id="fonnte-token-input" placeholder="Paste your Fonnte token here…" autocomplete="off">
+
+      <!-- Free tier info -->
+      <div style="background:#f0fdf4;border:1.5px solid #6ee7b7;border-radius:10px;padding:10px 14px;font-size:12px;color:#166534;margin-top:12px;">
+        ✅ <strong>Fonnte free tier:</strong> Send messages from your own WhatsApp number · Personalized per client · 2s delay between messages (safe from spam detection) · No monthly limit on free plan
+      </div>
+
+      <!-- Delay setting -->
+      <div style="display:flex;align-items:center;gap:10px;margin-top:12px;font-size:12px;">
+        <label style="font-weight:700;color:var(--gray-700);white-space:nowrap;">Delay between messages:</label>
+        <select id="fonnte-delay-select" style="padding:5px 10px;border:1.5px solid var(--gray-300);border-radius:7px;font-size:12px;">
+          <option value="2000">2 seconds (safe)</option>
+          <option value="3000" selected>3 seconds (recommended)</option>
+          <option value="5000">5 seconds (safest)</option>
+          <option value="10000">10 seconds (very safe)</option>
+        </select>
+      </div>
+
+      <!-- Buttons -->
+      <div style="display:flex;gap:8px;margin-top:18px;justify-content:space-between;align-items:center;flex-wrap:wrap;">
+        <button class="btn btn-outline btn-sm" onclick="fonnteClearToken()" style="font-size:11px;">🗑 Disconnect</button>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-outline" onclick="closeModal('fonnte-modal')">Cancel</button>
+          <button class="fonnte-btn" onclick="fonnteSaveToken()" style="padding:8px 20px;">💾 Save &amp; Connect</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== FONNTE BULK SEND PROGRESS MODAL ========== -->
+<div class="modal-overlay fonnte-progress-modal" id="fonnte-progress-modal">
+  <div class="modal" style="max-width:520px;">
+    <div class="modal-header" style="background:linear-gradient(135deg,#075e54,#25d366);border-radius:12px 12px 0 0;padding:20px 24px;">
+      <div>
+        <h2 style="color:white;font-size:18px;margin:0;">📨 Sending WhatsApp Messages…</h2>
+        <p style="color:rgba(255,255,255,.85);font-size:12px;margin:4px 0 0;" id="fonnte-progress-subtitle">Preparing…</p>
+      </div>
+    </div>
+    <div class="ai-modal-body">
+      <div style="margin-bottom:14px;">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--gray-600);margin-bottom:4px;">
+          <span id="fonnte-progress-label">Starting…</span>
+          <span id="fonnte-progress-pct">0%</span>
+        </div>
+        <div class="ai-progress-wrap">
+          <div class="ai-progress-fill" id="fonnte-progress-fill" style="width:0%;background:linear-gradient(90deg,#25d366,#128c7e);"></div>
+        </div>
+      </div>
+      <div id="fonnte-progress-results" style="max-height:300px;overflow-y:auto;border:1px solid var(--gray-200);border-radius:8px;padding:8px 12px;background:white;min-height:80px;font-size:12px;"></div>
+      <p style="font-size:11px;color:var(--gray-500);margin-top:10px;line-height:1.5;">⏳ Messages are sent one-by-one with a delay to stay safe. Do not close this window until done.</p>
+      <div style="display:flex;gap:8px;margin-top:14px;justify-content:flex-end;">
+        <button class="btn btn-outline" id="fonnte-progress-close-btn" onclick="closeModal('fonnte-progress-modal')" disabled>Close</button>
       </div>
     </div>
   </div>
@@ -5931,6 +6069,205 @@ async function aiGenerateBulkMessages() {
   toast(`⚡ AI generated ${ok} message(s)${fail ? ` (${fail} failed)` : ''}`, ok > 0 ? 'success' : 'error');
 }
 
+// ==================== FONNTE BULK WHATSAPP SENDER ====================
+
+// ── Storage helpers ───────────────────────────────────────────────────────────
+function getFontteToken()    { return localStorage.getItem('crm_fonnte_token') || ''; }
+function setFontteToken(t)   { localStorage.setItem('crm_fonnte_token', t.trim()); }
+function clearFontteToken()  { localStorage.removeItem('crm_fonnte_token'); }
+function getFontteDelay()    { return parseInt(localStorage.getItem('crm_fonnte_delay') || '3000', 10); }
+function setFontteDelay(ms)  { localStorage.setItem('crm_fonnte_delay', String(ms)); }
+
+// ── Update all Fonnte UI indicators ──────────────────────────────────────────
+function updateFontteStatus() {
+  const token = getFontteToken();
+  const dot   = document.getElementById('fonnte-dot');
+  const txt   = document.getElementById('fonnte-status-text');
+  const selBtn = document.getElementById('fonnte-send-sel-btn');
+  const allBtn = document.getElementById('fonnte-send-all-btn');
+  const barBtn = document.getElementById('fonnte-bar-btn');
+  const hint   = document.getElementById('fonnte-send-hint');
+  if (token) {
+    if (dot)    { dot.classList.add('connected'); dot.classList.remove('error'); }
+    if (txt)    txt.textContent = 'Connected ✓';
+    if (selBtn) selBtn.disabled = false;
+    if (allBtn) allBtn.disabled = false;
+    if (barBtn) barBtn.disabled = false;
+    if (hint)   hint.textContent = `Token saved (…${token.slice(-6)})`;
+  } else {
+    if (dot)    { dot.classList.remove('connected','error'); }
+    if (txt)    txt.textContent = 'Not connected';
+    if (selBtn) selBtn.disabled = true;
+    if (allBtn) allBtn.disabled = true;
+    if (barBtn) { barBtn.disabled = true; barBtn.title = 'Connect Fonnte first'; }
+    if (hint)   hint.textContent = 'Connect Fonnte first →';
+  }
+}
+
+// ── Open setup modal ──────────────────────────────────────────────────────────
+function openFontteModal() {
+  const token  = getFontteToken();
+  const inp    = document.getElementById('fonnte-token-input');
+  const banner = document.getElementById('fonnte-modal-banner');
+  const delay  = document.getElementById('fonnte-delay-select');
+  if (inp)    inp.value = '';
+  if (inp)    inp.placeholder = token ? `Token saved (…${token.slice(-6)}) — paste to replace` : 'Paste your Fonnte token here…';
+  if (delay)  delay.value = String(getFontteDelay());
+  if (banner) {
+    if (token) {
+      banner.style.background = '#f0fdf4'; banner.style.borderColor = '#6ee7b7'; banner.style.color = '#166534';
+      banner.textContent = `✅ Connected — token saved (ends …${token.slice(-6)}). Enter a new token below to replace.`;
+    } else {
+      banner.style.background = '#fef3c7'; banner.style.borderColor = '#fcd34d'; banner.style.color = '#92400e';
+      banner.textContent = '🔌 Not connected — follow the steps below to connect your WhatsApp.';
+    }
+  }
+  openModal('fonnte-modal');
+}
+
+function fonnteSaveToken() {
+  const inp   = document.getElementById('fonnte-token-input');
+  const delay = document.getElementById('fonnte-delay-select');
+  const val   = (inp ? inp.value : '').trim();
+  if (delay) setFontteDelay(parseInt(delay.value, 10));
+  if (!val) {
+    if (getFontteToken()) {
+      toast('✅ Settings saved', 'success');
+      closeModal('fonnte-modal');
+      updateFontteStatus();
+    } else {
+      toast('Please paste your Fonnte token first', 'error');
+    }
+    return;
+  }
+  setFontteToken(val);
+  toast('✅ Fonnte connected! You can now bulk send WhatsApp messages.', 'success');
+  closeModal('fonnte-modal');
+  updateFontteStatus();
+}
+
+function fonnteClearToken() {
+  if (!confirm('Disconnect Fonnte? You will need to re-enter your token to use bulk sending.')) return;
+  clearFontteToken();
+  updateFontteStatus();
+  closeModal('fonnte-modal');
+  toast('Fonnte disconnected', 'success');
+}
+
+// ── Single send via Fonnte API ────────────────────────────────────────────────
+async function fonnteSendOne(phone, message) {
+  const token = getFontteToken();
+  if (!token) throw new Error('no_token');
+  // Normalize phone: remove spaces, dashes, leading +
+  const normalized = phone.replace(/\D/g, '');
+  const res = await fetch('https://api.fonnte.com/send', {
+    method: 'POST',
+    headers: { 'Authorization': token, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ target: normalized, message: message, delay: 1 })
+  });
+  // Fonnte returns JSON with {status: true/false, ...}
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err?.message || err?.reason || `HTTP ${res.status}`);
+  }
+  const data = await res.json();
+  if (data.status === false) throw new Error(data.reason || data.message || 'Send failed');
+  return data;
+}
+
+// ── Bulk send to selected or all filtered clients ─────────────────────────────
+async function fonnteBulkSend(mode) {
+  const token = getFontteToken();
+  if (!token) { openFontteModal(); return; }
+
+  // Build client list
+  let list = [];
+  if (mode === 'selected') {
+    const selectedIds = rwaGetSelectedIds();
+    if (!selectedIds.length) { toast('No clients selected — tick checkboxes first', 'error'); return; }
+    list = clients.filter(c => selectedIds.includes(c.id) && c.whatsapp);
+  } else {
+    list = rwaGetFilteredList();
+  }
+  if (!list.length) { toast('No clients with WhatsApp numbers in current filter', 'error'); return; }
+
+  const delayMs  = getFontteDelay();
+  const today    = new Date().toISOString().split('T')[0];
+
+  // Setup progress modal
+  const subtitle   = document.getElementById('fonnte-progress-subtitle');
+  const progressFill = document.getElementById('fonnte-progress-fill');
+  const progressLbl  = document.getElementById('fonnte-progress-label');
+  const progressPct  = document.getElementById('fonnte-progress-pct');
+  const resultsEl    = document.getElementById('fonnte-progress-results');
+  const closeBtn     = document.getElementById('fonnte-progress-close-btn');
+
+  if (subtitle)   subtitle.textContent = `Sending to ${list.length} client(s) via Fonnte…`;
+  if (progressFill) progressFill.style.width = '0%';
+  if (progressPct)  progressPct.textContent = '0%';
+  if (resultsEl)    resultsEl.innerHTML = '';
+  if (closeBtn)     closeBtn.disabled = true;
+  openModal('fonnte-progress-modal');
+
+  let done = 0, ok = 0, fail = 0;
+  for (const c of list) {
+    if (progressLbl) progressLbl.textContent = `📨 Sending to ${c.name}…`;
+    // Use AI-generated message if available, otherwise build default
+    const msg = c._aiGeneratedWaMsg || buildWaMessage(c);
+    try {
+      await fonnteSendOne(c.whatsapp, msg);
+      ok++;
+      // Log the send as a follow-up
+      if (!c.followups) c.followups = [];
+      c.followups.push({ id: genId(), channel: 'WhatsApp', date: today, note: `Bulk sent via Fonnte: ${msg.substring(0, 80)}…` });
+      c.lastContact = today;
+      if (resultsEl) {
+        resultsEl.innerHTML += `<div class="fonnte-result-row">
+          <div class="fonnte-result-name">${esc(c.name)}</div>
+          <span class="fonnte-result-status ok">✓ Sent</span>
+          <div style="flex:1;color:var(--gray-500);font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(c.whatsapp)}</div>
+        </div>`;
+        resultsEl.scrollTop = resultsEl.scrollHeight;
+      }
+    } catch (e) {
+      fail++;
+      const errMsg = e.message.includes('no_token') ? 'No token' :
+        e.message.includes('CORS') || e.message.includes('Failed to fetch') ? 'Network/CORS error' :
+        e.message.substring(0, 40);
+      if (resultsEl) {
+        resultsEl.innerHTML += `<div class="fonnte-result-row">
+          <div class="fonnte-result-name">${esc(c.name)}</div>
+          <span class="fonnte-result-status err">✗ ${esc(errMsg)}</span>
+        </div>`;
+      }
+    }
+    done++;
+    const pct = Math.round((done / list.length) * 100);
+    if (progressFill) progressFill.style.width = pct + '%';
+    if (progressPct)  progressPct.textContent  = pct + '%';
+    if (done < list.length) await new Promise(r => setTimeout(r, delayMs));
+  }
+
+  save();
+  renderRemWaPanel();
+  if (subtitle)    subtitle.textContent = `Done! ✅ ${ok} sent · ❌ ${fail} failed`;
+  if (progressLbl) progressLbl.textContent = `Complete — ${ok}/${list.length} messages sent`;
+  if (closeBtn)    closeBtn.disabled = false;
+  toast(`📨 Sent ${ok} WhatsApp message(s)${fail ? ` (${fail} failed)` : ''}!`, ok > 0 ? 'success' : 'error');
+
+  // If CORS error detected, show helpful info
+  if (fail > 0 && resultsEl && resultsEl.innerHTML.includes('CORS')) {
+    if (resultsEl) resultsEl.innerHTML += `<div style="background:#fef3c7;border-radius:8px;padding:10px;margin-top:8px;font-size:11px;color:#92400e;">
+      ⚠️ <strong>CORS error detected.</strong> Fonnte's API may block direct browser calls.
+      Try using the <strong>Fonnte Dashboard</strong> to send, or run the dashboard from a local file instead of GitHub Pages.
+      Alternatively, use the <a href="https://fonnte.com/docs" target="_blank">Fonnte WhatsApp Bot</a> locally.
+    </div>`;
+  }
+}
+
+// ── Run on init ───────────────────────────────────────────────────────────────
+// (called at bottom of init section)
+
 // ==================== SUPPLIER UPGRADE — CARD-BASED RENDER ====================
 function renderSuppliers() {
   const search = (document.getElementById('sup-search')||{}).value||'';
@@ -6586,6 +6923,7 @@ updateNavCount();
 updateEmailBadge();
 updateBotExportCount();
 renderOverdueBanner();
+updateFontteStatus();
 
 // EmailJS — restore from localStorage and apply
 (function initEmailJS() {
