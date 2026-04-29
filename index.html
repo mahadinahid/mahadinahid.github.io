@@ -6179,17 +6179,107 @@ function fonnteClearToken() {
   toast('Fonnte disconnected', 'success');
 }
 
+// ── Phone number parser for Fonnte (strips country code, passes separately) ────
+function parsePhoneForFonnte(rawPhone) {
+  const digits = rawPhone.replace(/\D/g, '');
+  if (!digits) return { target: '', countryCode: '' };
+
+  // Ordered by specificity (longer codes first to avoid false matches)
+  // Format: [countryCode, minTotalDigits]
+  const CODES = [
+    // 3-digit codes
+    ['880', 13], // Bangladesh
+    ['886', 12], // Taiwan
+    ['855', 11], // Cambodia
+    ['853', 11], // Macau
+    ['852', 11], // Hong Kong
+    ['856', 11], // Laos
+    ['670', 11], // East Timor
+    ['673', 11], // Brunei
+    ['966', 12], // Saudi Arabia
+    ['971', 12], // UAE
+    ['972', 12], // Israel
+    ['974', 11], // Qatar
+    ['973', 11], // Bahrain
+    ['968', 11], // Oman
+    ['963', 12], // Syria
+    ['962', 12], // Jordan
+    ['961', 11], // Lebanon
+    ['960', 11], // Maldives
+    // 2-digit codes
+    ['91', 12],  // India
+    ['86', 13],  // China
+    ['62', 11],  // Indonesia
+    ['60', 11],  // Malaysia
+    ['63', 12],  // Philippines
+    ['66', 11],  // Thailand
+    ['84', 11],  // Vietnam
+    ['95', 11],  // Myanmar
+    ['94', 11],  // Sri Lanka
+    ['92', 12],  // Pakistan
+    ['98', 11],  // Iran
+    ['44', 12],  // UK
+    ['49', 12],  // Germany
+    ['33', 11],  // France
+    ['39', 12],  // Italy
+    ['34', 11],  // Spain
+    ['31', 11],  // Netherlands
+    ['32', 11],  // Belgium
+    ['46', 11],  // Sweden
+    ['47', 11],  // Norway
+    ['45', 11],  // Denmark
+    ['41', 11],  // Switzerland
+    ['43', 12],  // Austria
+    ['48', 11],  // Poland
+    ['55', 13],  // Brazil
+    ['52', 12],  // Mexico
+    ['54', 13],  // Argentina
+    ['57', 12],  // Colombia
+    ['56', 11],  // Chile
+    ['51', 11],  // Peru
+    ['58', 11],  // Venezuela
+    ['20', 12],  // Egypt
+    ['27', 11],  // South Africa
+    ['234', 13], // Nigeria (override — 3 digit)
+    ['233', 12], // Ghana
+    ['254', 12], // Kenya
+    ['255', 12], // Tanzania
+    ['256', 12], // Uganda
+    ['82', 12],  // South Korea
+    ['81', 12],  // Japan
+    ['64', 11],  // New Zealand
+    ['61', 11],  // Australia
+    ['7',  11],  // Russia/Kazakhstan
+    // 1-digit code last
+    ['1',  11],  // USA/Canada
+  ];
+
+  // Re-sort: 3-digit codes before 2-digit before 1-digit for correct matching
+  for (const [code, minLen] of CODES) {
+    if (digits.startsWith(code) && digits.length >= minLen) {
+      return { target: digits.slice(code.length), countryCode: code };
+    }
+  }
+
+  // Could not detect country code — send as-is (Fonnte will use its default)
+  return { target: digits, countryCode: '' };
+}
+
 // ── Single send via Fonnte API ────────────────────────────────────────────────
 async function fonnteSendOne(phone, message) {
   const token = getFontteToken();
   if (!token) throw new Error('no_token');
-  const normalized = phone.replace(/\D/g, '');
-  if (!normalized) throw new Error('Invalid phone number');
   if (!message || !message.trim()) throw new Error('Message is empty');
-  // Use FormData — Fonnte requires multipart/form-data or form-encoded
+
+  const { target, countryCode } = parsePhoneForFonnte(phone);
+  if (!target) throw new Error('Invalid phone number');
+
+  // Use FormData — Fonnte requires multipart/form-data
   const fd = new FormData();
-  fd.append('target',  normalized);
+  fd.append('target',  target);
   fd.append('message', message.trim());
+  if (countryCode) fd.append('countryCode', countryCode);
+
   const res = await fetch('https://api.fonnte.com/send', {
     method: 'POST',
     headers: { 'Authorization': token },
