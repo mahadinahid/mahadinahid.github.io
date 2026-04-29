@@ -592,6 +592,26 @@
   .ai-result-status.err { background:#fee2e2; color:#dc2626; }
   .ai-row-btn { background:linear-gradient(135deg,#7c3aed,#6366f1); color:white; border:none; border-radius:6px; padding:3px 8px; font-size:10px; font-weight:700; cursor:pointer; margin-left:4px; transition:opacity .15s; }
   .ai-row-btn:hover { opacity:.85; }
+  /* AI Provider Cards */
+  .ai-provider-list { display:flex; flex-direction:column; gap:8px; margin-bottom:14px; }
+  .ai-provider-card { display:flex; align-items:center; gap:12px; padding:12px 14px; border:2px solid var(--gray-200); border-radius:10px; cursor:pointer; transition:all .15s; background:white; user-select:none; }
+  .ai-provider-card:hover { border-color:#a78bfa; background:#faf8ff; }
+  .ai-provider-card.selected { border-color:#6366f1; background:#eef2ff; }
+  .ai-provider-card.has-key { border-color:#6ee7b7; }
+  .ai-provider-card.has-key.selected { border-color:#6366f1; background:#eef2ff; }
+  .ai-prov-icon { font-size:22px; width:34px; text-align:center; flex-shrink:0; }
+  .ai-prov-name { font-size:13px; font-weight:700; color:var(--gray-800); display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+  .ai-prov-model { font-size:11px; color:var(--gray-500); margin-top:2px; }
+  .ai-prov-free { font-size:10px; font-weight:700; color:#166534; background:#dcfce7; border-radius:6px; padding:1px 6px; display:inline-block; margin-top:3px; }
+  .ai-prov-free.warn { color:#92400e; background:#fef3c7; }
+  .ai-badge-rec { font-size:9px; background:linear-gradient(135deg,#7c3aed,#6366f1); color:white; border-radius:20px; padding:2px 7px; font-weight:700; letter-spacing:.3px; }
+  .ai-badge-active { font-size:9px; background:#059669; color:white; border-radius:20px; padding:2px 7px; font-weight:700; }
+  .ai-prov-check { margin-left:auto; font-size:18px; flex-shrink:0; }
+  .ai-key-panel { background:#f8fafc; border:1.5px solid var(--gray-200); border-radius:10px; padding:14px 16px; display:none; }
+  .ai-key-panel.visible { display:block; }
+  .ai-key-panel-title { font-size:12px; font-weight:700; color:var(--gray-700); margin-bottom:8px; }
+  .ai-key-guide { font-size:11px; color:var(--gray-600); line-height:1.7; background:white; border:1px solid var(--gray-200); border-radius:8px; padding:10px 12px; margin-top:8px; }
+  .ai-active-chip { display:inline-flex; align-items:center; gap:5px; background:linear-gradient(135deg,#7c3aed,#6366f1); color:white; border-radius:20px; padding:3px 10px; font-size:11px; font-weight:700; }
 
   /* ===== SMART CSV IMPORTER ===== */
   .csv-drop-zone { border:2px dashed var(--gray-300); border-radius:12px; padding:36px 20px; text-align:center; cursor:pointer; transition:all .2s; background:var(--gray-50); }
@@ -1759,34 +1779,48 @@ create policy "anon all" on crm_suppliers for all using (true) with check (true)
 
 <!-- ========== AI SETTINGS MODAL ========== -->
 <div class="modal-overlay" id="ai-settings-modal">
-  <div class="modal" style="max-width:460px;">
+  <div class="modal" style="max-width:500px;">
     <div class="modal-header" style="background:linear-gradient(135deg,#4c1d95,#7c3aed,#6366f1);border-radius:12px 12px 0 0;padding:20px 24px;">
       <div>
-        <h2 style="color:white;font-size:18px;margin:0;">⚡ AI Message Generator</h2>
-        <p style="color:rgba(255,255,255,.8);font-size:12px;margin:4px 0 0;">Powered by Google Gemini · 100% Free</p>
+        <h2 style="color:white;font-size:18px;margin:0;">⚡ AI Provider Settings</h2>
+        <p style="color:rgba(255,255,255,.8);font-size:12px;margin:4px 0 0;">Choose a free AI to generate personalized messages</p>
       </div>
       <button class="modal-close" onclick="closeModal('ai-settings-modal')" style="background:rgba(255,255,255,.18);color:white;">
         <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
     <div class="ai-modal-body">
-      <div id="ai-key-status-banner" style="background:#fef3c7;border:1.5px solid #fcd34d;border-radius:10px;padding:10px 14px;font-size:13px;color:#92400e;margin-bottom:16px;">
-        ⚠️ No API key set. Get your free key below.
+
+      <!-- Active provider banner -->
+      <div id="ai-active-banner" style="display:none;background:#f0fdf4;border:1.5px solid #6ee7b7;border-radius:10px;padding:9px 14px;font-size:13px;color:#166534;margin-bottom:14px;display:flex;align-items:center;gap:8px;">
+        <span>✅ Active provider:</span><span class="ai-active-chip" id="ai-active-chip-label">—</span>
+        <span style="font-size:11px;color:#4ade80;margin-left:2px;" id="ai-active-model-label"></span>
       </div>
-      <label style="font-size:11px;font-weight:700;color:var(--gray-600);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:4px;">Google Gemini API Key</label>
-      <input type="password" class="ai-key-input" id="ai-api-key-input" placeholder="AIzaSy..." autocomplete="off">
-      <div style="background:#f8fafc;border:1px solid var(--gray-200);border-radius:10px;padding:12px 14px;margin-top:14px;font-size:12px;color:var(--gray-700);line-height:1.7;">
-        <strong style="color:var(--gray-800);">🆓 Get a free key in 30 seconds:</strong><br>
-        1. Go to <a href="https://aistudio.google.com/apikey" target="_blank" style="color:#6366f1;font-weight:700;">aistudio.google.com/apikey</a><br>
-        2. Sign in with Google → Click <strong>Create API key</strong><br>
-        3. Copy &amp; paste it in the field above
+      <div id="ai-no-key-banner" style="background:#fef3c7;border:1.5px solid #fcd34d;border-radius:10px;padding:9px 14px;font-size:13px;color:#92400e;margin-bottom:14px;">
+        👆 Click a provider below to get started — all are free
       </div>
-      <div style="background:#f0fdf4;border:1.5px solid #6ee7b7;border-radius:10px;padding:10px 14px;font-size:12px;color:#166534;margin-top:10px;">
-        ✅ <strong>Free tier:</strong> 15 requests/min · 1,500 req/day · No credit card
+
+      <!-- Provider cards -->
+      <div class="ai-provider-list" id="ai-provider-list">
+        <!-- rendered by renderAIProviderList() -->
       </div>
-      <div style="display:flex;gap:8px;margin-top:18px;justify-content:flex-end;">
-        <button class="btn btn-outline" onclick="closeModal('ai-settings-modal')">Cancel</button>
-        <button class="ai-btn" onclick="saveAISettings()" style="padding:8px 20px;font-size:13px;">💾 Save &amp; Continue</button>
+
+      <!-- Key input panel — shown when a card is selected -->
+      <div class="ai-key-panel" id="ai-key-panel">
+        <div class="ai-key-panel-title">🔑 API Key for <strong id="ai-panel-provider-name">—</strong></div>
+        <input type="password" class="ai-key-input" id="ai-api-key-input" placeholder="Paste your key here…" autocomplete="off">
+        <div class="ai-key-guide" id="ai-panel-guide">—</div>
+        <div style="display:flex;gap:8px;margin-top:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;">
+          <a id="ai-panel-key-link" href="#" target="_blank" style="font-size:12px;color:#6366f1;font-weight:700;text-decoration:none;">🔗 Get free key →</a>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-outline btn-sm" onclick="aiClearProvider()" style="font-size:11px;">🗑 Remove Key</button>
+            <button class="ai-btn" onclick="saveAISettings()" style="padding:7px 18px;">✅ Save &amp; Activate</button>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;margin-top:14px;">
+        <button class="btn btn-outline" onclick="closeModal('ai-settings-modal')">Close</button>
       </div>
     </div>
   </div>
@@ -5479,71 +5513,273 @@ function exportForWABot() {
   toast(`✅ Exported ${data.length} WhatsApp contacts for WA Bot`,'success');
 }
 
-// ==================== AI MESSAGE GENERATOR (Google Gemini — Free) ====================
+// ==================== AI MESSAGE GENERATOR — Multi-Provider ====================
 
-function getGeminiKey()      { return localStorage.getItem('crm_gemini_key') || ''; }
-function storeGeminiKey(k)   { localStorage.setItem('crm_gemini_key', k.trim()); }
+// ── Provider definitions ──────────────────────────────────────────────────────
+const AI_PROVIDERS = {
+  groq: {
+    id: 'groq',
+    name: 'Groq',
+    icon: '⚡',
+    iconBg: '#f97316',
+    model: 'llama-3.3-70b-versatile',
+    modelLabel: 'Llama 3.3 70B',
+    freeLabel: '✅ Free · No credit card needed',
+    freeWarn: false,
+    recommended: true,
+    keyPrefix: 'gsk_',
+    keyPlaceholder: 'gsk_...',
+    keyUrl: 'https://console.groq.com/keys',
+    lsKey: 'crm_ai_key_groq',
+    guide: `1. Go to <a href="https://console.groq.com/keys" target="_blank" style="color:#6366f1;font-weight:700;">console.groq.com/keys</a><br>2. Sign in (free) → click <strong>Create API Key</strong><br>3. Copy &amp; paste it above`,
+    delay: 2200,   // ms between bulk requests (30 req/min free tier)
+  },
+  gemini: {
+    id: 'gemini',
+    name: 'Google Gemini',
+    icon: '✦',
+    iconBg: '#4285F4',
+    model: 'gemini-2.0-flash',
+    modelLabel: 'Gemini 2.0 Flash',
+    freeLabel: '⚠️ Free tier — requires billing enabled',
+    freeWarn: true,
+    recommended: false,
+    keyPrefix: 'AIza',
+    keyPlaceholder: 'AIzaSy...',
+    keyUrl: 'https://aistudio.google.com/apikey',
+    lsKey: 'crm_ai_key_gemini',
+    guide: `1. Go to <a href="https://aistudio.google.com/apikey" target="_blank" style="color:#6366f1;font-weight:700;">aistudio.google.com/apikey</a><br>2. Sign in with Google → <strong>Create API key</strong><br>3. In Google Cloud Console, <strong>enable billing</strong> on the project (free up to limits)<br>4. Copy &amp; paste the key above`,
+    delay: 4200,   // ms between bulk requests (15 req/min free tier)
+  },
+  openrouter: {
+    id: 'openrouter',
+    name: 'OpenRouter',
+    icon: '🔀',
+    iconBg: '#6366f1',
+    model: 'mistralai/mistral-7b-instruct:free',
+    modelLabel: 'Mistral 7B (free model)',
+    freeLabel: '✅ Free models available · No credit card',
+    freeWarn: false,
+    recommended: false,
+    keyPrefix: 'sk-or-',
+    keyPlaceholder: 'sk-or-...',
+    keyUrl: 'https://openrouter.ai/keys',
+    lsKey: 'crm_ai_key_openrouter',
+    guide: `1. Go to <a href="https://openrouter.ai/keys" target="_blank" style="color:#6366f1;font-weight:700;">openrouter.ai/keys</a><br>2. Sign up (free) → click <strong>Create Key</strong><br>3. Copy &amp; paste it above — uses free Mistral model`,
+    delay: 3000,
+  },
+  huggingface: {
+    id: 'huggingface',
+    name: 'Hugging Face',
+    icon: '🤗',
+    iconBg: '#ff9d00',
+    model: 'HuggingFaceH4/zephyr-7b-beta',
+    modelLabel: 'Zephyr 7B',
+    freeLabel: '✅ Free Inference API · No credit card',
+    freeWarn: false,
+    recommended: false,
+    keyPrefix: 'hf_',
+    keyPlaceholder: 'hf_...',
+    keyUrl: 'https://huggingface.co/settings/tokens',
+    lsKey: 'crm_ai_key_hf',
+    guide: `1. Go to <a href="https://huggingface.co/settings/tokens" target="_blank" style="color:#6366f1;font-weight:700;">huggingface.co/settings/tokens</a><br>2. Sign up (free) → <strong>New token</strong> → choose <em>Read</em> role<br>3. Copy &amp; paste it above`,
+    delay: 3500,
+  },
+};
+
+// ── Storage helpers ───────────────────────────────────────────────────────────
+function getActiveProviderId() { return localStorage.getItem('crm_ai_provider') || ''; }
+function setActiveProvider(id) { localStorage.setItem('crm_ai_provider', id); }
+function getProviderKey(id)    { return localStorage.getItem(AI_PROVIDERS[id]?.lsKey || '') || ''; }
+function setProviderKey(id, k) { localStorage.setItem(AI_PROVIDERS[id].lsKey, k.trim()); }
+function clearProviderKey(id)  { localStorage.removeItem(AI_PROVIDERS[id]?.lsKey || ''); }
+function getActiveKey()        { const id = getActiveProviderId(); return id ? getProviderKey(id) : ''; }
+
+// ── Provider card UI ─────────────────────────────────────────────────────────
+let _aiPanelProvider = '';   // which card is currently expanded
+
+function renderAIProviderList() {
+  const list = document.getElementById('ai-provider-list');
+  if (!list) return;
+  const activeId = getActiveProviderId();
+  list.innerHTML = Object.values(AI_PROVIDERS).map(p => {
+    const hasKey   = !!getProviderKey(p.id);
+    const isActive = p.id === activeId;
+    const isSelected = p.id === _aiPanelProvider;
+    let classes = 'ai-provider-card';
+    if (isSelected) classes += ' selected';
+    if (hasKey)     classes += ' has-key';
+    return `<div class="${classes}" onclick="selectAIProviderCard('${p.id}')">
+      <div class="ai-prov-icon" style="background:${p.iconBg}22;border-radius:8px;padding:4px;">${p.icon}</div>
+      <div style="flex:1;min-width:0;">
+        <div class="ai-prov-name">
+          ${p.name}
+          ${p.recommended ? '<span class="ai-badge-rec">⭐ Recommended</span>' : ''}
+          ${isActive && hasKey ? '<span class="ai-badge-active">● Active</span>' : ''}
+        </div>
+        <div class="ai-prov-model">${p.modelLabel}</div>
+        <div class="ai-prov-free${p.freeWarn ? ' warn' : ''}">${p.freeLabel}</div>
+      </div>
+      <div class="ai-prov-check">${hasKey ? (isActive ? '🟢' : '🔑') : '○'}</div>
+    </div>`;
+  }).join('');
+
+  // Update banners
+  const activeBanner = document.getElementById('ai-active-banner');
+  const noKeyBanner  = document.getElementById('ai-no-key-banner');
+  const chipLabel    = document.getElementById('ai-active-chip-label');
+  const modelLabel   = document.getElementById('ai-active-model-label');
+  if (activeId && getProviderKey(activeId)) {
+    const p = AI_PROVIDERS[activeId];
+    if (activeBanner) activeBanner.style.display = 'flex';
+    if (noKeyBanner)  noKeyBanner.style.display  = 'none';
+    if (chipLabel)    chipLabel.textContent = p.name;
+    if (modelLabel)   modelLabel.textContent = `· ${p.modelLabel}`;
+  } else {
+    if (activeBanner) activeBanner.style.display = 'none';
+    if (noKeyBanner)  noKeyBanner.style.display  = 'block';
+  }
+}
+
+function selectAIProviderCard(id) {
+  _aiPanelProvider = id;
+  renderAIProviderList();
+  const p = AI_PROVIDERS[id];
+  if (!p) return;
+  const panel    = document.getElementById('ai-key-panel');
+  const nameEl   = document.getElementById('ai-panel-provider-name');
+  const inp      = document.getElementById('ai-api-key-input');
+  const guideEl  = document.getElementById('ai-panel-guide');
+  const linkEl   = document.getElementById('ai-panel-key-link');
+  if (panel)   panel.classList.add('visible');
+  if (nameEl)  nameEl.textContent = p.name;
+  if (inp)     { inp.value = ''; inp.placeholder = p.keyPlaceholder; }
+  if (guideEl) guideEl.innerHTML = `<strong>🆓 Get your free key:</strong><br>${p.guide}`;
+  if (linkEl)  { linkEl.href = p.keyUrl; linkEl.textContent = `🔗 Go to ${p.name} →`; }
+}
 
 function openAISettingsModal(afterSaveCb) {
-  const k = getGeminiKey();
-  const inp    = document.getElementById('ai-api-key-input');
-  const banner = document.getElementById('ai-key-status-banner');
-  if (inp) inp.value = '';   // always clear — user re-enters to update
-  if (banner) {
-    if (k) {
-      banner.style.background = '#f0fdf4'; banner.style.borderColor = '#6ee7b7'; banner.style.color = '#166534';
-      banner.innerHTML = `✅ API key is saved (ends …${k.slice(-6)}). Enter a new one below to replace it.`;
-    } else {
-      banner.style.background = '#fef3c7'; banner.style.borderColor = '#fcd34d'; banner.style.color = '#92400e';
-      banner.innerHTML = '⚠️ No API key set. Get your free key below.';
-    }
-  }
+  _aiPanelProvider = getActiveProviderId() || 'groq';
   window._aiAfterSave = afterSaveCb || null;
+  renderAIProviderList();
+  // Auto-expand the active or first provider
+  selectAIProviderCard(_aiPanelProvider);
+  // If key already exists, show masked
+  const existingKey = getProviderKey(_aiPanelProvider);
+  const inp = document.getElementById('ai-api-key-input');
+  if (inp && existingKey) inp.placeholder = `Key saved (ends …${existingKey.slice(-6)}) — enter new to replace`;
   openModal('ai-settings-modal');
 }
 
 function saveAISettings() {
+  const id  = _aiPanelProvider;
+  if (!id || !AI_PROVIDERS[id]) { toast('Select a provider first', 'error'); return; }
   const inp = document.getElementById('ai-api-key-input');
   const val = (inp ? inp.value : '').trim();
   if (!val) {
-    // No new value entered — if key already exists, just close
-    if (getGeminiKey()) {
+    // No new value — if key already exists for this provider, just activate it
+    if (getProviderKey(id)) {
+      setActiveProvider(id);
+      toast(`✅ ${AI_PROVIDERS[id].name} activated!`, 'success');
       closeModal('ai-settings-modal');
       if (typeof window._aiAfterSave === 'function') window._aiAfterSave();
     } else {
-      toast('Please enter your Gemini API key', 'error');
+      toast('Please paste your API key first', 'error');
     }
     return;
   }
-  if (!val.startsWith('AIza') || val.length < 30) {
-    toast('That doesn\'t look like a valid Gemini key (should start with AIza…)', 'error');
-    return;
-  }
-  storeGeminiKey(val);
-  toast('✅ Gemini API key saved!', 'success');
+  setProviderKey(id, val);
+  setActiveProvider(id);
+  toast(`✅ ${AI_PROVIDERS[id].name} saved & activated!`, 'success');
+  renderAIProviderList();
   closeModal('ai-settings-modal');
   if (typeof window._aiAfterSave === 'function') window._aiAfterSave();
 }
 
-// ── Core Gemini API call ──────────────────────────────────────────────────────
-async function callGemini(prompt) {
-  const key = getGeminiKey();
-  if (!key) throw new Error('no_key');
+function aiClearProvider() {
+  const id = _aiPanelProvider;
+  if (!id) return;
+  if (!confirm(`Remove saved key for ${AI_PROVIDERS[id]?.name}?`)) return;
+  clearProviderKey(id);
+  if (getActiveProviderId() === id) localStorage.removeItem('crm_ai_provider');
+  toast('Key removed', 'success');
+  renderAIProviderList();
+  const inp = document.getElementById('ai-api-key-input');
+  if (inp) inp.value = '';
+}
+
+// ── Core AI dispatch (routes to correct provider) ────────────────────────────
+async function callAI(prompt) {
+  const id  = getActiveProviderId();
+  const key = id ? getProviderKey(id) : '';
+  if (!id || !key) throw new Error('no_key');
+  if (id === 'groq')        return callGroq(key, prompt);
+  if (id === 'gemini')      return callGeminiAI(key, prompt);
+  if (id === 'openrouter')  return callOpenRouter(key, prompt);
+  if (id === 'huggingface') return callHuggingFace(key, prompt);
+  throw new Error('Unknown provider: ' + id);
+}
+
+async function callGroq(key, prompt) {
+  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
+    body: JSON.stringify({ model: 'llama-3.3-70b-versatile', messages: [{ role:'user', content: prompt }], max_tokens: 300, temperature: 0.75 })
+  });
+  if (!res.ok) { const e = await res.json().catch(()=>({})); throw new Error(e?.error?.message || `Groq HTTP ${res.status}`); }
+  const d = await res.json();
+  return (d?.choices?.[0]?.message?.content || '').trim();
+}
+
+async function callGeminiAI(key, prompt) {
   const res = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${encodeURIComponent(key)}`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-    }
+    { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ contents:[{ parts:[{ text: prompt }] }] }) }
   );
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    const msg = err?.error?.message || `HTTP ${res.status}`;
-    throw new Error(msg);
+  if (!res.ok) { const e = await res.json().catch(()=>({})); throw new Error(e?.error?.message || `Gemini HTTP ${res.status}`); }
+  const d = await res.json();
+  return (d?.candidates?.[0]?.content?.parts?.[0]?.text || '').trim();
+}
+
+async function callOpenRouter(key, prompt) {
+  const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'Content-Type':'application/json', 'Authorization':`Bearer ${key}`, 'HTTP-Referer':'https://mahadinahid.github.io', 'X-Title':'ClientCRM' },
+    body: JSON.stringify({ model:'mistralai/mistral-7b-instruct:free', messages:[{ role:'user', content: prompt }], max_tokens: 300 })
+  });
+  if (!res.ok) { const e = await res.json().catch(()=>({})); throw new Error(e?.error?.message || `OpenRouter HTTP ${res.status}`); }
+  const d = await res.json();
+  return (d?.choices?.[0]?.message?.content || '').trim();
+}
+
+async function callHuggingFace(key, prompt) {
+  const res = await fetch('https://api-inference.huggingface.co/models/HuggingFaceH4/zephyr-7b-beta', {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${key}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ inputs: prompt, parameters: { max_new_tokens: 300, temperature: 0.75 } })
+  });
+  if (!res.ok) { const e = await res.json().catch(()=>({})); throw new Error(e?.error || `HF HTTP ${res.status}`); }
+  const d = await res.json();
+  const raw = Array.isArray(d) ? (d[0]?.generated_text || '') : (d?.generated_text || '');
+  // Strip the prompt from the output (HF returns prompt + completion)
+  return raw.replace(prompt, '').trim();
+}
+
+// ── Shared error handler ──────────────────────────────────────────────────────
+function handleAIError(e, retryFn) {
+  if (e.message === 'no_key') {
+    openAISettingsModal(retryFn);
+  } else if (e.message.includes('401') || e.message.includes('API_KEY_INVALID') || e.message.includes('invalid_api_key')) {
+    toast('❌ Invalid API key — update it in AI Settings', 'error');
+    openAISettingsModal(retryFn);
+  } else if (e.message.includes('429') || e.message.includes('RESOURCE_EXHAUSTED') || e.message.includes('rate_limit')) {
+    toast('⏳ Rate limit reached — wait a moment and try again', 'error');
+  } else if (e.message.includes('quota') || e.message.includes('billing')) {
+    toast('❌ Quota exceeded — try a different provider in AI Settings', 'error');
+    openAISettingsModal(retryFn);
+  } else {
+    toast(`❌ AI error: ${e.message.substring(0, 80)}`, 'error');
   }
-  const data = await res.json();
-  return (data?.candidates?.[0]?.content?.parts?.[0]?.text || '').trim();
 }
 
 // ── Build prompt for a single client ─────────────────────────────────────────
@@ -5555,11 +5791,11 @@ function buildAIPrompt(c) {
     ? Math.floor((new Date(today) - new Date(c.nextFollowup)) / 86400000) : null;
   const lines = [
     `Name: ${c.name}`,
-    c.company   ? `Company: ${c.company}` : null,
-    c.product   ? `Product interest: ${c.product}` : null,
-    c.status    ? `Status: ${c.status}` : null,
-    c.priority  ? `Priority: ${c.priority}` : null,
-    c.country   ? `Country: ${c.country}` : null,
+    c.company  ? `Company: ${c.company}` : null,
+    c.product  ? `Product interest: ${c.product}` : null,
+    c.status   ? `Status: ${c.status}` : null,
+    c.priority ? `Priority: ${c.priority}` : null,
+    c.country  ? `Country: ${c.country}` : null,
     daysSinceLast !== null ? `Days since last contact: ${daysSinceLast}` : null,
     daysOverdue  !== null ? `Overdue by: ${daysOverdue} days` : null,
     c.notes ? `Notes: ${c.notes.substring(0, 200)}` : null,
@@ -5584,85 +5820,61 @@ Return ONLY the message. No labels, no subject line, no explanation.`;
 
 // ── Generate for single client in WA modal ───────────────────────────────────
 async function aiGenerateSingleMessage() {
-  const key = getGeminiKey();
-  if (!key) { openAISettingsModal(() => aiGenerateSingleMessage()); return; }
+  if (!getActiveKey()) { openAISettingsModal(() => aiGenerateSingleMessage()); return; }
   const c = clients.find(x => x.id === currentWaClientId);
   if (!c) return;
   const btn = document.getElementById('wa-ai-generate-btn');
   if (btn) { btn.disabled = true; btn.textContent = '⏳ Writing…'; btn.classList.add('loading'); }
   try {
-    const msg = await callGemini(buildAIPrompt(c));
+    const msg = await callAI(buildAIPrompt(c));
     if (msg) {
       document.getElementById('wa-message-text').value = msg;
       updateWaPreview();
-      toast('✅ AI message ready — review &amp; send!', 'success');
-    } else {
-      toast('AI returned empty response — try again', 'error');
-    }
+      toast('✅ AI message ready — review & send!', 'success');
+    } else { toast('AI returned empty — try again', 'error'); }
   } catch (e) {
-    if (e.message === 'no_key') {
-      openAISettingsModal(() => aiGenerateSingleMessage());
-    } else if (e.message.includes('API_KEY_INVALID') || e.message.includes('401')) {
-      toast('❌ Invalid API key — update it in AI Settings', 'error');
-      openAISettingsModal(() => aiGenerateSingleMessage());
-    } else if (e.message.includes('429') || e.message.includes('RESOURCE_EXHAUSTED')) {
-      toast('⏳ Rate limit hit — wait a minute and try again', 'error');
-    } else {
-      toast(`❌ AI error: ${e.message.substring(0, 80)}`, 'error');
-    }
+    handleAIError(e, () => aiGenerateSingleMessage());
   } finally {
     if (btn) { btn.disabled = false; btn.textContent = '⚡ AI Write'; btn.classList.remove('loading'); }
   }
 }
 
-// ── Generate for a single row in WA Reminders (opens WA modal with AI msg) ──
+// ── Generate for a row in WA Reminders — opens WA modal pre-filled ───────────
 async function aiGenerateForRow(clientId) {
-  const key = getGeminiKey();
-  if (!key) { openAISettingsModal(() => aiGenerateForRow(clientId)); return; }
+  if (!getActiveKey()) { openAISettingsModal(() => aiGenerateForRow(clientId)); return; }
   const c = clients.find(x => x.id === clientId);
   if (!c) return;
-  // Find the row button and show loading
   const rowBtn = document.querySelector(`button.ai-row-btn[onclick="aiGenerateForRow('${clientId}')"]`);
   if (rowBtn) { rowBtn.textContent = '⏳'; rowBtn.disabled = true; }
   try {
-    const msg = await callGemini(buildAIPrompt(c));
+    const msg = await callAI(buildAIPrompt(c));
     if (msg) {
-      // Open WA modal and pre-fill with AI message
+      c._aiGeneratedWaMsg = msg;
       openWaModal(clientId);
-      // Wait a tick for modal to render
       setTimeout(() => {
         const ta = document.getElementById('wa-message-text');
         if (ta) { ta.value = msg; updateWaPreview(); }
-        toast('✅ AI message ready — review &amp; send!', 'success');
-      }, 120);
-    } else {
-      toast('AI returned empty — try again', 'error');
-    }
+        toast('✅ AI message ready — review & send!', 'success');
+      }, 150);
+    } else { toast('AI returned empty — try again', 'error'); }
   } catch (e) {
-    if (e.message === 'no_key') {
-      openAISettingsModal(() => aiGenerateForRow(clientId));
-    } else if (e.message.includes('API_KEY_INVALID') || e.message.includes('401')) {
-      toast('❌ Invalid API key — update in AI Settings', 'error');
-      openAISettingsModal();
-    } else if (e.message.includes('429') || e.message.includes('RESOURCE_EXHAUSTED')) {
-      toast('⏳ Rate limit — wait a moment and try again', 'error');
-    } else {
-      toast(`❌ AI error: ${e.message.substring(0, 80)}`, 'error');
-    }
+    handleAIError(e, () => aiGenerateForRow(clientId));
   } finally {
     if (rowBtn) { rowBtn.textContent = '⚡'; rowBtn.disabled = false; }
   }
 }
 
-// ── Bulk AI generate for WA Reminders panel ──────────────────────────────────
+// ── Bulk AI generate for all filtered clients in WA Reminders ────────────────
 async function aiGenerateBulkMessages() {
-  const key = getGeminiKey();
-  if (!key) { openAISettingsModal(() => aiGenerateBulkMessages()); return; }
+  if (!getActiveKey()) { openAISettingsModal(() => aiGenerateBulkMessages()); return; }
   const fullList = rwaGetFilteredList();
   if (!fullList.length) { toast('No clients in current filter', 'error'); return; }
-  // Cap at 15 to stay within free tier rate limits (15 req/min)
-  const list = fullList.slice(0, 15);
-  const skipped = fullList.length - list.length;
+  const providerId = getActiveProviderId();
+  const provider   = AI_PROVIDERS[providerId] || AI_PROVIDERS.groq;
+  const maxBatch   = providerId === 'gemini' ? 15 : 20;
+  const list       = fullList.slice(0, maxBatch);
+  const skipped    = fullList.length - list.length;
+  const delayMs    = provider.delay;
 
   const resultsEl    = document.getElementById('ai-bulk-results');
   const progressFill = document.getElementById('ai-bulk-progress-fill');
@@ -5673,49 +5885,50 @@ async function aiGenerateBulkMessages() {
 
   if (resultsEl)    resultsEl.innerHTML = '';
   if (progressFill) progressFill.style.width = '0%';
-  if (progressPct)  progressPct.textContent  = '0%';
-  if (subtitle)     subtitle.textContent = `Generating for ${list.length} client(s)…${skipped ? ` (${skipped} skipped — 15 max/batch)` : ''}`;
+  if (progressPct)  progressPct.textContent = '0%';
+  if (subtitle)     subtitle.textContent = `Generating for ${list.length} client(s) via ${provider.name}…${skipped ? ` (${skipped} skipped — max ${maxBatch}/batch)` : ''}`;
   if (closeBtn)     closeBtn.disabled = true;
   openModal('ai-bulk-modal');
 
   let done = 0, ok = 0, fail = 0;
   for (const c of list) {
-    if (progressLbl) progressLbl.textContent = `✍️ Writing for ${c.name}…`;
+    if (progressLbl) progressLbl.textContent = `✍️ ${c.name}…`;
     try {
-      const msg = await callGemini(buildAIPrompt(c));
+      const msg = await callAI(buildAIPrompt(c));
       if (msg) {
-        c._aiGeneratedWaMsg = msg;   // stash on client object
+        c._aiGeneratedWaMsg = msg;
         ok++;
-        if (resultsEl) resultsEl.innerHTML += `<div class="ai-result-row">
-          <div class="ai-result-name">${esc(c.name)}</div>
-          <span class="ai-result-status ok">✓ Done</span>
-          <div style="flex:1;color:var(--gray-600);font-size:11px;word-break:break-word;overflow:hidden;">${esc(msg.substring(0,90))}…</div>
-        </div>`;
-        if (resultsEl) resultsEl.scrollTop = resultsEl.scrollHeight;
+        if (resultsEl) {
+          resultsEl.innerHTML += `<div class="ai-result-row">
+            <div class="ai-result-name">${esc(c.name)}</div>
+            <span class="ai-result-status ok">✓ Done</span>
+            <div style="flex:1;color:var(--gray-600);font-size:11px;word-break:break-word;overflow:hidden;">${esc(msg.substring(0,90))}…</div>
+          </div>`;
+          resultsEl.scrollTop = resultsEl.scrollHeight;
+        }
       } else { throw new Error('Empty response'); }
     } catch (e) {
       fail++;
-      const errLabel = e.message.includes('429') || e.message.includes('RESOURCE_EXHAUSTED')
-        ? 'Rate limited' : e.message.includes('API_KEY_INVALID') ? 'Bad API key' : 'Failed';
+      const label = e.message.includes('429') || e.message.includes('rate_limit') || e.message.includes('RESOURCE_EXHAUSTED') ? 'Rate limited'
+        : e.message.includes('401') || e.message.includes('API_KEY_INVALID') ? 'Bad key — stopped' : 'Failed';
       if (resultsEl) resultsEl.innerHTML += `<div class="ai-result-row">
         <div class="ai-result-name">${esc(c.name)}</div>
-        <span class="ai-result-status err">✗ ${errLabel}</span>
+        <span class="ai-result-status err">✗ ${label}</span>
       </div>`;
-      if (e.message.includes('API_KEY_INVALID')) break;   // no point continuing
+      if (label.includes('Bad key')) break;
     }
     done++;
     const pct = Math.round((done / list.length) * 100);
     if (progressFill) progressFill.style.width = pct + '%';
     if (progressPct)  progressPct.textContent = pct + '%';
-    // ~4s delay to respect 15 req/min free tier
-    if (done < list.length) await new Promise(r => setTimeout(r, 4200));
+    if (done < list.length) await new Promise(r => setTimeout(r, delayMs));
   }
   save();
-  if (subtitle)  subtitle.textContent = `Done! ${ok} generated · ${fail} failed${skipped ? ` · ${skipped} skipped` : ''}`;
+  if (subtitle)    subtitle.textContent = `Done! ${ok} generated · ${fail} failed${skipped ? ` · ${skipped} skipped` : ''}`;
   if (progressLbl) progressLbl.textContent = 'Complete ✓';
-  if (closeBtn)  closeBtn.disabled = false;
+  if (closeBtn)    closeBtn.disabled = false;
   renderRemWaPanel();
-  toast(`⚡ AI generated ${ok} message(s)${fail ? ` — ${fail} failed` : ''}`, ok > 0 ? 'success' : 'error');
+  toast(`⚡ AI generated ${ok} message(s)${fail ? ` (${fail} failed)` : ''}`, ok > 0 ? 'success' : 'error');
 }
 
 // ==================== SUPPLIER UPGRADE — CARD-BASED RENDER ====================
