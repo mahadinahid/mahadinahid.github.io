@@ -1933,8 +1933,11 @@ create policy "anon all" on crm_suppliers for all using (true) with check (true)
       </div>
 
       <!-- Token input -->
-      <label style="font-size:11px;font-weight:700;color:var(--gray-600);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:5px;">Fonnte API Token</label>
-      <input type="password" class="fonnte-token-input" id="fonnte-token-input" placeholder="Paste your Fonnte token here…" autocomplete="off">
+      <label style="font-size:11px;font-weight:700;color:var(--gray-600);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:5px;">
+        Fonnte API Token
+        <span style="font-size:10px;font-weight:400;color:var(--gray-500);text-transform:none;letter-spacing:0;margin-left:6px;">📍 Found in: Fonnte dashboard → your device → <strong>Token</strong></span>
+      </label>
+      <input type="text" class="fonnte-token-input" id="fonnte-token-input" placeholder="Paste your Fonnte token here…" autocomplete="off">
 
       <!-- Free tier info -->
       <div style="background:#f0fdf4;border:1.5px solid #6ee7b7;border-radius:10px;padding:10px 14px;font-size:12px;color:#166534;margin-top:12px;">
@@ -1957,7 +1960,8 @@ create policy "anon all" on crm_suppliers for all using (true) with check (true)
       <!-- Buttons -->
       <div style="display:flex;gap:8px;margin-top:18px;justify-content:space-between;align-items:center;flex-wrap:wrap;">
         <button class="btn btn-outline btn-sm" onclick="fonnteClearToken()" style="font-size:11px;">🗑 Disconnect</button>
-        <div style="display:flex;gap:8px;">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn btn-outline btn-sm" id="fonnte-test-btn" onclick="fontteTestConnection()" style="font-size:11px;">🔌 Test Connection</button>
           <button class="btn btn-outline" onclick="closeModal('fonnte-modal')">Cancel</button>
           <button class="fonnte-btn" onclick="fonnteSaveToken()" style="padding:8px 20px;">💾 Save &amp; Connect</button>
         </div>
@@ -6179,21 +6183,55 @@ function fonnteClearToken() {
 async function fonnteSendOne(phone, message) {
   const token = getFontteToken();
   if (!token) throw new Error('no_token');
-  // Normalize phone: remove spaces, dashes, leading +
   const normalized = phone.replace(/\D/g, '');
+  if (!normalized) throw new Error('Invalid phone number');
+  if (!message || !message.trim()) throw new Error('Message is empty');
+  // Use FormData — Fonnte requires multipart/form-data or form-encoded
+  const fd = new FormData();
+  fd.append('target',  normalized);
+  fd.append('message', message.trim());
   const res = await fetch('https://api.fonnte.com/send', {
     method: 'POST',
     headers: { 'Authorization': token },
-    body: new URLSearchParams({ target: normalized, message: message, delay: '1' })
+    body: fd
   });
-  // Fonnte returns JSON with {status: true/false, ...}
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err?.message || err?.reason || `HTTP ${res.status}`);
+  const data = await res.json().catch(() => ({ status: false, reason: `HTTP ${res.status}` }));
+  if (data.status === false) {
+    const reason = data.reason || data.message || 'Send failed';
+    if (reason.includes('invalid token') || reason.includes('token')) throw new Error('invalid_token');
+    throw new Error(reason);
   }
-  const data = await res.json();
-  if (data.status === false) throw new Error(data.reason || data.message || 'Send failed');
   return data;
+}
+
+// ── Test Fonnte connection with a real API call ───────────────────────────────
+async function fontteTestConnection() {
+  const token = getFontteToken();
+  if (!token) { toast('Paste your token first', 'error'); return; }
+  const btn = document.getElementById('fonnte-test-btn');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Testing…'; }
+  try {
+    // Use Fonnte's /validate-token endpoint if available, otherwise try /device
+    const res = await fetch('https://api.fonnte.com/device', {
+      method: 'GET',
+      headers: { 'Authorization': token }
+    });
+    const data = await res.json().catch(() => ({}));
+    if (data.status === false) {
+      toast(`❌ Token invalid: ${data.reason || 'Please re-copy your token from Fonnte dashboard'}`, 'error');
+      const banner = document.getElementById('fonnte-modal-banner');
+      if (banner) { banner.style.background='#fee2e2'; banner.style.borderColor='#fca5a5'; banner.style.color='#dc2626'; banner.textContent='❌ Token is invalid — re-copy it from Fonnte → Device → Token'; }
+    } else {
+      const name = data.name || data.device || 'Device';
+      toast(`✅ Connected! Device: ${name}`, 'success');
+      const banner = document.getElementById('fonnte-modal-banner');
+      if (banner) { banner.style.background='#f0fdf4'; banner.style.borderColor='#6ee7b7'; banner.style.color='#166534'; banner.textContent=`✅ Connected — device "${name}" is active and ready`; }
+    }
+  } catch (e) {
+    toast(`❌ Connection failed: ${e.message}`, 'error');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '🔌 Test Connection'; }
+  }
 }
 
 // ── Bulk send to selected or all filtered clients ─────────────────────────────
@@ -6252,8 +6290,9 @@ async function fonnteBulkSend(mode) {
       }
     } catch (e) {
       fail++;
-      const errMsg = e.message.includes('no_token') ? 'No token' :
-        e.message.includes('CORS') || e.message.includes('Failed to fetch') ? 'Network/CORS error' :
+      const errMsg = e.message === 'no_token' ? 'No token saved' :
+        e.message === 'invalid_token' ? 'Invalid token — re-enter in Setup' :
+        e.message.includes('Failed to fetch') ? 'Network error' :
         e.message.substring(0, 40);
       if (resultsEl) {
         resultsEl.innerHTML += `<div class="fonnte-result-row">
