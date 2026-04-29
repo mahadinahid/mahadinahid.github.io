@@ -1945,10 +1945,12 @@ create policy "anon all" on crm_suppliers for all using (true) with check (true)
       <div style="display:flex;align-items:center;gap:10px;margin-top:12px;font-size:12px;">
         <label style="font-weight:700;color:var(--gray-700);white-space:nowrap;">Delay between messages:</label>
         <select id="fonnte-delay-select" style="padding:5px 10px;border:1.5px solid var(--gray-300);border-radius:7px;font-size:12px;">
-          <option value="2000">2 seconds (safe)</option>
-          <option value="3000" selected>3 seconds (recommended)</option>
-          <option value="5000">5 seconds (safest)</option>
-          <option value="10000">10 seconds (very safe)</option>
+          <option value="5000">5 seconds</option>
+          <option value="10000">10 seconds</option>
+          <option value="20000">20 seconds</option>
+          <option value="30000" selected>30 seconds (recommended)</option>
+          <option value="40000">40 seconds (very safe)</option>
+          <option value="60000">60 seconds (safest)</option>
         </select>
       </div>
 
