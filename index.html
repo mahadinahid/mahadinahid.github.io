@@ -633,6 +633,9 @@
   .fonnte-result-status.err { background:#fee2e2; color:#dc2626; }
   .fonnte-token-input { width:100%; padding:9px 14px; border:1.5px solid var(--gray-300); border-radius:8px; font-size:13px; font-family:monospace; box-sizing:border-box; }
   .fonnte-token-input:focus { border-color:#25d366; outline:none; box-shadow:0 0 0 3px rgba(37,211,102,.12); }
+  .fonnte-ai-btn { background:linear-gradient(135deg,#7c3aed,#25d366); color:white; border:none; border-radius:8px; padding:7px 16px; font-size:12px; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; gap:6px; transition:opacity .15s,transform .1s; white-space:nowrap; }
+  .fonnte-ai-btn:hover { opacity:.88; transform:translateY(-1px); }
+  .fonnte-ai-btn:disabled { opacity:.45; cursor:not-allowed; transform:none; }
 
   /* ===== SMART CSV IMPORTER ===== */
   .csv-drop-zone { border:2px dashed var(--gray-300); border-radius:12px; padding:36px 20px; text-align:center; cursor:pointer; transition:all .2s; background:var(--gray-50); }
@@ -1396,11 +1399,16 @@ create policy "anon all" on crm_suppliers for all using (true) with check (true)
               <button class="btn btn-outline btn-sm" onclick="openFontteModal()" style="margin-left:auto;font-size:11px;">⚙️ Setup / Connect</button>
             </h5>
             <p style="font-size:12px;color:#075985;margin:4px 0 8px;">Send personalised messages to ALL selected clients automatically — no opening tabs, no copy-paste. Uses <a href="https://fonnte.com" target="_blank" style="color:#25d366;font-weight:700;">Fonnte.com</a> free API.</p>
-            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-              <button class="fonnte-btn" id="fonnte-send-sel-btn" onclick="fonnteBulkSend('selected')" disabled title="Select clients first">📨 Send to Selected</button>
-              <button class="fonnte-btn" id="fonnte-send-all-btn" onclick="fonnteBulkSend('all')" disabled>📨 Send to All Filtered</button>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:6px;">
+              <button class="fonnte-btn" id="fonnte-send-sel-btn" onclick="fonnteBulkSend('selected')" disabled title="Send pre-generated or default messages to selected clients">📨 Send Selected</button>
+              <button class="fonnte-btn" id="fonnte-send-all-btn" onclick="fonnteBulkSend('all')" disabled title="Send pre-generated or default messages to all filtered clients">📨 Send All Filtered</button>
               <span style="font-size:11px;color:var(--gray-500);" id="fonnte-send-hint">Connect Fonnte first →</span>
             </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+              <button class="fonnte-ai-btn" id="fonnte-ai-sel-btn" onclick="fonnteSendWithAI('selected')" disabled title="AI writes personalized message for each selected client, then sends via Fonnte">⚡📨 AI + Send Selected</button>
+              <button class="fonnte-ai-btn" id="fonnte-ai-all-btn" onclick="fonnteSendWithAI('all')" disabled title="AI writes personalized message for every filtered client, then sends via Fonnte">⚡📨 AI + Send All</button>
+            </div>
+            <p style="font-size:11px;color:#6d28d9;margin:5px 0 0;">⚡📨 <strong>AI + Send</strong> — AI reads each client's profile and writes a unique message, then bulk sends automatically.</p>
           </div>
         </div>
         <div style="padding:10px 0;font-size:12px;color:var(--gray-500);">
@@ -6106,26 +6114,32 @@ function setFontteDelay(ms)  { localStorage.setItem('crm_fonnte_delay', String(m
 // ── Update all Fonnte UI indicators ──────────────────────────────────────────
 function updateFontteStatus() {
   const token = getFontteToken();
-  const dot   = document.getElementById('fonnte-dot');
-  const txt   = document.getElementById('fonnte-status-text');
-  const selBtn = document.getElementById('fonnte-send-sel-btn');
-  const allBtn = document.getElementById('fonnte-send-all-btn');
-  const barBtn = document.getElementById('fonnte-bar-btn');
-  const hint   = document.getElementById('fonnte-send-hint');
+  const dot      = document.getElementById('fonnte-dot');
+  const txt      = document.getElementById('fonnte-status-text');
+  const selBtn   = document.getElementById('fonnte-send-sel-btn');
+  const allBtn   = document.getElementById('fonnte-send-all-btn');
+  const aiSelBtn = document.getElementById('fonnte-ai-sel-btn');
+  const aiAllBtn = document.getElementById('fonnte-ai-all-btn');
+  const barBtn   = document.getElementById('fonnte-bar-btn');
+  const hint     = document.getElementById('fonnte-send-hint');
   if (token) {
-    if (dot)    { dot.classList.add('connected'); dot.classList.remove('error'); }
-    if (txt)    txt.textContent = 'Connected ✓';
-    if (selBtn) selBtn.disabled = false;
-    if (allBtn) allBtn.disabled = false;
-    if (barBtn) barBtn.disabled = false;
-    if (hint)   hint.textContent = `Token saved (…${token.slice(-6)})`;
+    if (dot)      { dot.classList.add('connected'); dot.classList.remove('error'); }
+    if (txt)      txt.textContent = 'Connected ✓';
+    if (selBtn)   selBtn.disabled = false;
+    if (allBtn)   allBtn.disabled = false;
+    if (aiSelBtn) aiSelBtn.disabled = false;
+    if (aiAllBtn) aiAllBtn.disabled = false;
+    if (barBtn)   barBtn.disabled = false;
+    if (hint)     hint.textContent = `Token saved (…${token.slice(-6)})`;
   } else {
-    if (dot)    { dot.classList.remove('connected','error'); }
-    if (txt)    txt.textContent = 'Not connected';
-    if (selBtn) selBtn.disabled = true;
-    if (allBtn) allBtn.disabled = true;
-    if (barBtn) { barBtn.disabled = true; barBtn.title = 'Connect Fonnte first'; }
-    if (hint)   hint.textContent = 'Connect Fonnte first →';
+    if (dot)      { dot.classList.remove('connected','error'); }
+    if (txt)      txt.textContent = 'Not connected';
+    if (selBtn)   selBtn.disabled = true;
+    if (allBtn)   allBtn.disabled = true;
+    if (aiSelBtn) aiSelBtn.disabled = true;
+    if (aiAllBtn) aiAllBtn.disabled = true;
+    if (barBtn)   { barBtn.disabled = true; barBtn.title = 'Connect Fonnte first'; }
+    if (hint)     hint.textContent = 'Connect Fonnte first →';
   }
 }
 
@@ -6413,6 +6427,134 @@ async function fonnteBulkSend(mode) {
       Alternatively, use the <a href="https://fonnte.com/docs" target="_blank">Fonnte WhatsApp Bot</a> locally.
     </div>`;
   }
+}
+
+// ── AI Generate + Bulk Send (combined one-click flow) ────────────────────────
+async function fonnteSendWithAI(mode) {
+  if (!getActiveKey()) { openAISettingsModal(() => fonnteSendWithAI(mode)); return; }
+  if (!getFontteToken()) { openFontteModal(); return; }
+
+  let list = [];
+  if (mode === 'selected') {
+    const ids = rwaGetSelectedIds();
+    if (!ids.length) { toast('No clients selected — tick checkboxes first', 'error'); return; }
+    list = clients.filter(c => ids.includes(c.id) && c.whatsapp);
+  } else {
+    list = rwaGetFilteredList();
+  }
+  if (!list.length) { toast('No clients with WhatsApp numbers in current filter', 'error'); return; }
+
+  const delayMs    = getFontteDelay();
+  const today      = new Date().toISOString().split('T')[0];
+  const providerId = getActiveProviderId();
+  const provider   = AI_PROVIDERS[providerId] || AI_PROVIDERS.groq;
+  const aiDelayMs  = provider.delay;
+
+  // Reuse fonnte-progress-modal for both phases
+  const titleEl     = document.querySelector('#fonnte-progress-modal h2');
+  const subtitle    = document.getElementById('fonnte-progress-subtitle');
+  const progressFill= document.getElementById('fonnte-progress-fill');
+  const progressLbl = document.getElementById('fonnte-progress-label');
+  const progressPct = document.getElementById('fonnte-progress-pct');
+  const resultsEl   = document.getElementById('fonnte-progress-results');
+  const closeBtn    = document.getElementById('fonnte-progress-close-btn');
+
+  if (titleEl)      titleEl.textContent = '⚡📨 AI Smart Bulk Send';
+  if (subtitle)     subtitle.textContent = `Phase 1/2 — AI writing messages for ${list.length} client(s) via ${provider.name}…`;
+  if (progressFill) progressFill.style.background = 'linear-gradient(90deg,#7c3aed,#a78bfa)';
+  if (progressFill) progressFill.style.width = '0%';
+  if (progressPct)  progressPct.textContent = '0%';
+  if (resultsEl)    resultsEl.innerHTML = '';
+  if (closeBtn)     closeBtn.disabled = true;
+  openModal('fonnte-progress-modal');
+
+  // ── Phase 1: AI generation ──────────────────────────────────────────────────
+  let done = 0, aiOk = 0, aiFail = 0;
+  for (const c of list) {
+    if (progressLbl) progressLbl.textContent = `✍️ Writing for ${c.name}…`;
+    try {
+      const msg = await callAI(buildAIPrompt(c));
+      if (msg) {
+        c._aiGeneratedWaMsg = msg;
+        aiOk++;
+        if (resultsEl) {
+          resultsEl.innerHTML += `<div class="fonnte-result-row">
+            <div class="fonnte-result-name">${esc(c.name)}</div>
+            <span class="fonnte-result-status" style="background:#ede9fe;color:#5b21b6;">✍ AI Done</span>
+            <div style="flex:1;color:var(--gray-500);font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(msg.substring(0, 70))}…</div>
+          </div>`;
+          resultsEl.scrollTop = resultsEl.scrollHeight;
+        }
+      } else { throw new Error('Empty response'); }
+    } catch (e) {
+      aiFail++;
+      c._aiGeneratedWaMsg = null;
+      const lbl = e.message.includes('429') || e.message.includes('rate_limit') ? 'Rate limited — using default'
+        : e.message.includes('401') || e.message.includes('API_KEY_INVALID') ? 'Bad key — using default'
+        : 'AI failed — using default';
+      if (resultsEl) {
+        resultsEl.innerHTML += `<div class="fonnte-result-row">
+          <div class="fonnte-result-name">${esc(c.name)}</div>
+          <span class="fonnte-result-status" style="background:#fef3c7;color:#92400e;">⚠ ${lbl}</span>
+        </div>`;
+      }
+    }
+    done++;
+    if (progressFill) progressFill.style.width = Math.round((done / list.length) * 50) + '%';
+    if (progressPct)  progressPct.textContent  = Math.round((done / list.length) * 50) + '%';
+    if (done < list.length) await new Promise(r => setTimeout(r, aiDelayMs));
+  }
+
+  // ── Phase 2: Fonnte send ────────────────────────────────────────────────────
+  if (progressFill) progressFill.style.background = 'linear-gradient(90deg,#25d366,#128c7e)';
+  if (subtitle)     subtitle.textContent = `Phase 2/2 — Sending ${list.length} message(s) via Fonnte…`;
+  if (resultsEl)    resultsEl.innerHTML += `<div style="border-top:2px dashed #25d366;margin:8px 0 4px;font-size:11px;font-weight:700;color:#075e54;">📨 Sending via Fonnte…</div>`;
+
+  done = 0;
+  let sendOk = 0, sendFail = 0;
+  for (const c of list) {
+    if (progressLbl) progressLbl.textContent = `📨 Sending to ${c.name}…`;
+    const msg = c._aiGeneratedWaMsg || buildWaMessage(c);
+    try {
+      await fonnteSendOne(c.whatsapp, msg);
+      sendOk++;
+      if (!c.followups) c.followups = [];
+      c.followups.push({ id: genId(), channel: 'WhatsApp', date: today, note: `AI Smart Send via Fonnte: ${msg.substring(0, 80)}…` });
+      c.lastContact = today;
+      if (resultsEl) {
+        resultsEl.innerHTML += `<div class="fonnte-result-row">
+          <div class="fonnte-result-name">${esc(c.name)}</div>
+          <span class="fonnte-result-status ok">✓ Sent</span>
+          <div style="flex:1;color:var(--gray-500);font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(c.whatsapp)}</div>
+        </div>`;
+        resultsEl.scrollTop = resultsEl.scrollHeight;
+      }
+    } catch (e) {
+      sendFail++;
+      const errMsg = e.message === 'no_token' ? 'No token' :
+        e.message === 'invalid_token' ? 'Invalid token — re-enter in Setup' :
+        e.message.includes('Failed to fetch') ? 'Network error' :
+        e.message.substring(0, 40);
+      if (resultsEl) {
+        resultsEl.innerHTML += `<div class="fonnte-result-row">
+          <div class="fonnte-result-name">${esc(c.name)}</div>
+          <span class="fonnte-result-status err">✗ ${esc(errMsg)}</span>
+        </div>`;
+      }
+    }
+    done++;
+    if (progressFill) progressFill.style.width = 50 + Math.round((done / list.length) * 50) + '%';
+    if (progressPct)  progressPct.textContent  = 50 + Math.round((done / list.length) * 50) + '%';
+    if (done < list.length) await new Promise(r => setTimeout(r, delayMs));
+  }
+
+  save();
+  renderRemWaPanel();
+  if (titleEl)      titleEl.textContent = '⚡📨 AI Smart Bulk Send — Done!';
+  if (subtitle)     subtitle.textContent = `✅ AI wrote ${aiOk} messages · 📨 Sent ${sendOk} · ❌ Failed ${sendFail}`;
+  if (progressLbl)  progressLbl.textContent = 'Complete ✓';
+  if (closeBtn)     closeBtn.disabled = false;
+  toast(`⚡📨 AI wrote + sent ${sendOk} message(s)!`, sendOk > 0 ? 'success' : 'error');
 }
 
 // ── Run on init ───────────────────────────────────────────────────────────────
